@@ -28,14 +28,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "env.d.ts",
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "src/index.d.ts",
-    "scripts/load-icon.ts"
-  ],
+  "include": ["env.d.ts", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/index.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
