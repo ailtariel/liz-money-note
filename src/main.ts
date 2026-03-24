@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
-import { loadAppConfig } from "@/config/runtime-config";
+import { loadAppConfig } from "@/core/app-config";
 import { registerPlugins } from "@/plugins";
 import router from "@/router";
 import { useAuthStore } from "@/stores/auth";

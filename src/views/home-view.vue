@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useAppConfig } from '@/composables/use-app-config';
+import { getAppConfig } from '@/core/app-config';
 
-const appConfig = useAppConfig();
+const appConfig = getAppConfig();
 
 const configItems = computed(() => [
   ['api_base_url', appConfig.api_base_url],

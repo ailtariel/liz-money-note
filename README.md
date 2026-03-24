@@ -150,6 +150,6 @@ A practical migration path is:
 2. Remove `vue`, `vuetify`, `pinia`, and `vue-router`
 3. Replace them with `react`, `react-dom`, and your preferred routing and state management stack
 4. Rewrite the entry in [src/main.ts](c:/workstation/dev/Vitruvian/vue-skeleton/src/main.ts)
-5. Keep infrastructure that is only weakly coupled to the UI framework, such as [src/config/runtime-config.ts](c:/workstation/dev/Vitruvian/vue-skeleton/src/config/runtime-config.ts) and [src/services/api.ts](c:/workstation/dev/Vitruvian/vue-skeleton/src/services/api.ts)
+5. Keep infrastructure that is only weakly coupled to the UI framework, such as [src/core/app-config.ts](c:/workstation/dev/Vitruvian/vue-skeleton/src/core/app-config.ts) and [src/core/api.ts](c:/workstation/dev/Vitruvian/vue-skeleton/src/core/api.ts)
 
 This keeps the migration scope small while preserving runtime config, container deployment, and proxy capabilities.

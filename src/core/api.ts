@@ -6,7 +6,7 @@ import axios, {
   type Method,
   type ResponseType
 } from 'axios';
-import { getAppConfig } from '@/config/runtime-config';
+import { getAppConfig } from '@/core/app-config';
 import { clearAuthSession, getAuthSession } from '@/services/auth-session';
 
 export interface StandardResponse<T = unknown> {

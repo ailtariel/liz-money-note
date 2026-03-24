@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import { useAppConfig } from '@/composables/use-app-config';
+import { getAppConfig } from '@/core/app-config';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
-const appConfig = useAppConfig();
+const appConfig = getAppConfig();
 
 async function handleLogin() {
   authStore.loginDemo();

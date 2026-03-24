@@ -2,12 +2,12 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useTheme } from 'vuetify';
-import { useAppConfig } from '@/composables/use-app-config';
+import { getAppConfig } from '@/core/app-config';
 import { useAuthStore } from '@/stores/auth';
 
 const route = useRoute();
 const theme = useTheme();
-const appConfig = useAppConfig();
+const appConfig = getAppConfig();
 const authStore = useAuthStore();
 
 const showAbout = computed(() => appConfig.feature_flags?.show_about !== false);
