@@ -1,7 +1,7 @@
-import type { InjectionKey } from 'vue';
 import type { RuntimeAppConfig } from '@/types/runtime-config';
 
-const STORAGE_KEY = '__APP_CONFIG__';
+const CONFIG_STORAGE_KEY = '__APP_CONFIG__';
+const RUNTIME_ENV_STORAGE_KEY = '__APP_RUNTIME_ENV__';
 
 const defaultConfig: RuntimeAppConfig = {
   app_title: 'Vue Skeleton',
@@ -15,8 +15,6 @@ const defaultConfig: RuntimeAppConfig = {
     default_theme: 'light'
   }
 };
-
-export const appConfigKey: InjectionKey<RuntimeAppConfig> = Symbol('app-config');
 
 declare global {
   interface Window {
@@ -100,19 +98,6 @@ function convertValue(value: unknown) {
   return raw;
 }
 
-async function fetchJson(path: string) {
-  try {
-    const response = await fetch(path);
-    if (!response.ok) {
-      return {};
-    }
-
-    return (await response.json()) as Record<string, unknown>;
-  } catch {
-    return {};
-  }
-}
-
 function normalizeRuntimeEnv(
   source: Record<string, unknown>
 ): Record<string, unknown> {
@@ -135,19 +120,28 @@ function normalizeRuntimeEnv(
 }
 
 function cacheConfig(config: RuntimeAppConfig) {
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  sessionStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
   window.__APP_CONFIG__ = config;
   document.title = config.app_title;
 }
 
-export function getAppConfig(): RuntimeAppConfig {
-  if (window.__APP_CONFIG__) {
-    return window.__APP_CONFIG__;
+function getStoredRuntimeEnv(): Record<string, unknown> {
+  const cached = sessionStorage.getItem(RUNTIME_ENV_STORAGE_KEY);
+  if (!cached) {
+    return {};
   }
 
-  const cached = sessionStorage.getItem(STORAGE_KEY);
+  try {
+    return JSON.parse(cached) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
+
+function getStoredConfig(): RuntimeAppConfig | null {
+  const cached = sessionStorage.getItem(CONFIG_STORAGE_KEY);
   if (!cached) {
-    return defaultConfig;
+    return null;
   }
 
   try {
@@ -155,16 +149,22 @@ export function getAppConfig(): RuntimeAppConfig {
     window.__APP_CONFIG__ = parsed;
     return parsed;
   } catch {
-    return defaultConfig;
+    return null;
   }
 }
 
-export async function loadAppConfig(): Promise<RuntimeAppConfig> {
-  const version = encodeURIComponent(__APP_BUILD_TIMESTAMP__);
-  const runtimeEnv = await fetchJson(`/config/env-config.json?v=${version}`);
-
+export function loadAppConfig(): RuntimeAppConfig {
+  const runtimeEnv = getStoredRuntimeEnv();
   const config = deepMerge(defaultConfig, normalizeRuntimeEnv(runtimeEnv));
 
   cacheConfig(config);
   return config;
+}
+
+export function getAppConfig(): RuntimeAppConfig {
+  if (window.__APP_CONFIG__) {
+    return window.__APP_CONFIG__;
+  }
+
+  return getStoredConfig() ?? loadAppConfig();
 }

@@ -20,10 +20,11 @@ This repo follows the most reusable pattern from `vitruvian-web`:
 1. Default config lives in `src/config/runtime-config.ts`
 2. Build step generates `public/config/env-config.template.json` from `APP_*` keys
 3. Container startup uses `entrypoint.sh` and `envsubst` to generate `env-config.json`
-4. Frontend boot merges `default config + APP_*`
+4. `index.html` preloads runtime env into `sessionStorage`
+5. Frontend boot merges `default config + APP_*`
 
 This lets you change deployment config without rebuilding the frontend image.
-In local development, Vite also generates `public/config/env-config.json` from `.env` and `.env.production` so `APP_*` values take effect without Docker.
+In local development, Vite also generates `public/config/env-config.json` from `.env` and `.env.production`, and the browser writes it into `sessionStorage` before the app starts.
 
 ## Runtime env naming convention
 

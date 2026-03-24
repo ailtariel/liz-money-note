@@ -8,6 +8,20 @@
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      window.__APP_CONFIG_READY__ = (async () => {
+        try {
+          const response = await fetch(`/config/env-config.json?v=${Date.now()}`, {
+            cache: 'no-store'
+          });
+
+          const runtimeEnv = response.ok ? await response.json() : {};
+          sessionStorage.setItem('__APP_RUNTIME_ENV__', JSON.stringify(runtimeEnv));
+        } catch {
+          sessionStorage.removeItem('__APP_RUNTIME_ENV__');
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
-  </html>
+</html>
