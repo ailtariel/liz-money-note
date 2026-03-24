@@ -1,56 +1,27 @@
 # Vue Skeleton
 
-Reusable Vue 3 starter repository based on the delivery patterns used in `vitruvian-web`, trimmed down into a project-ready baseline.
+A frontend skeleton repository for starting projects quickly, with reusable engineering defaults, runtime configuration support, and the Nginx / Docker delivery path required for production deployment.
 
-## Included capabilities
+## Capabilities
 
-- Vite + Vue 3 + TypeScript
-- Vue Router with route meta guards
-- Vuetify 3 with theme defaults
-- Pinia store bootstrap
-- Axios request layer with runtime `api_base_url`
-- Runtime config merge before app mount
-- Docker + Nginx delivery
-- Container startup injection of server-side `APP_*` environment variables
+- Foundation: Vite + TypeScript
+- Vue (removable): Vue 3 + Vuetify + Pinia + Vue Router
+- Preset pieces:
+  - Runtime config loading and merging
+  - Base Axios API wrapper
+  - Route guards and auth session placeholder implementation
+  - Docker / Helm examples
+- Nginx server
+- Fast production deployment support, including runtime env injection
 
-## Why this skeleton keeps runtime config
-
-This repo follows the most reusable pattern from `vitruvian-web`:
-
-1. Default config lives in `src/config/runtime-config.ts`
-2. Build step generates `public/config/env-config.template.json` from `APP_*` keys
-3. Container startup uses `entrypoint.sh` and `envsubst` to generate `env-config.json`
-4. `index.html` preloads runtime env into `sessionStorage`
-5. Frontend boot merges `default config + APP_*`
-
-This lets you change deployment config without rebuilding the frontend image.
-In local development, Vite also generates `public/config/env-config.json` from `.env` and `.env.production`, and the browser writes it into `sessionStorage` before the app starts.
-
-## Runtime env naming convention
-
-- `APP_APP_TITLE=My App` -> `app_title`
-- `APP_API_BASE_URL=/api` -> `api_base_url`
-- `APP_FEATURE_FLAGS__SHOW_ABOUT=true` -> `feature_flags.show_about`
-- `APP_VUETIFY__DEFAULT_THEME=dark` -> `vuetify.default_theme`
-
-Single underscore stays underscore style. Double underscore creates a nested object.
-
-## Env variable groups
-
-- `VITE_*`: development-only variables used by Vite itself, such as local dev server proxy targets.
-- `APP_*`: runtime client config used in all environments. In production these values are injected when the container or pod starts.
-- `NG_*`: nginx runtime variables used only in production container runtime for nginx template rendering.
-
-## Local development
+## Local Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-By default the Vite dev server reads `.env.development`.
-
-## Production build
+## Production Build
 
 ```bash
 npm run build
@@ -60,21 +31,125 @@ npm run build
 
 ```bash
 docker build -t vue-skeleton:local .
-docker run --rm -p 8080:8080 --env-file .env.example vue-skeleton:local
+docker run --rm -p 8080:8080 --env-file .env vue-skeleton:local
 ```
 
-The container entrypoint writes:
+At container startup, the flow is:
 
-- `/usr/share/nginx/html/config/env-config.json`
+1. `entrypoint.sh` reads `APP_*` variables from the container environment
+2. `public/config/env-config.json` is generated from `public/config/env-config.template.json`
+3. Before the app starts, `index.html` reads `env-config.json`
+4. The result is written into `sessionStorage`
+5. The app reads from `sessionStorage` and merges the result with the default config
 
-from:
+## Runtime Env
 
-- `/usr/share/nginx/html/config/env-config.template.json`
+This repository uses three kinds of environment variables. They have different scopes and should not be mixed.
 
-## Suggested next additions from `vitruvian-web`
+### 1. `VITE_*`
 
-- `vue-i18n` if your products target multiple locales
-- Shared WebSocket / SSE proxy snippets if the backend streams
-- SSO callback handling and permission-aware route guards
-- ESLint / Prettier / Vitest if you want stronger defaults
-- Request/response error normalization and API modules once your backend contracts stabilize
+Purpose:
+
+- Only effective in local development
+- Primarily used by `vite.config.ts`
+- Typical use cases are local dev server ports and proxy targets
+
+Example:
+
+```env
+VITE_API_PROXY_TARGET=http://localhost:8080
+VITE_AUTH_PROXY_TARGET=http://localhost:8080
+VITE_PORT=8000
+VITE_PREVIEW_PORT=5174
+```
+
+Notes:
+
+- These variables do not become part of the client runtime config
+- Production containers do not depend on them
+- Whether they take effect depends on Vite's env loading rules and the current startup mode
+
+### 2. `APP_*`
+
+Purpose:
+
+- Client runtime configuration
+- Effective in both local development and production
+- Converted into the `snake_case` config object used by the frontend
+
+Example:
+
+```env
+APP_APP_TITLE=Vue Skeleton
+APP_API_BASE_URL=/api
+APP_ENABLE_ROUTE_GUARD=true
+APP_DEFAULT_ROUTE=/
+APP_FEATURE_FLAGS__SHOW_ABOUT=true
+APP_VUETIFY__DEFAULT_THEME=light
+```
+
+Mapping result:
+
+- `APP_APP_TITLE` -> `app_title`
+- `APP_API_BASE_URL` -> `api_base_url`
+- `APP_FEATURE_FLAGS__SHOW_ABOUT` -> `feature_flags.show_about`
+- `APP_VUETIFY__DEFAULT_THEME` -> `vuetify.default_theme`
+
+Rules:
+
+- A single underscore stays underscore style
+- A double underscore `__` creates object nesting
+
+Local development configuration:
+
+- This repository extracts `APP_*` from `.env` and `.env.production`
+- It generates `public/config/env-config.json`
+- On page load, that file is written into `sessionStorage`
+- App code reads runtime env only from `sessionStorage`
+
+Production configuration:
+
+- Inject `APP_*` when the container or Pod starts
+- `entrypoint.sh` uses those variables to generate `env-config.json`
+- No frontend rebuild is required
+
+Important:
+
+- If you add a new `APP_*` variable in Helm `values.yaml`, Kubernetes YAML, `docker-compose`, or any other deployment manifest, you must first add the same key to [`.env`](c:/workstation/dev/Vitruvian/vue-skeleton/.env) or `.env.production`
+- The reason is that the key list in `env-config.template.json` is generated at build time from `.env` and `.env.production`
+- If the key does not exist at build time, setting that variable in the production container later will still not write it into the final `env-config.json`
+
+### 3. `NG_*`
+
+Purpose:
+
+- Only used for Nginx template rendering inside the production container
+- Not exposed as frontend runtime config
+
+Example:
+
+```env
+NG_PORT=8080
+NG_API_UPSTREAM=http://your-api-service:8080
+NG_AUTH_UPSTREAM=http://your-auth-service:8080
+```
+
+Notes:
+
+- These variables are mainly consumed by `nginx/templates/default.conf.template`
+- Local `npm run dev` does not depend on them
+- In production they can be overridden directly in Docker, Helm, or Kubernetes YAML
+
+## React Migration
+
+If you want to turn this skeleton into a React-based project, it is best to replace only the UI layer and keep the runtime config and deployment pipeline unchanged.
+
+A practical migration path is:
+
+1. Keep the `Vite + TypeScript + Docker + Nginx + runtime env` structure
+2. Remove `vue`, `vuetify`, `pinia`, and `vue-router`
+3. Replace them with `react`, `react-dom`, and your preferred routing and state management stack
+4. Rewrite the entry in [src/main.ts](c:/workstation/dev/Vitruvian/vue-skeleton/src/main.ts)
+5. Keep infrastructure that is only weakly coupled to the UI framework, such as [src/config/runtime-config.ts](c:/workstation/dev/Vitruvian/vue-skeleton/src/config/runtime-config.ts) and [src/services/api.ts](c:/workstation/dev/Vitruvian/vue-skeleton/src/services/api.ts)
+
+This keeps the migration scope small while preserving runtime config, container deployment, and proxy capabilities.
