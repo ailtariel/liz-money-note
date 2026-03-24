@@ -10,7 +10,8 @@ deploy.sh
 Dockerfile
 dockerize.sh
 README.md
-.env*
+.env.development
+.env.*.local
 helm
 .github
 *.tsbuildinfo

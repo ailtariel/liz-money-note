@@ -31,8 +31,11 @@ npm run build
 
 ```bash
 docker build -t vue-skeleton:local .
-docker run --rm -p 8080:8080 --env-file .env vue-skeleton:local
+docker run --rm -p 80:8080 --env-file .env vue-skeleton:local
 ```
+
+The nginx process runs as the non-root `nginx` user inside the container, so it listens on a non-privileged port such as `8080`.
+External exposure can still use port `80` by mapping `80 -> 8080` in Docker, Compose, Helm, or Kubernetes Service configuration.
 
 At container startup, the flow is:
 

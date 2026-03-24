@@ -10,4 +10,4 @@ services:
       NG_API_UPSTREAM: http://host.docker.internal:8080
       NG_AUTH_UPSTREAM: http://host.docker.internal:8080
     ports:
-      - "8080:8080"
+      - "80:8080"
