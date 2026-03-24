@@ -23,7 +23,7 @@ This repo follows the most reusable pattern from `vitruvian-web`:
 4. Frontend boot merges `default config + APP_*`
 
 This lets you change deployment config without rebuilding the frontend image.
-In local development, Vite also generates `public/config/env-config.json` from merged `.env*` files so `APP_*` values take effect without Docker.
+In local development, Vite also generates `public/config/env-config.json` from `.env` and `.env.production` so `APP_*` values take effect without Docker.
 
 ## Runtime env naming convention
 

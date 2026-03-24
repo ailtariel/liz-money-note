@@ -14,7 +14,7 @@ function createPlugins(mode: string, command: "serve" | "build"): PluginOption[]
         configFile: "src/plugins/vuetify/style.scss",
       },
     }),
-    generateEnvTemplate(mode),
+    generateEnvTemplate(),
   ];
 
   if (command === "build") {
