@@ -1,6 +1,6 @@
 {
   "APP_API_BASE_URL": "/api",
-  "APP_APP_TITLE": "Vue Skeleton1",
+  "APP_APP_TITLE": "Vue Skeleton",
   "APP_DEFAULT_ROUTE": "/",
   "APP_ENABLE_ROUTE_GUARD": "true",
   "APP_FEATURE_FLAGS__SHOW_ABOUT": "true",

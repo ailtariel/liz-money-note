@@ -3,7 +3,6 @@ import { defineConfig, loadEnv, mergeConfig, type PluginOption, type UserConfig 
 import vue from "@vitejs/plugin-vue";
 import vuetify from "vite-plugin-vuetify";
 import viteCompression from "vite-plugin-compression";
-import { createSvg } from "./scripts/pre-load-icon";
 import generateEnvTemplate from "./scripts/generate-env-template";
 
 function createPlugins(mode: string, command: "serve" | "build"): PluginOption[] {
@@ -15,7 +14,6 @@ function createPlugins(mode: string, command: "serve" | "build"): PluginOption[]
         configFile: "src/plugins/vuetify/style.scss",
       },
     }),
-    createSvg("src/icons/svg/"),
     generateEnvTemplate(mode),
   ];
 
