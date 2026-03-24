@@ -13,5 +13,3 @@
 *.icns  -text
 *.msi   -text
 *.exe   -text
-*.conf  -text
-mime.types -text

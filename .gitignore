@@ -3,9 +3,11 @@ dist
 .idea
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 coverage
 *.local
 *.tsbuildinfo
+public/config/env-config.json
 .DS_Store
 npm-debug.log*
 yarn-debug.log*
