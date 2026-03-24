@@ -28,9 +28,9 @@ ingress:
   tls: []
 
 env:
-  NGINX_PORT: "8080"
-  API_UPSTREAM: "http://your-api-service.default.svc.cluster.local:8080"
-  AUTH_UPSTREAM: "http://your-auth-service.default.svc.cluster.local:8080"
+  NG_PORT: "8080"
+  NG_API_UPSTREAM: "http://your-api-service.default.svc.cluster.local:8080"
+  NG_AUTH_UPSTREAM: "http://your-auth-service.default.svc.cluster.local:8080"
   APP_APP_TITLE: "Vue Skeleton"
   APP_API_BASE_URL: "/api"
   APP_ENABLE_ROUTE_GUARD: "true"

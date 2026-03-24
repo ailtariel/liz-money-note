@@ -1,64 +1,35 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Plugin } from 'vite';
+import { loadEnv, type Plugin } from 'vite';
 
-function parseEnvFile(content: string): Record<string, string> {
-  return content
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('#'))
-    .reduce<Record<string, string>>((acc, line) => {
-      const separatorIndex = line.indexOf('=');
+function getEnvFiles(rootDir: string, mode: string) {
+  return [
+    '.env',
+    '.env.local',
+    `.env.${mode}`,
+    `.env.${mode}.local`
+  ].map((file) => path.join(rootDir, file));
+}
 
-      if (separatorIndex === -1) {
-        return acc;
-      }
-
-      const key = line.slice(0, separatorIndex).trim();
-      const value = line.slice(separatorIndex + 1).trim();
-      acc[key] = value;
+function pickAppEnv(env: Record<string, string>) {
+  return Object.keys(env)
+    .filter((key) => key.startsWith('APP_'))
+    .sort()
+    .reduce<Record<string, string>>((acc, key) => {
+      acc[key] = env[key];
       return acc;
     }, {});
 }
 
-function resolveSourceEnvPath(rootDir: string) {
-  const candidates = [
-    '.env.example',
-    '.env',
-    '.env.production',
-    '.env.development'
-  ];
-
-  for (const candidate of candidates) {
-    const fullPath = path.join(rootDir, candidate);
-    if (fs.existsSync(fullPath)) {
-      return fullPath;
-    }
-  }
-
-  return undefined;
+function writeJsonFile(filePath: string, payload: Record<string, string>) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
 }
 
-function writeTemplate(rootDir: string) {
-  const sourcePath = resolveSourceEnvPath(rootDir);
-  const outputPath = path.join(
-    rootDir,
-    'public',
-    'config',
-    'env-config.template.json'
-  );
-
-  if (!sourcePath) {
-    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-    fs.writeFileSync(outputPath, '{}\n', 'utf8');
-    return;
-  }
-
-  const env = parseEnvFile(fs.readFileSync(sourcePath, 'utf8'));
-  const lines = Object.keys(env)
-    .filter((key) => key.startsWith('APP_'))
-    .sort()
-    .map((key) => `  "${key}": "\${${key}}"`);
+function writeTemplate(rootDir: string, mode: string) {
+  const env = pickAppEnv(loadEnv(mode, rootDir, ''));
+  const outputPath = path.join(rootDir, 'public', 'config', 'env-config.template.json');
+  const lines = Object.keys(env).map((key) => `  "${key}": "\${${key}}"`);
 
   const content = lines.length ? `{\n${lines.join(',\n')}\n}\n` : '{}\n';
 
@@ -66,15 +37,32 @@ function writeTemplate(rootDir: string) {
   fs.writeFileSync(outputPath, content, 'utf8');
 }
 
-export default function generateEnvTemplate(): Plugin {
+function writeDevRuntimeEnv(rootDir: string, mode: string) {
+  const env = pickAppEnv(loadEnv(mode, rootDir, ''));
+  const outputPath = path.join(rootDir, 'public', 'config', 'env-config.json');
+  writeJsonFile(outputPath, env);
+}
+
+export default function generateEnvTemplate(mode: string): Plugin {
   return {
     name: 'generate-env-template',
-    apply: 'build',
     buildStart() {
-      writeTemplate(process.cwd());
+      writeTemplate(process.cwd(), mode);
     },
-    configureServer() {
-      writeTemplate(process.cwd());
+    configureServer(server) {
+      const rootDir = server.config.root;
+      writeDevRuntimeEnv(rootDir, mode);
+
+      const envFiles = getEnvFiles(rootDir, mode);
+      server.watcher.add(envFiles);
+      server.watcher.on('change', (changedFile) => {
+        if (!envFiles.includes(changedFile)) {
+          return;
+        }
+
+        writeDevRuntimeEnv(rootDir, mode);
+        server.ws.send({ type: 'full-reload' });
+      });
     }
   };
 }

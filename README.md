@@ -18,12 +18,12 @@ Reusable Vue 3 starter repository based on the delivery patterns used in `vitruv
 This repo follows the most reusable pattern from `vitruvian-web`:
 
 1. Default config lives in `src/config/runtime-config.ts`
-2. Development-only overrides live in `public/config/config-dev.json`
-3. Build step generates `public/config/env-config.template.json` from `APP_*` keys
-4. Container startup uses `entrypoint.sh` and `envsubst` to generate `env-config.json`
-5. Frontend boot merges `default config + config-dev.json + APP_*`
+2. Build step generates `public/config/env-config.template.json` from `APP_*` keys
+3. Container startup uses `entrypoint.sh` and `envsubst` to generate `env-config.json`
+4. Frontend boot merges `default config + APP_*`
 
 This lets you change deployment config without rebuilding the frontend image.
+In local development, Vite also generates `public/config/env-config.json` from merged `.env*` files so `APP_*` values take effect without Docker.
 
 ## Runtime env naming convention
 
@@ -33,6 +33,12 @@ This lets you change deployment config without rebuilding the frontend image.
 - `APP_VUETIFY__DEFAULT_THEME=dark` -> `vuetify.default_theme`
 
 Single underscore stays underscore style. Double underscore creates a nested object.
+
+## Env variable groups
+
+- `VITE_*`: development-only variables used by Vite itself, such as local dev server proxy targets.
+- `APP_*`: runtime client config used in all environments. In production these values are injected when the container or pod starts.
+- `NG_*`: nginx runtime variables used only in production container runtime for nginx template rendering.
 
 ## Local development
 

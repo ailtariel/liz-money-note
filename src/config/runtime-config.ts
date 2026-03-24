@@ -161,15 +161,9 @@ export function getAppConfig(): RuntimeAppConfig {
 
 export async function loadAppConfig(): Promise<RuntimeAppConfig> {
   const version = encodeURIComponent(__APP_BUILD_TIMESTAMP__);
-  const devConfig = import.meta.env.DEV
-    ? await fetchJson('/config/config-dev.json')
-    : {};
   const runtimeEnv = await fetchJson(`/config/env-config.json?v=${version}`);
 
-  const config = deepMerge(
-    defaultConfig,
-    deepMerge(devConfig, normalizeRuntimeEnv(runtimeEnv))
-  );
+  const config = deepMerge(defaultConfig, normalizeRuntimeEnv(runtimeEnv));
 
   cacheConfig(config);
   return config;

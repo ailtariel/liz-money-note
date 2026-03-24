@@ -1,6 +1,6 @@
 server {
-  listen ${NGINX_PORT};
-  listen [::]:${NGINX_PORT};
+  listen ${NG_PORT};
+  listen [::]:${NG_PORT};
   server_name _;
 
   root /usr/share/nginx/html;
@@ -18,7 +18,7 @@ server {
   }
 
   location /api/ {
-    proxy_pass ${API_UPSTREAM};
+    proxy_pass ${NG_API_UPSTREAM};
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -29,7 +29,7 @@ server {
   # Example: standard HTTP upstream
   # Replace the path and upstream according to the real backend route.
   location /example-http/ {
-    proxy_pass ${API_UPSTREAM};
+    proxy_pass ${NG_API_UPSTREAM};
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -40,19 +40,19 @@ server {
   # Example: WebSocket upstream
   # Typical use cases: chat, realtime status, live collaboration.
   location /example-ws/ {
-    proxy_pass ${API_UPSTREAM};
+    proxy_pass ${NG_API_UPSTREAM};
     include /etc/nginx/templates/ws_common.conf;
   }
 
   # Example: SSE upstream
   # Typical use cases: LLM token streaming, progress events, notifications.
   location /example-sse/ {
-    proxy_pass ${API_UPSTREAM};
+    proxy_pass ${NG_API_UPSTREAM};
     include /etc/nginx/templates/sse_common.conf;
   }
 
   location /login {
-    proxy_pass ${AUTH_UPSTREAM};
+    proxy_pass ${NG_AUTH_UPSTREAM};
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -60,7 +60,7 @@ server {
   }
 
   location /logout {
-    proxy_pass ${AUTH_UPSTREAM};
+    proxy_pass ${NG_AUTH_UPSTREAM};
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -68,7 +68,7 @@ server {
   }
 
   location /callback {
-    proxy_pass ${AUTH_UPSTREAM};
+    proxy_pass ${NG_AUTH_UPSTREAM};
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -76,7 +76,7 @@ server {
   }
 
   location /user/ {
-    proxy_pass ${AUTH_UPSTREAM};
+    proxy_pass ${NG_AUTH_UPSTREAM};
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

@@ -10,9 +10,9 @@ RUN npm run build
 
 FROM nginx:1.28-alpine
 
-ENV NGINX_PORT=8080
-ENV API_UPSTREAM=http://host.docker.internal:8080
-ENV AUTH_UPSTREAM=http://host.docker.internal:8080
+ENV NG_PORT=8080
+ENV NG_API_UPSTREAM=http://host.docker.internal:8080
+ENV NG_AUTH_UPSTREAM=http://host.docker.internal:8080
 
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/nginx.conf

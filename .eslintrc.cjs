@@ -1,7 +1,22 @@
 /* eslint-env node */
-require('@rushstack/eslint-patch/modern-module-resolution');
+try {
+  require('@rushstack/eslint-patch/modern-module-resolution');
+} catch {
+  // Optional in this skeleton: don't hard-fail if ESLint deps are not installed yet.
+}
 
-// ('use strict');
+const hasModule = (moduleName) => {
+  try {
+    require.resolve(moduleName);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const extendIfInstalled = (moduleName, extendName = moduleName) => {
+  return hasModule(moduleName) ? [extendName] : [];
+};
 
 const off = 'off';
 const warn = 'warn';
@@ -313,21 +328,21 @@ const ruleStyle = {
 
 const config = {
   root: true,
+  ignorePatterns: ['dist/', 'node_modules/'],
   env: {
     browser: true,
     es6: true,
     node: true
   },
   extends: [
-    'plugin:vue/vue3-essential',
     'eslint:recommended',
-    '@vue/typescript/recommended',
-    '@vue/eslint-config-typescript',
-    '@vue/eslint-config-prettier/skip-formatting',
-    'unused-imports',
+    ...extendIfInstalled('eslint-plugin-vue', 'plugin:vue/vue3-essential'),
+    ...extendIfInstalled('@vue/eslint-config-typescript'),
+    ...extendIfInstalled('@vue/eslint-config-prettier', '@vue/eslint-config-prettier/skip-formatting')
   ],
   parserOptions: {
-    ecmaVersion: 'latest'
+    ecmaVersion: 'latest',
+    sourceType: 'module'
   },
   rules: {
     ...rulesOff,

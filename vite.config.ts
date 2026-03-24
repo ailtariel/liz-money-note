@@ -6,7 +6,7 @@ import viteCompression from "vite-plugin-compression";
 import { createSvg } from "./scripts/pre-load-icon";
 import generateEnvTemplate from "./scripts/generate-env-template";
 
-function createPlugins(command: "serve" | "build"): PluginOption[] {
+function createPlugins(mode: string, command: "serve" | "build"): PluginOption[] {
   const plugins: PluginOption[] = [
     vue(),
     vuetify({
@@ -16,11 +16,11 @@ function createPlugins(command: "serve" | "build"): PluginOption[] {
       },
     }),
     createSvg("src/icons/svg/"),
+    generateEnvTemplate(mode),
   ];
 
   if (command === "build") {
     plugins.push(
-      generateEnvTemplate(),
       viteCompression({
         algorithm: "gzip",
         deleteOriginFile: false,
@@ -38,7 +38,7 @@ export default defineConfig(({ mode, command }) => {
 
   const config: Record<string, UserConfig> = {
     default: {
-      plugins: createPlugins(command),
+      plugins: createPlugins(mode, command),
       define: {
         __APP_BUILD_TIMESTAMP__: JSON.stringify(new Date().toISOString()),
       },

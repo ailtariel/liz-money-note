@@ -28,7 +28,7 @@ const configItems = computed(() => [
         <v-card rounded="xl" variant="flat" color="surface">
           <v-card-title>Included foundation</v-card-title>
           <v-card-text class="d-flex flex-column ga-3">
-            <div>Runtime config merge: <code>default config + config-dev.json + APP_*</code></div>
+            <div>Runtime config merge: <code>default config + APP_*</code></div>
             <div>Pinia store bootstrap and auth-session placeholder</div>
             <div>Axios instance with runtime base URL and 401 handling</div>
             <div>Vuetify theme defaults and route-based app shell</div>
