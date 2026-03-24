@@ -1,0 +1,17 @@
+*   text eol=lf
+*.pdf   -text
+*.jpg   -text
+*.gif   -text
+*.png   -text
+*.pptx  -text
+*.mp4   -text
+*.mp3   -text
+*.wav   -text
+*.eml   -text
+*.docx  -text
+*.ico   -text
+*.icns  -text
+*.msi   -text
+*.exe   -text
+*.conf  -text
+mime.types -text

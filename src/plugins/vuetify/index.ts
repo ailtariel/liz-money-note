@@ -1,0 +1,1 @@
+export { createAppVuetify } from './vuetify';

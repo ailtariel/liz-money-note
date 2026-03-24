@@ -1,0 +1,15 @@
+node_modules
+dist
+.vscode
+.idea
+.gitignore
+.gitattributes
+.prettierrc.json
+.code-workspace
+deploy.sh
+Dockerfile
+dockerize.sh
+README.md
+.env*
+helm
+.github

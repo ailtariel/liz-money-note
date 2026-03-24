@@ -1,0 +1,4 @@
+// customize vuetify globle css variables
+@use "vuetify/settings" with (
+  $tooltip-border-radius: 13px
+);

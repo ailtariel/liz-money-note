@@ -1,0 +1,176 @@
+import type { InjectionKey } from 'vue';
+import type { RuntimeAppConfig } from '@/types/runtime-config';
+
+const STORAGE_KEY = '__APP_CONFIG__';
+
+const defaultConfig: RuntimeAppConfig = {
+  app_title: 'Vue Skeleton',
+  api_base_url: '/api',
+  default_route: '/',
+  enable_route_guard: true,
+  feature_flags: {
+    show_about: true
+  },
+  vuetify: {
+    default_theme: 'light'
+  }
+};
+
+export const appConfigKey: InjectionKey<RuntimeAppConfig> = Symbol('app-config');
+
+declare global {
+  interface Window {
+    __APP_CONFIG__?: RuntimeAppConfig;
+  }
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function deepMerge<T>(base: T, override: unknown): T {
+  if (!isPlainObject(base) || !isPlainObject(override)) {
+    return (override as T) ?? base;
+  }
+
+  const output: Record<string, unknown> = { ...base };
+
+  Object.entries(override).forEach(([key, value]) => {
+    const current = output[key];
+
+    if (isPlainObject(current) && isPlainObject(value)) {
+      output[key] = deepMerge(current, value);
+      return;
+    }
+
+    output[key] = value;
+  });
+
+  return output as T;
+}
+
+function toSnakeCase(value: string) {
+  return value.toLowerCase();
+}
+
+function setDeepValue(
+  target: Record<string, unknown>,
+  path: string[],
+  value: unknown
+) {
+  let cursor = target;
+
+  path.forEach((segment, index) => {
+    if (index === path.length - 1) {
+      cursor[segment] = value;
+      return;
+    }
+
+    if (!isPlainObject(cursor[segment])) {
+      cursor[segment] = {};
+    }
+
+    cursor = cursor[segment] as Record<string, unknown>;
+  });
+}
+
+function convertValue(value: unknown) {
+  const raw = String(value ?? '').trim();
+
+  if (!raw) {
+    return undefined;
+  }
+
+  if (
+    (raw.startsWith('{') && raw.endsWith('}')) ||
+    (raw.startsWith('[') && raw.endsWith(']'))
+  ) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return raw;
+    }
+  }
+
+  if (raw === 'true') return true;
+  if (raw === 'false') return false;
+  if (raw === 'null') return null;
+  if (/^-?\d+(\.\d+)?$/.test(raw)) return Number(raw);
+
+  return raw;
+}
+
+async function fetchJson(path: string) {
+  try {
+    const response = await fetch(path);
+    if (!response.ok) {
+      return {};
+    }
+
+    return (await response.json()) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
+
+function normalizeRuntimeEnv(
+  source: Record<string, unknown>
+): Record<string, unknown> {
+  const output: Record<string, unknown> = {};
+
+  Object.entries(source).forEach(([key, value]) => {
+    if (!key.startsWith('APP_')) {
+      return;
+    }
+
+    const segments = key
+      .replace(/^APP_/, '')
+      .split('__')
+      .map((segment) => toSnakeCase(segment));
+
+    setDeepValue(output, segments, convertValue(value));
+  });
+
+  return output;
+}
+
+function cacheConfig(config: RuntimeAppConfig) {
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  window.__APP_CONFIG__ = config;
+  document.title = config.app_title;
+}
+
+export function getAppConfig(): RuntimeAppConfig {
+  if (window.__APP_CONFIG__) {
+    return window.__APP_CONFIG__;
+  }
+
+  const cached = sessionStorage.getItem(STORAGE_KEY);
+  if (!cached) {
+    return defaultConfig;
+  }
+
+  try {
+    const parsed = JSON.parse(cached) as RuntimeAppConfig;
+    window.__APP_CONFIG__ = parsed;
+    return parsed;
+  } catch {
+    return defaultConfig;
+  }
+}
+
+export async function loadAppConfig(): Promise<RuntimeAppConfig> {
+  const version = encodeURIComponent(__APP_BUILD_TIMESTAMP__);
+  const devConfig = import.meta.env.DEV
+    ? await fetchJson('/config/config-dev.json')
+    : {};
+  const runtimeEnv = await fetchJson(`/config/env-config.json?v=${version}`);
+
+  const config = deepMerge(
+    defaultConfig,
+    deepMerge(devConfig, normalizeRuntimeEnv(runtimeEnv))
+  );
+
+  cacheConfig(config);
+  return config;
+}
