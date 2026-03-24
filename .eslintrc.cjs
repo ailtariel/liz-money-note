@@ -153,13 +153,17 @@ const rulesWarn = {
   'curly': [
     /*warn*/ off,
     /*
-     * 'all',           // 无论什么情况，都需要带括号
+     * 'all',           // Always require braces
      *
-     * 只有single statement可以不带括号，否则是语法错误。
-     * single statement有4种：a)一行的statement，b)一行的statement但前后有注释，c)if,else,for,while,do的statement是一个单行的if,else,for,while,do statement，d)if,else,for,while,do的statement是一个多行的if,else,for,while,do statement
-     * 'multi',         // 多个statement必须带  - a) b) c) d)可以不带
-     * 'multi-line',    // 与关键字不在一行必须带 - a) c)而且必须在同一行，可以不带
-     * 'multi-or-nest', // 多行的嵌入必须带      - a) b) c) 如果是一行，可以不带
+     * Only a single statement can omit braces; otherwise it is a syntax error.
+     * There are four single-statement cases:
+     * a) a one-line statement
+     * b) a one-line statement with surrounding comments
+     * c) the controlled statement of if/else/for/while/do is itself a one-line if/else/for/while/do statement
+     * d) the controlled statement of if/else/for/while/do is itself a multi-line if/else/for/while/do statement
+     * 'multi',         // Require braces for multiple statements; a) b) c) d) may omit them
+     * 'multi-line',    // Require braces when the statement is not on the same line as the keyword; a) and c) may omit them only if they stay on the same line
+     * 'multi-or-nest', // Require braces for multi-line nesting; a) b) c) may omit them if they stay on one line
      */
     multiLine,
     consistent
