@@ -6,8 +6,9 @@ server {
   root /usr/share/nginx/html;
   index index.html;
 
-  location = /favicon.ico {
-    alias /usr/share/nginx/html/static/icons/favicon.ico;
+  location = /_auth {
+      proxy_pass ${NG_API_UPSTREAM}/auth;   # Auth API of service A (GET/HEAD, no body)
+      include /etc/nginx/templates/auth.conf;
   }
 
   location /config/ {

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="/static/icons/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="/static/icons/favicon.svg" />
     <title>Vue Skeleton</title>
   </head>
   <body>
@@ -11,12 +11,18 @@
     <script>
       window.__APP_CONFIG_READY__ = (async () => {
         try {
-          const response = await fetch(`/config/env-config.json?v=${Date.now()}`, {
-            cache: 'no-store'
-          });
+          const response = await fetch(
+            `/config/env-config.json?v=${Date.now()}`,
+            {
+              cache: 'no-store'
+            }
+          );
 
           const runtimeEnv = response.ok ? await response.json() : {};
-          sessionStorage.setItem('__APP_RUNTIME_ENV__', JSON.stringify(runtimeEnv));
+          sessionStorage.setItem(
+            '__APP_RUNTIME_ENV__',
+            JSON.stringify(runtimeEnv)
+          );
         } catch {
           sessionStorage.removeItem('__APP_RUNTIME_ENV__');
         }
