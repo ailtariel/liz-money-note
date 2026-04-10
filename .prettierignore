@@ -1,0 +1,7 @@
+node_modules
+dist
+.vite
+coverage
+*.tsbuildinfo
+public/config/env-config.json
+public/config/env-config.*.json
