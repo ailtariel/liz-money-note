@@ -37,6 +37,7 @@ export interface TransactionFilters {
   accountId?: number | null;
   type?: TransactionType | null;
   tagId?: number | null;
+  tagIds?: number[] | null;
   dateFrom?: string | null;
   dateTo?: string | null;
 }

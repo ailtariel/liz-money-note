@@ -21,6 +21,8 @@ export default {
     allAccounts: 'All accounts',
     allTypes: 'All types',
     thisMonth: 'This month',
+    thisYear: 'This year',
+    custom: 'Custom',
     today: 'Today',
     yesterday: 'Yesterday',
     save: 'Save',
@@ -28,6 +30,7 @@ export default {
     edit: 'Edit',
     copy: 'Copy',
     delete: 'Delete',
+    clear: 'Clear',
     archive: 'Archive',
     active: 'Active',
     archived: 'Archived',
@@ -80,7 +83,7 @@ export default {
       title: 'Filters',
       book: 'Book',
       account: 'Account',
-      type: 'Type',
+      type: 'Transaction type',
       month: 'Month'
     }
   },

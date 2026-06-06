@@ -7,7 +7,7 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 
-const appBarHeight = 88;
+const appBarHeight = 64;
 const showBack = computed(() => route.meta.bottomNav !== true);
 const pageTitle = computed(() =>
   typeof route.meta.titleKey === 'string' ? t(route.meta.titleKey) : ''

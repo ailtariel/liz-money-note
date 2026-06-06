@@ -4,6 +4,7 @@ import { useI18n } from '@/i18n';
 import { useBookStore } from '@/modules/books/book.store';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useTagStore } from '@/modules/tags/tag.store';
+import type { Tag } from '@/modules/tags/tag.types';
 import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import type {
   Transaction,
@@ -15,8 +16,13 @@ import { transactionTypeOptions } from '@/components/shared/financeDisplay';
 import AppBarVue from '@/components/shared/app-bar.vue';
 import TransactionItemVue from './components/TransactionItem.vue';
 import TransactionDetailVue from './components/TransactionDetail.vue';
+import TransactionFilterListSheet from './components/TransactionFilterListSheet.vue';
+import TransactionTagFilterSheet from './components/TransactionTagFilterSheet.vue';
+import TransactionDateFilterSheet from './components/TransactionDateFilterSheet.vue';
 import useTransaction from './useTransactionDisplay';
 import type { TransactionListRow } from './transaction-ui.types';
+
+type DateFilterMode = 'month' | 'year' | 'custom';
 
 const { t } = useI18n();
 const bookStore = useBookStore();
@@ -24,7 +30,11 @@ const accountStore = useAccountStore();
 const tagStore = useTagStore();
 const transactionStore = useTransactionStore();
 const trans = useTransaction();
-const filterSheetOpen = ref(false);
+const bookFilterOpen = ref(false);
+const accountFilterOpen = ref(false);
+const typeFilterOpen = ref(false);
+const tagFilterOpen = ref(false);
+const dateFilterOpen = ref(false);
 const detailSheetOpen = ref(false);
 
 const selectedTransaction = ref<Transaction | null>(null);
@@ -32,7 +42,11 @@ const selectedTransaction = ref<Transaction | null>(null);
 const filters = reactive({
   bookId: null as number | null,
   accountId: null as number | null,
-  type: null as TransactionType | null
+  type: null as TransactionType | null,
+  tagIds: [] as number[],
+  dateFrom: null as string | null,
+  dateTo: null as string | null,
+  dateMode: 'month' as DateFilterMode
 });
 
 const typeOptions = computed(() => transactionTypeOptions(t));
@@ -74,6 +88,11 @@ const monthlyExpense = computed(() =>
 const summaryBookTitle = computed(() =>
   filters.bookId ? trans.getBookName(filters.bookId) : t('common.allBooks')
 );
+const selectedTags = computed(() =>
+  filters.tagIds
+    .map((tagId) => tagStore.tags.find((tag) => tag.id === tagId))
+    .filter((tag): tag is Tag => Boolean(tag))
+);
 
 const listRows = computed<TransactionListRow[]>(() => {
   const rows: TransactionListRow[] = [];
@@ -111,17 +130,30 @@ const listRows = computed<TransactionListRow[]>(() => {
   return rows;
 });
 
-function filterLabel(kind: 'book' | 'account' | 'type') {
-  if (kind === 'book') {
-    return filters.bookId
-      ? trans.getBookName(filters.bookId)
-      : t('common.allBooks');
-  }
-
+function filterLabel(kind: 'account' | 'type' | 'tag' | 'date') {
   if (kind === 'account') {
     return filters.accountId
       ? trans.getAccountName(filters.accountId)
       : t('common.allAccounts');
+  }
+
+  if (kind === 'tag') {
+    return filters.tagIds.length ? `Tag ${filters.tagIds.length}` : 'Tag';
+  }
+
+  if (kind === 'date') {
+    if (filters.dateMode === 'month') {
+      return t('common.thisMonth');
+    }
+
+    if (filters.dateMode === 'year') {
+      return t('common.thisYear');
+    }
+
+    if (filters.dateFrom && filters.dateTo) {
+      return `${filters.dateFrom} - ${filters.dateTo}`;
+    }
+    return t('common.thisMonth');
   }
 
   return filters.type
@@ -130,13 +162,60 @@ function filterLabel(kind: 'book' | 'account' | 'type') {
     : t('common.allTypes');
 }
 
-async function applyFilters() {
+async function loadWithFilters() {
   await transactionStore.load({
     bookId: filters.bookId,
     accountId: filters.accountId,
-    type: filters.type
+    type: filters.type,
+    tagIds: filters.tagIds,
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo
   });
-  filterSheetOpen.value = false;
+}
+
+async function selectBook(value: number | string | null) {
+  filters.bookId = typeof value === 'number' ? value : null;
+  bookFilterOpen.value = false;
+  await loadWithFilters();
+}
+
+async function selectAccount(value: number | string | null) {
+  filters.accountId = typeof value === 'number' ? value : null;
+  accountFilterOpen.value = false;
+  await loadWithFilters();
+}
+
+async function selectType(value: number | string | null) {
+  filters.type = typeof value === 'string' ? (value as TransactionType) : null;
+  typeFilterOpen.value = false;
+  await loadWithFilters();
+}
+
+async function applyTagFilters() {
+  tagFilterOpen.value = false;
+  await loadWithFilters();
+}
+
+async function applyDateFilters(range: {
+  dateFrom: string | null;
+  dateTo: string | null;
+  mode: DateFilterMode;
+}) {
+  filters.dateFrom = range.dateFrom;
+  filters.dateTo = range.dateTo;
+  filters.dateMode = range.mode;
+  dateFilterOpen.value = false;
+  await loadWithFilters();
+}
+
+async function removeSelectedTag(tagId: number) {
+  filters.tagIds = filters.tagIds.filter((id) => id !== tagId);
+  await loadWithFilters();
+}
+
+async function clearSelectedTags() {
+  filters.tagIds = [];
+  await loadWithFilters();
 }
 
 function openDetail(transaction: Transaction) {
@@ -170,14 +249,11 @@ function handleEditorSaved() {
         icon="$add"
         variant="flat"
         size="small"
+        class="ma-2"
         @click="editorOpen = true"
       />
       <v-btn icon="$search" variant="text" />
-      <v-btn
-        icon="$tune"
-        variant="text"
-        @click="filterSheetOpen = true"
-      />
+      <v-btn icon="$tune" variant="text" @click="tagFilterOpen = true" />
     </template>
   </AppBarVue>
   <v-dialog
@@ -194,61 +270,53 @@ function handleEditorSaved() {
   </v-dialog>
   <v-main>
     <v-container>
-      <div class="summary-grid">
-        <v-card class="summary-book-card">
-          <button
-            class="summary-book"
-            type="button"
-            @click="filterSheetOpen = true"
+      <!-- <div class="summary-grid"> -->
+      <v-card class="summary-book-card mb-2">
+        <button
+          class="summary-book"
+          type="button"
+          @click="bookFilterOpen = true"
+        >
+          <v-avatar
+            class="summary-book-icon"
+            color="success"
+            size="48"
+            variant="tonal"
           >
-            <v-avatar
-              class="summary-book-icon"
-              color="success"
-              size="56"
-              variant="tonal"
-            >
-              <v-icon icon="$book" />
-            </v-avatar>
-            <div class="summary-book-name text-truncate">
-              {{ summaryBookTitle }}
-              <v-icon class="summary-book-arrow" icon="$dropdown" size="18" />
-            </div>
-          </button>
-        </v-card>
+            <v-icon icon="$book" />
+          </v-avatar>
+          <div class="summary-book-name text-truncate">
+            {{ summaryBookTitle }}
+            <v-icon class="summary-book-arrow" icon="$dropdown" size="18" />
+          </div>
+        </button>
+      </v-card>
 
-        <v-card class="summary-amount-card">
-          <div class="summary-amounts">
-            <div class="summary-amount-block">
-              <div class="summary-label">{{ t('transaction.income') }}</div>
-              <div class="summary-amount amount-income">
-                {{ formatMinorUnits(monthlyIncome, baseCurrency) }}
-              </div>
-            </div>
-            <div class="summary-line"></div>
-            <div class="summary-amount-block">
-              <div class="summary-label">{{ t('transaction.expense') }}</div>
-              <div class="summary-amount amount-expense">
-                {{ formatMinorUnits(monthlyExpense, baseCurrency) }}
-              </div>
+      <v-card class="summary-amount-card">
+        <div class="summary-amounts">
+          <div class="summary-amount-block">
+            <div class="summary-label">{{ t('transaction.income') }}</div>
+            <div class="summary-amount amount-income">
+              {{ formatMinorUnits(monthlyIncome, baseCurrency) }}
             </div>
           </div>
-        </v-card>
-      </div>
+          <div class="summary-line"></div>
+          <div class="summary-amount-block">
+            <div class="summary-label">{{ t('transaction.expense') }}</div>
+            <div class="summary-amount amount-expense">
+              {{ formatMinorUnits(monthlyExpense, baseCurrency) }}
+            </div>
+          </div>
+        </div>
+      </v-card>
+      <!-- </div> -->
 
       <div class="filter-row">
         <v-chip
           class="filter-chip"
-          prepend-icon="$book"
-          variant="flat"
-          @click="filterSheetOpen = true"
-        >
-          {{ filterLabel('book') }}
-        </v-chip>
-        <v-chip
-          class="filter-chip"
           prepend-icon="$account"
           variant="flat"
-          @click="filterSheetOpen = true"
+          @click="accountFilterOpen = true"
         >
           {{ filterLabel('account') }}
         </v-chip>
@@ -256,13 +324,42 @@ function handleEditorSaved() {
           class="filter-chip"
           prepend-icon="$filter"
           variant="flat"
-          @click="filterSheetOpen = true"
+          @click="typeFilterOpen = true"
         >
           {{ filterLabel('type') }}
         </v-chip>
-        <v-chip class="filter-chip" prepend-icon="$calendar" variant="flat">
-          {{ t('common.thisMonth') }}
+        <v-chip
+          class="filter-chip"
+          prepend-icon="$tag"
+          variant="flat"
+          @click="tagFilterOpen = true"
+        >
+          {{ filterLabel('tag') }}
         </v-chip>
+        <v-chip
+          class="filter-chip"
+          prepend-icon="$calendar"
+          variant="flat"
+          @click="dateFilterOpen = true"
+        >
+          {{ filterLabel('date') }}
+        </v-chip>
+      </div>
+
+      <div v-if="selectedTags.length" class="selected-tag-row">
+        <v-chip
+          v-for="tag in selectedTags"
+          :key="tag.id"
+          color="primary"
+          variant="outlined"
+          closable
+          @click:close="removeSelectedTag(tag.id)"
+        >
+          {{ tag.name }}
+        </v-chip>
+        <v-btn variant="text" color="primary" @click="clearSelectedTags">
+          {{ t('common.clear') }}
+        </v-btn>
       </div>
 
       <v-card v-if="!listRows.length" class="soft-card pa-6 text-center">
@@ -280,34 +377,55 @@ function handleEditorSaved() {
         </template>
       </v-virtual-scroll>
 
-      <v-bottom-sheet v-model="filterSheetOpen">
-        <v-card class="pa-4">
-          <div class="text-h6 font-weight-bold mb-4">
-            {{ t('transaction.filters.title') }}
-          </div>
-          <v-select
-            v-model="filters.bookId"
-            :items="bookFilterOptions"
-            item-title="title"
-            item-value="value"
-            :label="t('transaction.filters.book')"
-          />
-          <v-select
-            v-model="filters.accountId"
-            :items="accountFilterOptions"
-            item-title="title"
-            item-value="value"
-            :label="t('transaction.filters.account')"
-          />
-          <v-select
-            v-model="filters.type"
-            :items="typeFilterOptions"
-            :label="t('transaction.filters.type')"
-          />
-          <v-btn block color="primary" @click="applyFilters">
-            {{ t('common.confirm') }}
-          </v-btn>
-        </v-card>
+      <v-bottom-sheet v-model="bookFilterOpen">
+        <TransactionFilterListSheet
+          v-model="filters.bookId"
+          :items="bookFilterOptions"
+          :title="t('transaction.filters.book')"
+          @select="selectBook"
+        />
+      </v-bottom-sheet>
+
+      <v-bottom-sheet v-model="accountFilterOpen">
+        <TransactionFilterListSheet
+          v-model="filters.accountId"
+          :items="accountFilterOptions"
+          :title="t('transaction.filters.account')"
+          @select="selectAccount"
+        />
+      </v-bottom-sheet>
+
+      <v-bottom-sheet v-model="typeFilterOpen">
+        <TransactionFilterListSheet
+          v-model="filters.type"
+          :items="typeFilterOptions"
+          :title="t('transaction.filters.type')"
+          @select="selectType"
+        />
+      </v-bottom-sheet>
+
+      <v-bottom-sheet v-model="tagFilterOpen">
+        <TransactionTagFilterSheet
+          v-model="filters.tagIds"
+          :clear-label="t('common.clear')"
+          :confirm-label="t('common.confirm')"
+          :tags="tagStore.tags"
+          title="Tag"
+          @apply="applyTagFilters"
+        />
+      </v-bottom-sheet>
+
+      <v-bottom-sheet v-model="dateFilterOpen">
+        <TransactionDateFilterSheet
+          :confirm-label="t('common.confirm')"
+          :custom-label="t('common.custom')"
+          :date-from="filters.dateFrom"
+          :date-to="filters.dateTo"
+          :month-label="t('common.thisMonth')"
+          :title="t('transaction.filters.month')"
+          :year-label="t('common.thisYear')"
+          @apply="applyDateFilters"
+        />
       </v-bottom-sheet>
 
       <v-bottom-sheet v-model="detailSheetOpen">
@@ -327,7 +445,9 @@ function handleEditorSaved() {
   gap: 1rem;
 }
 
-.summary-book-card,
+.summary-book-card {
+  background-color: transparent;
+}
 .summary-amount-card {
   min-height: 7.75rem;
   padding: 1.25rem;
@@ -424,6 +544,14 @@ function handleEditorSaved() {
   background: rgb(var(--v-theme-surface));
   color: rgb(var(--v-theme-on-surface));
   box-shadow: 0 0.375rem 1.125rem rgba(15, 23, 42, 0.08);
+}
+
+.selected-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  align-items: center;
+  padding-bottom: 0.875rem;
 }
 
 .transaction-scroll {

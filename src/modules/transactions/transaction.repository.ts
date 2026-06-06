@@ -112,6 +112,15 @@ export async function listTransactions(filters: TransactionFilters = {}) {
     values.push(filters.tagId);
   }
 
+  if (filters.tagIds?.length) {
+    const placeholders = filters.tagIds.map(() => '?').join(', ');
+    where.push(`EXISTS (
+      SELECT 1 FROM transaction_tags tt
+      WHERE tt.transaction_id = t.id AND tt.tag_id IN (${placeholders})
+    )`);
+    values.push(...filters.tagIds);
+  }
+
   if (filters.dateFrom) {
     where.push('date(t.occurred_at) >= date(?)');
     values.push(filters.dateFrom);

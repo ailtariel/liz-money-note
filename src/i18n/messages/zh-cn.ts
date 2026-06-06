@@ -19,8 +19,10 @@ export default {
     all: '全部',
     allBooks: '全部账本',
     allAccounts: '全部账户',
-    allTypes: '全部类型',
+    allTypes: '全部交易',
     thisMonth: '本月',
+    thisYear: '本年',
+    custom: '自定义',
     today: '今天',
     yesterday: '昨天',
     save: '保存',
@@ -28,6 +30,7 @@ export default {
     edit: '编辑',
     copy: '复制',
     delete: '删除',
+    clear: '清空',
     archive: '归档',
     active: '启用',
     archived: '已归档',
@@ -80,7 +83,7 @@ export default {
       title: '筛选',
       book: '账本',
       account: '账户',
-      type: '类型',
+      type: '交易类型',
       month: '月份'
     }
   },

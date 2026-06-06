@@ -51,10 +51,10 @@ const openDetail = (transaction: Transaction) => {
     <div class="transaction-content">
       <v-avatar
         :color="trans.getColor(item.transaction)"
-        size="52"
+        size="36"
         variant="tonal"
       >
-        <v-icon :icon="trans.getIcon(item.transaction)" />
+        <v-icon :icon="trans.getIcon(item.transaction)" size="20" />
       </v-avatar>
       <div class="min-w-0 flex-grow-1">
         <div class="transaction-title text-truncate">
