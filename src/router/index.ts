@@ -46,14 +46,6 @@ const router = createRouter({
           }
         },
         {
-          path: 'transactions/new',
-          name: 'transaction-new',
-          component: () => import('@/components/TransactionEditor.vue'),
-          meta: {
-            titleKey: 'nav.newTransaction'
-          }
-        },
-        {
           path: 'books',
           name: 'books',
           component: () => import('@/components/Books.vue'),

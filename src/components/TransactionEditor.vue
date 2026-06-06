@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 import { useI18n } from '@/i18n';
 import { useBookStore } from '@/modules/books/book.store';
 import { useAccountStore } from '@/modules/accounts/account.store';
@@ -13,7 +12,10 @@ import MobilePage from '@/components/shared/MobilePage.vue';
 import { transactionTypeOptions } from '@/components/shared/financeDisplay';
 
 const { t } = useI18n();
-const router = useRouter();
+const emit = defineEmits<{
+  close: [];
+  saved: [];
+}>();
 const bookStore = useBookStore();
 const accountStore = useAccountStore();
 const tagStore = useTagStore();
@@ -122,7 +124,7 @@ async function submit() {
       tagIds: form.tagIds
     });
     await accountStore.load();
-    await router.push({ name: 'transactions' });
+    emit('saved');
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('transaction.saveFailed');
   }
@@ -136,7 +138,14 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MobilePage :title="t('nav.newTransaction')" content-class="editor-content" show-back>
+  <MobilePage
+    :title="t('nav.newTransaction')"
+    back-action="emit"
+    content-class="editor-content editor-page-content"
+    :has-footer="false"
+    show-back
+    @back="emit('close')"
+  >
     <template #actions>
       <v-btn prepend-icon="$calendar" variant="text">
         {{ t('transaction.template') }}
@@ -389,7 +398,7 @@ onMounted(async () => {
   bottom: 0;
   left: 0;
   z-index: 10;
-  width: min(100%, 430px);
+  width: min(100vw, 430px);
   margin: 0 auto;
   padding: 14px 18px calc(16px + env(safe-area-inset-bottom));
   background: linear-gradient(180deg, rgba(246, 248, 247, 0), rgb(var(--v-theme-background)) 28%);

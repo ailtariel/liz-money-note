@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { useI18n } from '@/i18n';
 import { useBookStore } from '@/modules/books/book.store';
 import { useAccountStore } from '@/modules/accounts/account.store';
@@ -10,6 +9,7 @@ import type { Transaction, TransactionType } from '@/modules/transactions/transa
 import { formatMinorUnits } from '@/modules/shared/money';
 import AmountText from '@/components/shared/AmountText.vue';
 import MobilePage from '@/components/shared/MobilePage.vue';
+import TransactionEditor from '@/components/TransactionEditor.vue';
 import { formatShortDate, formatTime, transactionTypeOptions } from '@/components/shared/financeDisplay';
 
 type TransactionListRow =
@@ -17,7 +17,6 @@ type TransactionListRow =
   | { kind: 'item'; key: string; transaction: Transaction };
 
 const { t } = useI18n();
-const router = useRouter();
 const bookStore = useBookStore();
 const accountStore = useAccountStore();
 const tagStore = useTagStore();
@@ -25,6 +24,7 @@ const transactionStore = useTransactionStore();
 const error = ref('');
 const filterSheetOpen = ref(false);
 const detailSheetOpen = ref(false);
+const editorOpen = ref(false);
 const selectedTransaction = ref<Transaction | null>(null);
 
 const filters = reactive({
@@ -188,6 +188,11 @@ async function removeSelected() {
   }
 }
 
+async function handleEditorSaved() {
+  editorOpen.value = false;
+  await Promise.all([accountStore.load(), transactionStore.load()]);
+}
+
 onMounted(async () => {
   await Promise.all([
     bookStore.load(),
@@ -304,8 +309,21 @@ onMounted(async () => {
       icon="$add"
       location="bottom end"
       position="fixed"
-      @click="router.push({ name: 'transaction-new' })"
+      @click="editorOpen = true"
     />
+
+    <v-dialog
+      v-model="editorOpen"
+      fullscreen
+      persistent
+      transition="dialog-bottom-transition"
+    >
+      <TransactionEditor
+        v-if="editorOpen"
+        @close="editorOpen = false"
+        @saved="handleEditorSaved"
+      />
+    </v-dialog>
 
     <v-bottom-sheet v-model="filterSheetOpen">
       <v-card class="pa-4">
@@ -394,8 +412,8 @@ onMounted(async () => {
 }
 
 .transaction-scroll {
-  height: calc(100vh - 328px);
-  min-height: 360px;
+  height: auto;
+  min-height: 0;
 }
 
 .date-row {
@@ -411,7 +429,9 @@ onMounted(async () => {
 }
 
 .transaction-fab {
-  right: 22px;
-  bottom: calc(var(--app-bottom-nav-height) + env(safe-area-inset-bottom) + 18px);
+  right: calc(max((100vw - 430px) / 2, 0px) + 22px) !important;
+  bottom: calc(var(--app-bottom-nav-height) + env(safe-area-inset-bottom) + 22px) !important;
+  left: auto !important;
+  z-index: 1005;
 }
 </style>

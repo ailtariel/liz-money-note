@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from '@/i18n';
-import { useAppLocale } from '@/composables/useAppLocale';
+import { useAppLocale } from '@/modules/shared/useAppLocale';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useRecurringStore } from '@/modules/recurring/recurring.store';
 import AmountText from '@/components/shared/AmountText.vue';
