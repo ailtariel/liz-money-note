@@ -79,6 +79,10 @@ export default {
     needBookAccount: '请选择账本和账户。',
     saveFailed: '保存流水失败。',
     deleteFailed: '删除流水失败。',
+    search: {
+      title: '搜索流水',
+      placeholder: 'Tag、金额、标题或描述'
+    },
     filters: {
       title: '筛选',
       book: '账本',

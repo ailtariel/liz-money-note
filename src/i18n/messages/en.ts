@@ -79,6 +79,10 @@ export default {
     needBookAccount: 'Please choose a book and account.',
     saveFailed: 'Failed to save transaction.',
     deleteFailed: 'Failed to delete transaction.',
+    search: {
+      title: 'Search transactions',
+      placeholder: 'Tag, amount, title, or description'
+    },
     filters: {
       title: 'Filters',
       book: 'Book',

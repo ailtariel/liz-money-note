@@ -45,6 +45,10 @@ function mapTransaction(row: TransactionRow): Transaction {
   };
 }
 
+function escapeLike(value: string) {
+  return value.replace(/[\\%_]/g, (character) => `\\${character}`);
+}
+
 export async function insertTransaction(
   input: TransactionInput,
   db: SQLiteDBConnection
@@ -129,6 +133,45 @@ export async function listTransactions(filters: TransactionFilters = {}) {
   if (filters.dateTo) {
     where.push('date(t.occurred_at) <= date(?)');
     values.push(filters.dateTo);
+  }
+
+  const search = filters.search?.trim();
+  if (search) {
+    const normalizedSearch = search.toLowerCase();
+    const likeSearch = `%${escapeLike(normalizedSearch)}%`;
+    const numericSearch = normalizedSearch.replace(/[^\d]/g, '');
+    const searchWhere = [
+      "LOWER(COALESCE(t.note, '')) LIKE ? ESCAPE '\\'",
+      `LOWER(
+        CASE t.type
+          WHEN 'income' THEN 'income 收入'
+          WHEN 'expense' THEN 'expense 支出'
+          WHEN 'transfer' THEN 'transfer 转账'
+          ELSE t.type
+        END
+      ) LIKE ? ESCAPE '\\'`,
+      `EXISTS (
+        SELECT 1
+        FROM transaction_tags stt
+        INNER JOIN tags st ON st.id = stt.tag_id
+        WHERE stt.transaction_id = t.id
+          AND LOWER(st.name) LIKE ? ESCAPE '\\'
+      )`
+    ];
+    values.push(likeSearch, likeSearch, likeSearch);
+
+    if (numericSearch) {
+      searchWhere.push(
+        "CAST(t.amount AS TEXT) LIKE ? ESCAPE '\\'",
+        "printf('%.2f', t.amount / 100.0) LIKE ? ESCAPE '\\'"
+      );
+      values.push(
+        `%${escapeLike(numericSearch)}%`,
+        `%${escapeLike(normalizedSearch)}%`
+      );
+    }
+
+    where.push(`(${searchWhere.join(' OR ')})`);
   }
 
   const result = await db.query(

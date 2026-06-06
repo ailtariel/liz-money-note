@@ -40,4 +40,5 @@ export interface TransactionFilters {
   tagIds?: number[] | null;
   dateFrom?: string | null;
   dateTo?: string | null;
+  search?: string | null;
 }

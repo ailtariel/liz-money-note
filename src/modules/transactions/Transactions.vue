@@ -35,7 +35,9 @@ const accountFilterOpen = ref(false);
 const typeFilterOpen = ref(false);
 const tagFilterOpen = ref(false);
 const dateFilterOpen = ref(false);
+const searchOpen = ref(false);
 const detailSheetOpen = ref(false);
+const searchDraft = ref('');
 
 const selectedTransaction = ref<Transaction | null>(null);
 
@@ -46,7 +48,8 @@ const filters = reactive({
   tagIds: [] as number[],
   dateFrom: null as string | null,
   dateTo: null as string | null,
-  dateMode: 'month' as DateFilterMode
+  dateMode: 'month' as DateFilterMode,
+  search: null as string | null
 });
 
 const typeOptions = computed(() => transactionTypeOptions(t));
@@ -93,6 +96,7 @@ const selectedTags = computed(() =>
     .map((tagId) => tagStore.tags.find((tag) => tag.id === tagId))
     .filter((tag): tag is Tag => Boolean(tag))
 );
+const activeSearch = computed(() => filters.search?.trim() ?? '');
 
 const listRows = computed<TransactionListRow[]>(() => {
   const rows: TransactionListRow[] = [];
@@ -169,7 +173,8 @@ async function loadWithFilters() {
     type: filters.type,
     tagIds: filters.tagIds,
     dateFrom: filters.dateFrom,
-    dateTo: filters.dateTo
+    dateTo: filters.dateTo,
+    search: filters.search
   });
 }
 
@@ -218,6 +223,25 @@ async function clearSelectedTags() {
   await loadWithFilters();
 }
 
+function openSearch() {
+  searchDraft.value = activeSearch.value;
+  searchOpen.value = true;
+}
+
+async function applySearch() {
+  const keyword = searchDraft.value.trim();
+  filters.search = keyword || null;
+  searchOpen.value = false;
+  await loadWithFilters();
+}
+
+async function clearSearch() {
+  searchDraft.value = '';
+  filters.search = null;
+  searchOpen.value = false;
+  await loadWithFilters();
+}
+
 function openDetail(transaction: Transaction) {
   selectedTransaction.value = transaction;
   detailSheetOpen.value = true;
@@ -252,8 +276,19 @@ function handleEditorSaved() {
         class="ma-2"
         @click="editorOpen = true"
       />
-      <v-btn icon="$search" variant="text" />
-      <v-btn icon="$tune" variant="text" @click="tagFilterOpen = true" />
+      <v-btn icon="$search" variant="text" @click="openSearch" />
+      <v-chip
+        v-if="activeSearch"
+        class="search-keyword-chip"
+        color="primary"
+        size="small"
+        variant="tonal"
+        closable
+        @click="openSearch"
+        @click:close.stop="clearSearch"
+      >
+        {{ activeSearch }}
+      </v-chip>
     </template>
   </AppBarVue>
   <v-dialog
@@ -428,6 +463,32 @@ function handleEditorSaved() {
         />
       </v-bottom-sheet>
 
+      <v-bottom-sheet v-model="searchOpen">
+        <v-card class="search-sheet pa-4">
+          <div class="search-sheet-title">
+            {{ t('transaction.search.title') }}
+          </div>
+          <v-text-field
+            v-model="searchDraft"
+            autofocus
+            clearable
+            density="comfortable"
+            hide-details
+            prepend-inner-icon="$search"
+            :label="t('transaction.search.placeholder')"
+            @keydown.enter="applySearch"
+          />
+          <div class="search-sheet-actions">
+            <v-btn variant="text" color="primary" @click="clearSearch">
+              {{ t('common.clear') }}
+            </v-btn>
+            <v-btn color="primary" variant="flat" @click="applySearch">
+              {{ t('common.confirm') }}
+            </v-btn>
+          </div>
+        </v-card>
+      </v-bottom-sheet>
+
       <v-bottom-sheet v-model="detailSheetOpen">
         <TransactionDetailVue
           :transaction="selectedTransaction"
@@ -546,12 +607,40 @@ function handleEditorSaved() {
   box-shadow: 0 0.375rem 1.125rem rgba(15, 23, 42, 0.08);
 }
 
+.search-keyword-chip {
+  max-width: 8rem;
+}
+
+.search-keyword-chip :deep(.v-chip__content) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .selected-tag-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.625rem;
   align-items: center;
   padding-bottom: 0.875rem;
+}
+
+.search-sheet {
+  border-radius: 1rem 1rem 0 0;
+}
+
+.search-sheet-title {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.search-sheet-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1rem;
 }
 
 .transaction-scroll {
