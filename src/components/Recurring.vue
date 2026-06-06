@@ -9,7 +9,6 @@ import type { RepeatType } from '@/modules/recurring/recurring.types';
 import type { TransactionType } from '@/modules/transactions/transaction.types';
 import { formatMinorUnits, parseMoneyToMinorUnits } from '@/modules/shared/money';
 import { todayIsoDate } from '@/modules/shared/date';
-import MobilePage from '@/components/shared/MobilePage.vue';
 import { repeatTypeOptions, transactionTypeOptions } from '@/components/shared/financeDisplay';
 
 const { t } = useI18n();
@@ -167,9 +166,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MobilePage :title="t('nav.recurring')" show-back>
-    <div class="d-flex flex-column ga-4">
-      <div class="text-body-2 text-medium-emphasis">{{ t('recurring.subtitle') }}</div>
+  <div class="d-flex flex-column ga-4">
+    <div class="text-body-2 text-medium-emphasis">{{ t('recurring.subtitle') }}</div>
       <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
       <v-card class="soft-card pa-4">
@@ -222,7 +220,6 @@ onMounted(async () => {
             </v-btn>
           </div>
         </div>
-      </v-card>
-    </div>
-  </MobilePage>
+    </v-card>
+  </div>
 </template>

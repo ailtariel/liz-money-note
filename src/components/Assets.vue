@@ -3,7 +3,6 @@ import { computed, onMounted } from 'vue';
 import { useI18n } from '@/i18n';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { formatMinorUnits } from '@/modules/shared/money';
-import MobilePage from '@/components/shared/MobilePage.vue';
 import { accountTypeIcon, accountTypeLabel } from '@/components/shared/financeDisplay';
 
 const { t } = useI18n();
@@ -21,9 +20,8 @@ onMounted(() => accountStore.load());
 </script>
 
 <template>
-  <MobilePage :title="t('nav.assets')">
-    <div class="d-flex flex-column ga-4">
-      <v-card class="asset-hero pa-5 text-white">
+  <div class="d-flex flex-column ga-4">
+    <v-card class="asset-hero pa-5 text-white">
         <div class="text-body-2 opacity-80">{{ t('assets.total') }}</div>
         <div class="text-h4 font-weight-bold mt-2">{{ formatMinorUnits(totalAssets, baseCurrency) }}</div>
         <div class="text-caption opacity-80 mt-1">{{ t('assets.included') }}</div>
@@ -47,9 +45,8 @@ onMounted(() => accountStore.load());
             </div>
           </div>
         </div>
-      </v-card>
-    </div>
-  </MobilePage>
+    </v-card>
+  </div>
 </template>
 
 <style scoped>

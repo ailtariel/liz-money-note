@@ -8,7 +8,6 @@ import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import type { Transaction, TransactionType } from '@/modules/transactions/transaction.types';
 import { formatMinorUnits } from '@/modules/shared/money';
 import AmountText from '@/components/shared/AmountText.vue';
-import MobilePage from '@/components/shared/MobilePage.vue';
 import TransactionEditor from '@/components/TransactionEditor.vue';
 import { formatShortDate, formatTime, transactionTypeOptions } from '@/components/shared/financeDisplay';
 
@@ -204,14 +203,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MobilePage :title="t('nav.transactions')">
-    <template #actions>
-      <v-btn icon="$search" variant="text" />
-      <v-btn icon="$filter" variant="text" @click="filterSheetOpen = true" />
-    </template>
-
-    <div class="d-flex flex-column ga-4">
-      <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+  <div class="d-flex flex-column ga-4">
+    <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
       <v-card class="overview-card pa-5 text-white">
         <v-row gap="0">
@@ -300,19 +293,17 @@ onMounted(async () => {
             </div>
           </v-card>
         </template>
-      </v-virtual-scroll>
-    </div>
+    </v-virtual-scroll>
 
-    <Teleport to="body">
-      <v-fab
-        class="transaction-fab"
-        color="primary"
-        icon="$add"
-        location="bottom end"
-        position="fixed"
-        @click="editorOpen = true"
-      />
-    </Teleport>
+    <v-fab
+      app
+      color="primary"
+      icon="$add"
+      location="bottom end"
+      offset
+      order="1"
+      @click="editorOpen = true"
+    />
 
     <v-dialog
       v-model="editorOpen"
@@ -397,7 +388,7 @@ onMounted(async () => {
         </div>
       </v-card>
     </v-bottom-sheet>
-  </MobilePage>
+  </div>
 </template>
 
 <style scoped>
@@ -430,10 +421,4 @@ onMounted(async () => {
   margin-bottom: 10px;
 }
 
-.transaction-fab {
-  right: calc(max((100vw - 430px) / 2, 0px) + 22px) !important;
-  bottom: calc(var(--app-bottom-nav-height) + env(safe-area-inset-bottom) + 22px) !important;
-  left: auto !important;
-  z-index: 1005;
-}
 </style>

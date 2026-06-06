@@ -8,7 +8,6 @@ import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import type { TransactionType } from '@/modules/transactions/transaction.types';
 import { formatMinorUnits, parseMoneyToMinorUnits } from '@/modules/shared/money';
 import { todayIsoDate } from '@/modules/shared/date';
-import MobilePage from '@/components/shared/MobilePage.vue';
 import { transactionTypeOptions } from '@/components/shared/financeDisplay';
 
 const { t } = useI18n();
@@ -138,22 +137,21 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MobilePage
-    :title="t('nav.newTransaction')"
-    back-action="emit"
-    content-class="editor-content editor-page-content"
-    :has-footer="false"
-    show-back
-    @back="emit('close')"
-  >
-    <template #actions>
+  <v-card class="h-100 d-flex flex-column" rounded="0">
+    <v-toolbar color="background" elevation="0" height="88">
+      <v-btn icon="$close" variant="text" @click="emit('close')" />
+      <v-toolbar-title class="mobile-title">
+        {{ t('nav.newTransaction') }}
+      </v-toolbar-title>
+      <v-spacer />
       <v-btn prepend-icon="$calendar" variant="text">
         {{ t('transaction.template') }}
       </v-btn>
-    </template>
+    </v-toolbar>
 
-    <v-form class="d-flex flex-column ga-4" @submit.prevent="submit">
-      <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+    <v-card-text class="flex-grow-1 overflow-y-auto px-4 pb-4">
+      <v-form class="d-flex flex-column ga-4" @submit.prevent="submit">
+        <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
       <v-card class="soft-card pa-1">
         <v-tabs v-model="form.type" grow hide-slider selected-class="editor-tab-active">
@@ -291,13 +289,14 @@ onMounted(async () => {
           rows="3"
         />
       </v-card>
-    </v-form>
+      </v-form>
+    </v-card-text>
 
-    <div class="save-bar">
+    <v-card-actions class="pa-4 pt-2">
       <v-btn block color="primary" size="x-large" @click="submit">
         {{ t('common.save') }}
       </v-btn>
-    </div>
+    </v-card-actions>
 
     <v-bottom-sheet v-model="accountSheetOpen">
       <v-card class="pa-4">
@@ -331,10 +330,16 @@ onMounted(async () => {
         </v-list>
       </v-card>
     </v-bottom-sheet>
-  </MobilePage>
+  </v-card>
 </template>
 
 <style scoped>
+.mobile-title {
+  font-size: 1.625rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
 .editor-tab-active {
   background: rgba(var(--v-theme-primary), 0.1);
 }
@@ -392,15 +397,4 @@ onMounted(async () => {
   text-align: right;
 }
 
-.save-bar {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 10;
-  width: min(100vw, 430px);
-  margin: 0 auto;
-  padding: 14px 18px calc(16px + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(246, 248, 247, 0), rgb(var(--v-theme-background)) 28%);
-}
 </style>

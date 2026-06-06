@@ -2,7 +2,6 @@
 import { onMounted, reactive, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import { useTagStore } from '@/modules/tags/tag.store';
-import MobilePage from '@/components/shared/MobilePage.vue';
 
 const { t } = useI18n();
 const store = useTagStore();
@@ -67,9 +66,8 @@ onMounted(() => store.load());
 </script>
 
 <template>
-  <MobilePage :title="t('nav.tags')" show-back>
-    <div class="d-flex flex-column ga-4">
-      <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+  <div class="d-flex flex-column ga-4">
+    <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
       <v-card class="soft-card pa-4">
         <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
@@ -99,7 +97,6 @@ onMounted(() => store.load());
           <v-btn size="small" variant="text" @click="editTag(tag.id)">{{ t('common.edit') }}</v-btn>
           <v-btn size="small" variant="text" @click="remove(tag.id)">{{ t('common.delete') }}</v-btn>
         </div>
-      </v-card>
-    </div>
-  </MobilePage>
+    </v-card>
+  </div>
 </template>

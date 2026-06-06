@@ -1,8 +1,5 @@
 :root {
   color-scheme: light dark;
-  --app-header-height: 88px;
-  --app-bottom-nav-height: 82px;
-  --app-editor-save-height: 94px;
 }
 
 *,
@@ -17,7 +14,6 @@ body,
   margin: 0;
   height: 100%;
   min-height: 100%;
-  overflow: hidden;
 }
 
 body {
@@ -27,46 +23,6 @@ body {
 
 code {
   font-family: 'Cascadia Code', 'Consolas', monospace;
-}
-
-.mobile-page {
-  height: 100dvh;
-  min-height: 100vh;
-  overflow: hidden;
-  background: rgb(var(--v-theme-background));
-}
-
-.mobile-main {
-  height: 100dvh;
-  overflow: hidden;
-}
-
-.mobile-app-bar {
-  border-bottom: 0;
-}
-
-.mobile-title {
-  font-size: 1.625rem;
-  font-weight: 800;
-  letter-spacing: 0;
-}
-
-.mobile-page-content {
-  width: min(100vw, 430px);
-  height: calc(100dvh - var(--app-header-height) - var(--app-bottom-nav-height) - env(safe-area-inset-bottom));
-  margin: 0 auto;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding: 16px 18px 24px;
-}
-
-.mobile-page--without-footer .mobile-page-content {
-  height: calc(100dvh - var(--app-header-height));
-}
-
-.mobile-page-content.editor-content {
-  height: calc(100dvh - var(--app-header-height) - var(--app-editor-save-height) - env(safe-area-inset-bottom));
-  padding-bottom: 24px;
 }
 
 .soft-card {

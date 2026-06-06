@@ -2,8 +2,6 @@
 import { computed } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
 import { useI18n } from '@/i18n';
-import MobilePage from '@/components/shared/MobilePage.vue';
-import LanguageSwitcher from '@/components/shared/LanguageSwitcher.vue';
 
 const { t } = useI18n();
 
@@ -44,13 +42,8 @@ const sections = computed<Array<{ title: string; items: MoreItem[] }>>(() => [
 </script>
 
 <template>
-  <MobilePage :title="t('nav.more')">
-    <template #actions>
-      <LanguageSwitcher />
-    </template>
-
-    <div class="d-flex flex-column ga-5">
-      <v-card v-for="section in sections" :key="section.title" class="soft-card">
+  <div class="d-flex flex-column ga-5">
+    <v-card v-for="section in sections" :key="section.title" class="soft-card">
         <div class="px-4 pt-4 text-subtitle-1 font-weight-bold">{{ section.title }}</div>
         <v-list class="bg-transparent">
           <v-list-item
@@ -69,7 +62,6 @@ const sections = computed<Array<{ title: string; items: MoreItem[] }>>(() => [
             </template>
           </v-list-item>
         </v-list>
-      </v-card>
-    </div>
-  </MobilePage>
+    </v-card>
+  </div>
 </template>

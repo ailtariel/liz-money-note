@@ -5,7 +5,6 @@ import { exportDatabaseJson, importDatabaseJson } from '@/modules/database/backu
 import { importTextFiles } from '@/modules/import/import.service';
 import type { ImportBatchResult } from '@/modules/import/import.types';
 import { currencies, type CurrencyCode } from '@/modules/shared/money';
-import MobilePage from '@/components/shared/MobilePage.vue';
 
 const { t } = useI18n();
 const message = ref('');
@@ -94,9 +93,8 @@ async function importSelectedFiles() {
 </script>
 
 <template>
-  <MobilePage :title="t('nav.data')" show-back>
-    <div class="d-flex flex-column ga-4">
-      <div class="text-body-2 text-medium-emphasis">{{ t('data.subtitle') }}</div>
+  <div class="d-flex flex-column ga-4">
+    <div class="text-body-2 text-medium-emphasis">{{ t('data.subtitle') }}</div>
       <v-alert v-if="message" type="success" variant="tonal">{{ message }}</v-alert>
       <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
@@ -148,7 +146,6 @@ async function importSelectedFiles() {
 
       <v-alert v-if="importResult?.issueCount" type="warning" variant="tonal">
         {{ t('data.issueWarning', { count: importResult.issueCount }) }}
-      </v-alert>
-    </div>
-  </MobilePage>
+    </v-alert>
+  </div>
 </template>

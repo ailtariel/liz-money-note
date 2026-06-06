@@ -4,7 +4,6 @@ import { useI18n } from '@/i18n';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import type { AccountType } from '@/modules/accounts/account.types';
 import { currencies, formatMinorUnits, parseMoneyToMinorUnits, type CurrencyCode } from '@/modules/shared/money';
-import MobilePage from '@/components/shared/MobilePage.vue';
 import { accountTypeIcon, accountTypeLabel } from '@/components/shared/financeDisplay';
 
 const { t } = useI18n();
@@ -79,9 +78,8 @@ onMounted(() => store.load());
 </script>
 
 <template>
-  <MobilePage :title="t('nav.accounts')" show-back>
-    <div class="d-flex flex-column ga-4">
-      <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+  <div class="d-flex flex-column ga-4">
+    <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
       <v-card class="soft-card pa-4">
         <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
@@ -127,6 +125,5 @@ onMounted(() => store.load());
           </div>
         </div>
       </v-card>
-    </div>
-  </MobilePage>
+  </div>
 </template>

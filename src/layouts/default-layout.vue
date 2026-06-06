@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from '@/i18n';
+import LanguageSwitcher from '@/components/shared/LanguageSwitcher.vue';
 
 const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
 
 const navItems = computed(() => [
@@ -13,81 +15,95 @@ const navItems = computed(() => [
   { title: t('nav.more'), name: 'more', icon: '$more' }
 ]);
 
+const appBarHeight = 88;
 const bottomNavHeight = 82;
 const showBottomNav = computed(() => route.meta.bottomNav === true);
+const showBack = computed(() => route.meta.bottomNav !== true);
 const activeNav = computed(() => String(route.name ?? 'transactions'));
+const pageTitle = computed(() =>
+  typeof route.meta.titleKey === 'string' ? t(route.meta.titleKey) : ''
+);
 </script>
 
 <template>
-  <div class="app-shell">
-    <RouterView />
+  <v-layout class="app-layout" full-height>
+    <v-app-bar color="background" elevation="0" :height="appBarHeight">
+      <div class="app-bar-content">
+        <v-btn v-if="showBack" icon="$close" variant="text" @click="router.back()" />
 
-    <div v-if="showBottomNav" class="mobile-bottom-nav-host">
-      <v-layout class="mobile-bottom-nav-layout">
-        <v-bottom-navigation
-          :model-value="activeNav"
-          absolute
-          class="mobile-bottom-nav"
-          color="primary"
-          grow
-          :height="bottomNavHeight"
-          mandatory
-        >
-          <v-btn
-            v-for="item in navItems"
-            :key="item.name"
-            :to="{ name: item.name }"
-            :value="item.name"
-          >
-            <v-icon :icon="item.icon" />
-            <span>{{ item.title }}</span>
-          </v-btn>
-        </v-bottom-navigation>
-      </v-layout>
-    </div>
-  </div>
+        <v-app-bar-title class="mobile-title">
+          {{ pageTitle }}
+        </v-app-bar-title>
+
+        <v-spacer />
+
+        <template v-if="route.name === 'transactions'">
+          <v-btn icon="$search" variant="text" />
+        </template>
+
+        <LanguageSwitcher v-if="route.name === 'more'" />
+      </div>
+    </v-app-bar>
+
+    <v-main scrollable>
+      <div class="app-main-content">
+        <RouterView />
+      </div>
+    </v-main>
+
+    <v-bottom-navigation
+      v-if="showBottomNav"
+      :model-value="activeNav"
+      color="primary"
+      grow
+      :height="bottomNavHeight"
+      mandatory
+    >
+      <v-btn
+        v-for="item in navItems"
+        :key="item.name"
+        :to="{ name: item.name }"
+        :value="item.name"
+      >
+        <v-icon :icon="item.icon" />
+        <span>{{ item.title }}</span>
+      </v-btn>
+    </v-bottom-navigation>
+  </v-layout>
 </template>
 
 <style scoped>
-.app-shell {
-  height: 100dvh;
-  min-height: 100vh;
-  overflow: hidden;
+.app-layout {
+  background: rgb(var(--v-theme-background));
 }
 
-.mobile-bottom-nav-host {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  z-index: 1004;
-  width: min(100vw, 430px);
-  height: calc(var(--app-bottom-nav-height) + env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-.mobile-bottom-nav-layout {
-  width: 100%;
-  height: var(--app-bottom-nav-height);
-}
-
-.mobile-bottom-nav {
-  top: auto !important;
-  right: 0 !important;
-  bottom: env(safe-area-inset-bottom) !important;
-  left: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  height: var(--app-bottom-nav-height) !important;
+.app-bar-content {
+  display: flex;
+  width: min(100%, 430px);
+  height: 100%;
+  align-items: center;
   margin: 0 auto;
-  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.06);
-  box-shadow: 0 -12px 30px rgba(15, 23, 42, 0.08);
-  pointer-events: auto;
-  transform: none !important;
+  padding: 0 18px;
 }
 
-.mobile-bottom-nav :deep(.v-bottom-navigation__content) {
-  align-items: stretch;
-  height: var(--app-bottom-nav-height);
+.mobile-title {
+  font-size: 1.625rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.app-main-content {
+  width: min(100%, 430px);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 16px 18px 24px;
+}
+
+@media (max-width: 360px) {
+  .app-bar-content,
+  .app-main-content {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
 }
 </style>

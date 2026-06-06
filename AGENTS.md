@@ -15,7 +15,8 @@ This does not override explicit user instructions in the current conversation, s
 Before any implementation, code edit, or command execution related to delivery:
 
 1. Read `README.md` at the repository root only when the conversation/task is related to this repository.
-2. Read `AI-coding-specification/*.md` only when the task involves code changes.
+2. Read `AI-coding-specification/coding-specification.md` when the task involves code changes.
+3. Read `AI-coding-specification/front-end.md` when the task involves frontend layout, pages, components, styles, or UI behavior.
 
 If additional rule files are added under `AI-coding-specification/`, list them explicitly in this section and describe when each file applies. Do not rely on wildcard reading for mandatory rules.
 
