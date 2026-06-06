@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "cap:sync:android": "cap sync android",
+    "db:generate-preload": "node --experimental-strip-types scripts/generate-preloaded-database.mjs",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit"
   },

@@ -14,3 +14,4 @@
 *.msi   -text
 *.exe   -text
 *.wasm  -text
+*.db    -text

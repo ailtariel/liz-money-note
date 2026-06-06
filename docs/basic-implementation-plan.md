@@ -20,11 +20,15 @@
 - 已实现流水创建和软删除时的账户余额事务一致性。
 - 已实现周期事件批准时复制 Tag，并在同一事务中生成流水、更新余额、推进下一次触发日。
 - 已添加 Capacitor Android 平台和基础配置。
+- 已实现 CSV / TXT 文本导入，支持按文件创建账本、自动创建导入账户、分类转 Tag、金额和汇总行修复。
+- 已将 `.mockdata` 一次性生成到预置 SQLite 数据库 `public/assets/databases/liz_money_note.db`，应用启动时连接 `liz_money_note` 并在空库时复制预置库。
 
 当前差异和待验证项：
 
 - 数据导出/恢复当前使用 `@capacitor-community/sqlite` 的 JSON import/export 能力，未实现原始 SQLite 数据库文件导出。若必须导出 `.db` 文件，需要补充文件系统访问方案并确认 Web 与 Android 的交互要求。
 - 已执行 `npm run build` 和 `npx cap sync android`；尚未在 Android Studio 中手动构建 Debug APK。
+- CSV / TXT 导入没有自动去重能力，重复导入同一文件会产生重复流水。
+- 预置数据库只在本地业务库为空时复制，不会在每次启动时覆盖已有用户数据。
 
 ## 范围
 
@@ -314,6 +318,38 @@ npm run dev
 ```
 
 Expected: 导出后可恢复同一份账本、账户、Tag、流水和周期事件数据。
+
+## 任务 11：实现 CSV / TXT 文本导入
+
+**Files:**
+
+- Create: `src/modules/import/import.types.ts`
+- Create: `src/modules/import/text-import.parser.ts`
+- Create: `src/modules/import/import.service.ts`
+- Modify: `src/pages/DataSettingsPage.vue`
+- Modify: `docs/basic-data-design.md`
+
+- [x] 支持选择多个 `.csv` / `.txt` 文件。
+- [x] 每个文件作为一个账本导入，账本名为文件名去扩展名。
+- [x] 文件无账户字段时自动创建 `${账本名} 导入账户`。
+- [x] 支持按文件名自动推断币种，并允许导入页面手动覆盖。
+- [x] 将 `分类` 字段转换为 Tag。
+- [x] 跳过空行和 `合计` 汇总行。
+- [x] 修复金额中的正负号、千分位逗号和小数格式，存储为最小货币单位。
+- [x] 单个文件导入使用 SQLite 事务。
+- [x] 使用 `.mockdata` 目录样例验证解析和转换规则。
+
+Verification:
+
+```bash
+npm run typecheck
+npm run build
+node --experimental-strip-types scripts/verify-import-parser.mjs
+node --experimental-strip-types scripts/verify-mockdata-sqlite-import.mjs
+npm run db:generate-preload
+```
+
+Expected: 类型检查和构建通过，`.mockdata` 中每个文件都能解析为对应账本且导入行数符合样例数据；转换后的数据可写入 SQLite，账户余额与导入流水一致。
 
 ## 任务 10：Android 打包验证
 

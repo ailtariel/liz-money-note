@@ -288,3 +288,58 @@ recurring_event_tags
 ```
 
 `settings` 为可选表。
+
+## CSV / TXT 导入映射
+
+导入功能用于兼容其它账本 App 导出的典型流水文件。第一版导入不新增数据库表，直接转换为现有 `books`、`accounts`、`tags`、`transactions` 和 `transaction_tags` 数据。
+
+### 文件到业务对象
+
+- 每个导入文件创建或复用一个账本。
+- 账本名使用文件名去掉扩展名，例如 `2025国内.csv` 导入到账本 `2025国内`。
+- 每个导入账本创建或复用一个导入账户，账户名为 `${账本名} 导入账户`。
+- 文件没有账户字段时，所有流水都归属该导入账户。
+- 文件没有币种字段时按以下规则推断：
+  - 文件名包含 `国内` 时使用 `CNY`。
+  - 其它文件默认使用 `AED`。
+  - 用户在导入页面手动选择币种时，以用户选择为准。
+
+### 字段映射
+
+| 导入字段 | 目标字段 | 说明 |
+| --- | --- | --- |
+| 日期 | `transactions.occurred_at` | 支持 `YYYY-MM-DD` 和 `YYYY-MM-DD HH:mm:ss` |
+| 收支类型 | `transactions.type` | `收入` -> `income`，`支出` -> `expense` |
+| 金额 | `transactions.amount` | 去掉正负号、千分位逗号后转为最小货币单位 |
+| 分类 | `tags.name` | 分类转换为 Tag，不作为账本或二级分类 |
+| 备注 | `transactions.note` | 空值保存为空 |
+
+### 格式修复规则
+
+- 支持 `.csv` 和 `.txt` 文本文件。
+- CSV 支持双引号包裹的字段，例如 `"34,000"`。
+- TXT 支持逗号、Tab 或连续空白分隔。
+- 金额允许 `+`、`-`、千分位逗号和最多两位小数。
+- 金额符号不决定流水类型；当金额符号与 `收支类型` 冲突时，以 `收支类型` 为准，金额取绝对值。
+- 空行和 `合计` 汇总行会跳过。
+- 单行解析失败时跳过该行并在导入结果中报告；同一文件内可解析行继续导入。
+- 单个文件落库过程使用一个 SQLite 事务；如果写入失败，该文件不产生部分数据。
+
+### 第一版限制
+
+- 导入文件没有稳定外部 ID，第一版不做自动去重。重复导入同一文件会产生重复流水。
+- 当前 mock 数据不包含转账记录，第一版文本导入只处理收入和支出。
+- 导入账户的初始余额为 `0`，当前余额由导入流水累计得到。
+
+## 预置 SQLite 数据库
+
+`.mockdata` 只作为开发期一次性数据源，不由应用运行时读取。应用运行时连接的数据库名为 `liz_money_note`。
+
+预置数据库生成流程：
+
+1. 使用 `scripts/generate-preloaded-database.mjs` 读取 `.mockdata`。
+2. 按 CSV / TXT 导入映射规则转换为 SQLite 数据。
+3. 生成 `public/assets/databases/liz_money_note.db`。
+4. 生成 `public/assets/databases/databases.json`，供 `@capacitor-community/sqlite` 的 `copyFromAssets` 使用。
+
+应用启动时会初始化 SQLite 连接，并在本地业务库为空时从 `public/assets/databases/liz_money_note.db` 复制预置库。若本地库已经存在账户、Tag、非默认账本或流水，启动流程不会覆盖用户数据。
