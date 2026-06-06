@@ -1,16 +1,24 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useDisplay } from 'vuetify';
 import { useI18n } from '@/i18n';
 import { useBookStore } from '@/modules/books/book.store';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useTagStore } from '@/modules/tags/tag.store';
 import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import type { TransactionType } from '@/modules/transactions/transaction.types';
-import { formatMinorUnits, parseMoneyToMinorUnits } from '@/modules/shared/money';
+import {
+  formatMoneyInputDisplay,
+  formatMinorUnits,
+  maskMoneyInput,
+  parseMoneyToMinorUnits
+} from '@/modules/shared/money';
 import { todayIsoDate } from '@/modules/shared/date';
 import { transactionTypeOptions } from '@/components/shared/financeDisplay';
+import NumericKeyboard from '@/components/shared/NumericKeyboard.vue';
 
 const { t } = useI18n();
+const { mobile } = useDisplay();
 const emit = defineEmits<{
   close: [];
   saved: [];
@@ -22,6 +30,9 @@ const transactionStore = useTransactionStore();
 const error = ref('');
 const accountSheetOpen = ref(false);
 const bookSheetOpen = ref(false);
+const amountKeyboardOpen = ref(false);
+const tagSheetOpen = ref(false);
+const tagError = ref('');
 
 const form = reactive({
   bookId: null as number | null,
@@ -32,19 +43,14 @@ const form = reactive({
   date: todayIsoDate(),
   time: '12:35',
   note: '',
-  tagIds: [] as number[],
-  category: 'food'
+  tagIds: [] as number[]
+});
+const tagForm = reactive({
+  name: '',
+  color: '#0f766e'
 });
 
 const typeOptions = computed(() => transactionTypeOptions(t));
-const categories = computed(() => [
-  { value: 'food', title: t('category.food'), icon: '$food' },
-  { value: 'shopping', title: t('category.shopping'), icon: '$shopping' },
-  { value: 'transport', title: t('category.transport'), icon: '$transport' },
-  { value: 'daily', title: t('category.daily'), icon: '$daily' },
-  { value: 'entertainment', title: t('category.entertainment'), icon: '$entertainment' },
-  { value: 'more', title: t('category.more'), icon: '$more' }
-]);
 
 const selectedAccount = computed(() =>
   accountStore.activeAccounts.find((account) => account.id === form.accountId)
@@ -62,7 +68,7 @@ const targetAccounts = computed(() =>
   )
 );
 
-const displayAmount = computed(() => form.amount || t('transaction.amountPlaceholder'));
+const displayAmount = computed(() => formatMoneyInputDisplay(form.amount));
 
 watch(
   () => form.accountId,
@@ -80,16 +86,18 @@ watch(
   }
 );
 
+function updateAmount(value: string) {
+  form.amount = maskMoneyInput(value);
+}
+
+function openAmountKeyboard() {
+  if (mobile.value) {
+    amountKeyboardOpen.value = true;
+  }
+}
+
 function appendAmount(value: string) {
-  if (value === '.' && form.amount.includes('.')) {
-    return;
-  }
-
-  if (form.amount.includes('.') && form.amount.split('.')[1].length >= 2) {
-    return;
-  }
-
-  form.amount = `${form.amount}${value}`;
+  updateAmount(`${form.amount}${value}`);
 }
 
 function backspaceAmount() {
@@ -100,6 +108,38 @@ function toggleTag(tagId: number) {
   form.tagIds = form.tagIds.includes(tagId)
     ? form.tagIds.filter((id) => id !== tagId)
     : [...form.tagIds, tagId];
+}
+
+function resetTagForm() {
+  tagError.value = '';
+  tagForm.name = '';
+  tagForm.color = '#0f766e';
+}
+
+async function submitTag() {
+  const name = tagForm.name.trim();
+
+  if (!name) {
+    return;
+  }
+
+  tagError.value = '';
+  try {
+    await tagStore.create({
+      name,
+      color: tagForm.color || null
+    });
+    const createdTag = tagStore.tags.find((tag) => tag.name === name);
+
+    if (createdTag && !form.tagIds.includes(createdTag.id)) {
+      form.tagIds = [...form.tagIds, createdTag.id];
+    }
+
+    tagSheetOpen.value = false;
+    resetTagForm();
+  } catch (err) {
+    tagError.value = err instanceof Error ? err.message : t('tag.saveFailed');
+  }
 }
 
 async function submit() {
@@ -119,12 +159,13 @@ async function submit() {
       accountId: form.accountId,
       targetAccountId: form.type === 'transfer' ? form.targetAccountId : null,
       occurredAt: `${form.date} ${form.time}:00`,
-      note: form.note || categories.value.find((item) => item.value === form.category)?.title || null,
+      note: form.note || null,
       tagIds: form.tagIds
     });
     emit('saved');
   } catch (err) {
-    error.value = err instanceof Error ? err.message : t('transaction.saveFailed');
+    error.value =
+      err instanceof Error ? err.message : t('transaction.saveFailed');
   }
 }
 
@@ -142,173 +183,194 @@ onMounted(async () => {
       <v-toolbar-title class="mobile-title">
         {{ t('nav.newTransaction') }}
       </v-toolbar-title>
-      <v-spacer />
-      <v-btn prepend-icon="$calendar" variant="text">
-        {{ t('transaction.template') }}
-      </v-btn>
     </v-toolbar>
 
     <v-card-text class="flex-grow-1 overflow-y-auto px-4 pb-4">
       <v-form class="d-flex flex-column ga-4" @submit.prevent="submit">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
-      <v-card class="soft-card pa-1">
-        <v-tabs v-model="form.type" grow hide-slider selected-class="editor-tab-active">
-          <v-tab v-for="item in typeOptions" :key="item.value" :prepend-icon="item.icon" :value="item.value">
-            {{ item.title }}
-          </v-tab>
-        </v-tabs>
-      </v-card>
-
-      <v-card class="soft-card pa-5 amount-card">
-        <div class="text-body-2 text-medium-emphasis">
-          {{ t('transaction.amount') }} ({{ selectedAccount?.currency ?? 'AED' }})
-        </div>
-        <div class="d-flex align-center">
-          <div class="amount-display">{{ displayAmount }}</div>
-          <v-spacer />
-          <v-btn icon="$chartDonut" variant="tonal" />
-        </div>
-        <div class="calculator-grid mt-4">
-          <v-btn v-for="key in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0']" :key="key" variant="tonal" @click="appendAmount(key)">
-            {{ key }}
-          </v-btn>
-          <v-btn icon="$close" variant="tonal" @click="backspaceAmount" />
-        </div>
-      </v-card>
-
-      <v-card class="soft-card pa-4">
-        <div class="text-subtitle-1 font-weight-bold mb-4">{{ t('transaction.category') }}</div>
-        <v-slide-group v-model="form.category" show-arrows="desktop">
-          <v-slide-group-item
-            v-for="category in categories"
-            :key="category.value"
-            v-slot="{ isSelected, toggle }"
-            :value="category.value"
+        <v-card class="soft-card pa-1">
+          <v-tabs
+            v-model="form.type"
+            grow
+            hide-slider
+            selected-class="editor-tab-active"
           >
-            <button class="category-option" type="button" @click="toggle">
-              <span :class="['category-icon', isSelected ? 'category-icon-active' : '']">
-                <v-icon :icon="category.icon" />
-              </span>
-              <span :class="['text-body-2', isSelected ? 'text-primary font-weight-bold' : 'text-medium-emphasis']">
-                {{ category.title }}
-              </span>
-            </button>
-          </v-slide-group-item>
-        </v-slide-group>
-      </v-card>
+            <v-tab
+              v-for="item in typeOptions"
+              :key="item.value"
+              :prepend-icon="item.icon"
+              :value="item.value"
+            >
+              {{ item.title }}
+            </v-tab>
+          </v-tabs>
+        </v-card>
 
-      <v-card class="soft-card">
-        <v-list class="bg-transparent">
-          <v-list-item @click="accountSheetOpen = true">
-            <template #prepend>
-              <v-avatar color="primary" variant="tonal">
-                <v-icon icon="$account" />
-              </v-avatar>
-            </template>
-            <v-list-item-title class="font-weight-bold">{{ t('transaction.account') }}</v-list-item-title>
-            <v-list-item-subtitle>
-              {{ selectedAccount?.name || '-' }}
-              <span v-if="selectedAccount"> · {{ t('account.balance') }} {{ formatMinorUnits(selectedAccount.currentBalance, selectedAccount.currency) }}</span>
-            </v-list-item-subtitle>
-            <template #append><v-icon icon="$next" /></template>
-          </v-list-item>
-
-          <v-divider />
-
-          <v-list-item @click="bookSheetOpen = true">
-            <template #prepend>
-              <v-avatar color="secondary" variant="tonal">
-                <v-icon icon="$book" />
-              </v-avatar>
-            </template>
-            <v-list-item-title class="font-weight-bold">{{ t('transaction.book') }}</v-list-item-title>
-            <v-list-item-subtitle>{{ selectedBook?.name || '-' }}</v-list-item-subtitle>
-            <template #append><v-icon icon="$next" /></template>
-          </v-list-item>
-
+        <v-card class="soft-card pa-5">
+          <v-text-field
+            :model-value="displayAmount"
+            :label="t('transaction.amount')"
+            class="amount-field"
+            placeholder="0.00"
+            inputmode="decimal"
+            :readonly="mobile"
+            :suffix="selectedAccount?.currency"
+            clearable
+            @click="openAmountKeyboard"
+            @update:model-value="updateAmount(String($event ?? ''))"
+          />
           <template v-if="form.type === 'transfer'">
-            <v-divider />
             <v-select
               v-model="form.targetAccountId"
               :items="targetAccounts"
-              class="px-4 pt-4"
               item-title="name"
               item-value="id"
               :label="t('transaction.toAccount')"
             />
           </template>
-        </v-list>
-      </v-card>
+        </v-card>
 
-      <v-card class="soft-card pa-4">
-        <div class="text-subtitle-1 font-weight-bold mb-3">
-          {{ t('transaction.tags') }} ({{ t('common.optional') }})
-        </div>
-        <div class="d-flex flex-wrap ga-2">
-          <v-chip
-            v-for="tag in tagStore.tags"
-            :key="tag.id"
-            :color="tag.color || 'primary'"
-            :variant="form.tagIds.includes(tag.id) ? 'flat' : 'tonal'"
-            @click="toggleTag(tag.id)"
-          >
-            {{ tag.name }}
-          </v-chip>
-          <v-chip prepend-icon="$add" variant="outlined">{{ t('transaction.addTag') }}</v-chip>
-        </div>
-      </v-card>
+        <v-card class="soft-card pa-4">
+          <div class="text-subtitle-1 font-weight-bold mb-4">
+            {{ t('transaction.tags') }} ({{ t('common.optional') }})
+          </div>
+          <div class="d-flex flex-wrap ga-2">
+            <v-chip
+              v-for="tag in tagStore.tags"
+              :key="tag.id"
+              :color="tag.color || 'primary'"
+              :variant="form.tagIds.includes(tag.id) ? 'flat' : 'tonal'"
+              @click="toggleTag(tag.id)"
+            >
+              {{ tag.name }}
+            </v-chip>
+            <v-chip
+              prepend-icon="$add"
+              variant="outlined"
+              @click="tagSheetOpen = true"
+            >
+              {{ t('transaction.addTag') }}
+            </v-chip>
+          </div>
+        </v-card>
 
-      <v-card class="soft-card">
-        <v-list class="bg-transparent">
-          <v-list-item>
-            <template #prepend><v-icon icon="$calendar" /></template>
-            <v-list-item-title>{{ t('common.date') }}</v-list-item-title>
-            <template #append>
-              <input v-model="form.date" class="plain-date-input" type="date" />
-            </template>
-          </v-list-item>
-          <v-divider />
-          <v-list-item>
-            <template #prepend><v-icon icon="$clock" /></template>
-            <v-list-item-title>{{ t('common.time') }}</v-list-item-title>
-            <template #append>
-              <input v-model="form.time" class="plain-date-input" type="time" />
-            </template>
-          </v-list-item>
-        </v-list>
-      </v-card>
+        <v-card class="soft-card">
+          <v-list class="bg-transparent">
+            <v-list-item @click="accountSheetOpen = true">
+              <template #prepend>
+                <v-avatar color="primary" variant="tonal">
+                  <v-icon icon="$account" />
+                </v-avatar>
+              </template>
+              <v-list-item-title class="font-weight-bold">{{
+                t('transaction.account')
+              }}</v-list-item-title>
+              <v-list-item-subtitle>
+                {{ selectedAccount?.name || '-' }}
+                <span v-if="selectedAccount">
+                  · {{ t('account.balance') }}
+                  {{
+                    formatMinorUnits(
+                      selectedAccount.currentBalance,
+                      selectedAccount.currency
+                    )
+                  }}</span
+                >
+              </v-list-item-subtitle>
+              <template #append><v-icon icon="$next" /></template>
+            </v-list-item>
 
-      <v-card class="soft-card pa-4">
-        <v-textarea
-          v-model="form.note"
-          :counter="200"
-          hide-details
-          :label="t('common.note')"
-          rows="3"
-        />
-      </v-card>
+            <v-divider />
+
+            <v-list-item @click="bookSheetOpen = true">
+              <template #prepend>
+                <v-avatar color="secondary" variant="tonal">
+                  <v-icon icon="$book" />
+                </v-avatar>
+              </template>
+              <v-list-item-title class="font-weight-bold">{{
+                t('transaction.book')
+              }}</v-list-item-title>
+              <v-list-item-subtitle>{{
+                selectedBook?.name || '-'
+              }}</v-list-item-subtitle>
+              <template #append><v-icon icon="$next" /></template>
+            </v-list-item>
+          </v-list>
+        </v-card>
+
+        <v-card class="soft-card">
+          <v-list class="bg-transparent">
+            <v-list-item>
+              <template #prepend><v-icon icon="$calendar" /></template>
+              <v-list-item-title>{{ t('common.date') }}</v-list-item-title>
+              <template #append>
+                <input
+                  v-model="form.date"
+                  class="plain-date-input"
+                  type="date"
+                />
+              </template>
+            </v-list-item>
+            <v-divider />
+            <v-list-item>
+              <template #prepend><v-icon icon="$clock" /></template>
+              <v-list-item-title>{{ t('common.time') }}</v-list-item-title>
+              <template #append>
+                <input
+                  v-model="form.time"
+                  class="plain-date-input"
+                  type="time"
+                />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-card>
+
+        <v-card class="soft-card pa-4">
+          <v-textarea
+            v-model="form.note"
+            :counter="200"
+            hide-details
+            :label="t('common.note')"
+            rows="3"
+          />
+        </v-card>
       </v-form>
     </v-card-text>
 
     <v-card-actions class="pa-4 pt-2">
-      <v-btn block color="primary" size="x-large" @click="submit">
+      <v-btn
+        block
+        color="primary"
+        variant="flat"
+        size="x-large"
+        @click="submit"
+      >
         {{ t('common.save') }}
       </v-btn>
     </v-card-actions>
 
     <v-bottom-sheet v-model="accountSheetOpen">
       <v-card class="pa-4">
-        <div class="text-h6 font-weight-bold mb-3">{{ t('transaction.account') }}</div>
+        <div class="text-h6 font-weight-bold mb-3">
+          {{ t('transaction.account') }}
+        </div>
         <v-list class="bg-transparent">
           <v-list-item
             v-for="account in accountStore.activeAccounts"
             :key="account.id"
             :active="form.accountId === account.id"
-            @click="form.accountId = account.id; accountSheetOpen = false"
+            @click="
+              form.accountId = account.id;
+              accountSheetOpen = false;
+            "
           >
             <v-list-item-title>{{ account.name }}</v-list-item-title>
-            <v-list-item-subtitle>{{ formatMinorUnits(account.currentBalance, account.currency) }}</v-list-item-subtitle>
+            <v-list-item-subtitle>{{
+              formatMinorUnits(account.currentBalance, account.currency)
+            }}</v-list-item-subtitle>
           </v-list-item>
         </v-list>
       </v-card>
@@ -316,7 +378,9 @@ onMounted(async () => {
 
     <v-bottom-sheet v-model="bookSheetOpen">
       <v-card class="pa-4">
-        <div class="text-h6 font-weight-bold mb-3">{{ t('transaction.book') }}</div>
+        <div class="text-h6 font-weight-bold mb-3">
+          {{ t('transaction.book') }}
+        </div>
         <v-list class="bg-transparent">
           <v-list-item
             v-for="book in bookStore.activeBooks"
@@ -324,10 +388,58 @@ onMounted(async () => {
             :active="form.bookId === book.id"
             :title="book.name"
             :subtitle="book.description || ''"
-            @click="form.bookId = book.id; bookSheetOpen = false"
+            @click="
+              form.bookId = book.id;
+              bookSheetOpen = false;
+            "
           />
         </v-list>
       </v-card>
+    </v-bottom-sheet>
+
+    <v-bottom-sheet v-model="tagSheetOpen">
+      <v-card class="pa-4">
+        <div class="text-h6 font-weight-bold mb-3">
+          {{ t('transaction.addTag') }}
+        </div>
+        <v-alert v-if="tagError" class="mb-3" type="error" variant="tonal">
+          {{ tagError }}
+        </v-alert>
+        <v-form class="d-flex flex-column ga-3" @submit.prevent="submitTag">
+          <v-text-field
+            v-model="tagForm.name"
+            :label="t('common.name')"
+            autofocus
+            required
+          />
+          <v-text-field v-model="tagForm.color" :label="t('common.color')" />
+          <div class="d-flex ga-2">
+            <v-btn color="primary" type="submit">
+              {{ t('common.add') }}
+            </v-btn>
+            <v-btn
+              variant="text"
+              @click="
+                tagSheetOpen = false;
+                resetTagForm();
+              "
+            >
+              {{ t('common.cancel') }}
+            </v-btn>
+          </div>
+        </v-form>
+      </v-card>
+    </v-bottom-sheet>
+
+    <v-bottom-sheet v-model="amountKeyboardOpen">
+      <NumericKeyboard
+        :confirm-label="t('common.confirm')"
+        :display-value="displayAmount"
+        :title="`${t('transaction.amount')} (${selectedAccount?.currency ?? 'AED'})`"
+        @backspace="backspaceAmount"
+        @confirm="amountKeyboardOpen = false"
+        @input="appendAmount"
+      />
     </v-bottom-sheet>
   </v-card>
 </template>
@@ -347,44 +459,10 @@ onMounted(async () => {
   min-height: 150px;
 }
 
-.amount-display {
+.amount-field :deep(.v-field__input) {
   color: rgb(var(--v-theme-primary));
-  font-size: 4rem;
-  font-weight: 800;
+  font-weight: 400;
   line-height: 1.1;
-}
-
-.calculator-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.category-option {
-  display: flex;
-  width: 74px;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.category-icon {
-  display: grid;
-  width: 54px;
-  height: 54px;
-  place-items: center;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-  border-radius: 50%;
-  color: rgba(var(--v-theme-on-surface), 0.64);
-}
-
-.category-icon-active {
-  border-color: rgb(var(--v-theme-primary));
-  background: rgba(var(--v-theme-primary), 0.1);
-  color: rgb(var(--v-theme-primary));
 }
 
 .plain-date-input {
@@ -395,5 +473,4 @@ onMounted(async () => {
   font: inherit;
   text-align: right;
 }
-
 </style>
