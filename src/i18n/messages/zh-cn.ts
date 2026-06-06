@@ -181,6 +181,15 @@ export default {
       system: '跟随系统'
     }
   },
+  settings: {
+    defaultCurrency: {
+      loadFailed: '加载默认货币失败。',
+      saveFailed: '保存默认货币失败。',
+      CNY: '人民币',
+      USD: '美元',
+      AED: '阿联酋迪拉姆'
+    }
+  },
   data: {
     title: '数据',
     subtitle: '导入、导出或恢复本地 SQLite 数据',

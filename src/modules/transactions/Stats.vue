@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue';
 import { useI18n } from '@/i18n';
 import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import { useTagStore } from '@/modules/tags/tag.store';
+import { useDefaultCurrencyStore } from '@/modules/settings/default-currency.store';
 import { formatMinorUnits } from '@/modules/shared/money';
 import AmountText from '@/components/shared/AmountText.vue';
 import AppBarVue from '@/components/shared/app-bar.vue';
@@ -10,9 +11,12 @@ import AppBarVue from '@/components/shared/app-bar.vue';
 const { t } = useI18n();
 const transactionStore = useTransactionStore();
 const tagStore = useTagStore();
+const defaultCurrencyStore = useDefaultCurrencyStore();
 
 const transactions = computed(() => transactionStore.transactions);
-const baseCurrency = computed(() => transactions.value[0]?.currency ?? 'AED');
+const baseCurrency = computed(
+  () => transactions.value[0]?.currency ?? defaultCurrencyStore.currency
+);
 const income = computed(() =>
   transactions.value
     .filter((transaction) => transaction.type === 'income')
@@ -51,7 +55,11 @@ const trend = computed(() => [
 ]);
 
 onMounted(async () => {
-  await Promise.all([transactionStore.load(), tagStore.load()]);
+  await Promise.all([
+    transactionStore.load(),
+    tagStore.load(),
+    defaultCurrencyStore.load()
+  ]);
 });
 </script>
 

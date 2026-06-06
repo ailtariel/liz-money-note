@@ -3,6 +3,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
 import { useAccountStore } from '@/modules/accounts/account.store';
+import { useDefaultCurrencyStore } from '@/modules/settings/default-currency.store';
 import type { AccountType } from '@/modules/accounts/account.types';
 import {
   currencies,
@@ -17,6 +18,7 @@ import {
 
 const { t } = useI18n();
 const store = useAccountStore();
+const defaultCurrencyStore = useDefaultCurrencyStore();
 const error = ref('');
 const editingId = ref<number | null>(null);
 const editorOpen = ref(false);
@@ -31,7 +33,7 @@ const accountTypes: AccountType[] = [
 const form = reactive({
   name: '',
   type: 'cash' as AccountType,
-  currency: 'CNY' as CurrencyCode,
+  currency: 'AED' as CurrencyCode,
   initialBalance: '0',
   isIncludedInAssets: true
 });
@@ -40,7 +42,7 @@ function resetForm() {
   editingId.value = null;
   form.name = '';
   form.type = 'cash';
-  form.currency = 'CNY';
+  form.currency = defaultCurrencyStore.currency;
   form.initialBalance = '0';
   form.isIncludedInAssets = true;
 }
@@ -98,7 +100,9 @@ async function archive(accountId: number) {
   }
 }
 
-onMounted(() => store.load());
+onMounted(async () => {
+  await Promise.all([store.load(), defaultCurrencyStore.load()]);
+});
 </script>
 
 <template>

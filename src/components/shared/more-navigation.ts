@@ -80,7 +80,12 @@ export const moreNavigationSections: MoreNavigationSection[] = [
         to: { name: 'theme' },
         routeNames: ['theme']
       },
-      { titleKey: 'more.defaultCurrency', icon: '$cash' },
+      {
+        titleKey: 'more.defaultCurrency',
+        icon: '$cash',
+        to: { name: 'default-currency' },
+        routeNames: ['default-currency']
+      },
       { titleKey: 'more.about', icon: '$info' }
     ]
   }

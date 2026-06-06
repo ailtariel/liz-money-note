@@ -181,6 +181,15 @@ export default {
       system: 'System'
     }
   },
+  settings: {
+    defaultCurrency: {
+      loadFailed: 'Failed to load default currency.',
+      saveFailed: 'Failed to save default currency.',
+      CNY: 'Chinese yuan',
+      USD: 'US dollar',
+      AED: 'UAE dirham'
+    }
+  },
   data: {
     title: 'Data',
     subtitle: 'Import, export, or restore local SQLite data',
