@@ -10,7 +10,7 @@ const router = createRouter({
       component: () => import('@/components/layouts/default-layout.vue'),
       children: [
         {
-          path: '',
+          path: 'transactions',
           name: 'transactions',
           component: () => import('@/modules/transactions/Transactions.vue'),
           meta: {
