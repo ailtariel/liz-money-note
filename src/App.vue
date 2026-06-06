@@ -4,10 +4,12 @@ import { useI18n } from '@/i18n';
 import { useAppLocale } from '@/modules/shared/useAppLocale';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useRecurringStore } from '@/modules/recurring/recurring.store';
+import { useApplyTheme } from '@/modules/theme/useApplyTheme';
 import AmountText from '@/components/shared/AmountText.vue';
 
 const { t } = useI18n();
 const appLocale = useAppLocale();
+useApplyTheme();
 const recurringStore = useRecurringStore();
 const accountStore = useAccountStore();
 const sheetOpen = ref(false);

@@ -166,6 +166,21 @@ export default {
     defaultCurrency: '默认货币',
     about: '关于'
   },
+  theme: {
+    loadFailed: '加载主题设置失败。',
+    saveFailed: '保存主题设置失败。',
+    colorScheme: {
+      title: '色系',
+      green: '绿色',
+      orange: '橙色'
+    },
+    mode: {
+      title: '外观',
+      light: '浅色',
+      dark: '深色',
+      system: '跟随系统'
+    }
+  },
   data: {
     title: '数据',
     subtitle: '导入、导出或恢复本地 SQLite 数据',

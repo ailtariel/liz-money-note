@@ -117,6 +117,14 @@ const router = createRouter({
           meta: {
             titleKey: 'more.restore'
           }
+        },
+        {
+          path: 'theme',
+          name: 'theme',
+          component: () => import('@/modules/theme/Theme.vue'),
+          meta: {
+            titleKey: 'more.theme'
+          }
         }
       ]
     },

@@ -123,9 +123,9 @@ export function createAppVuetify(config: RuntimeAppConfig) {
       }
     },
     theme: {
-      defaultTheme: config.vuetify?.default_theme ?? 'light',
+      defaultTheme: config.vuetify?.default_theme ?? 'greenLight',
       themes: {
-        light: {
+        greenLight: {
           colors: {
             primary: '#0f766e',
             secondary: '#2563eb',
@@ -136,12 +136,34 @@ export function createAppVuetify(config: RuntimeAppConfig) {
             warning: '#d97706'
           }
         },
-        dark: {
+        greenDark: {
           colors: {
             primary: '#5eead4',
             secondary: '#93c5fd',
             background: '#101918',
             surface: '#17211f',
+            success: '#34d399',
+            error: '#f87171',
+            warning: '#fbbf24'
+          }
+        },
+        orangeLight: {
+          colors: {
+            primary: '#ea580c',
+            secondary: '#2563eb',
+            background: '#FFF8F2',
+            surface: '#ffffff',
+            success: '#059669',
+            error: '#dc2626',
+            warning: '#d97706'
+          }
+        },
+        orangeDark: {
+          colors: {
+            primary: '#fdba74',
+            secondary: '#93c5fd',
+            background: '#1f1710',
+            surface: '#2a2118',
             success: '#34d399',
             error: '#f87171',
             warning: '#fbbf24'

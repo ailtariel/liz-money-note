@@ -166,6 +166,21 @@ export default {
     defaultCurrency: 'Default currency',
     about: 'About'
   },
+  theme: {
+    loadFailed: 'Failed to load theme settings.',
+    saveFailed: 'Failed to save theme settings.',
+    colorScheme: {
+      title: 'Color scheme',
+      green: 'Green',
+      orange: 'Orange'
+    },
+    mode: {
+      title: 'Appearance',
+      light: 'Light',
+      dark: 'Dark',
+      system: 'System'
+    }
+  },
   data: {
     title: 'Data',
     subtitle: 'Import, export, or restore local SQLite data',

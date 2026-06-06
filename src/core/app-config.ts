@@ -12,7 +12,7 @@ const defaultConfig: RuntimeAppConfig = {
     show_about: true
   },
   vuetify: {
-    default_theme: 'light'
+    default_theme: 'greenLight'
   }
 };
 

@@ -74,7 +74,12 @@ export const moreNavigationSections: MoreNavigationSection[] = [
   {
     titleKey: 'more.settings',
     items: [
-      { titleKey: 'more.theme', icon: '$themeDark' },
+      {
+        titleKey: 'more.theme',
+        icon: '$themeDark',
+        to: { name: 'theme' },
+        routeNames: ['theme']
+      },
       { titleKey: 'more.defaultCurrency', icon: '$cash' },
       { titleKey: 'more.about', icon: '$info' }
     ]

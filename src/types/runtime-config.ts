@@ -5,7 +5,7 @@ export interface RuntimeAppConfig {
   enable_route_guard: boolean;
   feature_flags: Record<string, boolean>;
   vuetify: {
-    default_theme: 'light' | 'dark';
+    default_theme: 'greenLight' | 'greenDark' | 'orangeLight' | 'orangeDark';
   };
   [key: string]: unknown;
 }

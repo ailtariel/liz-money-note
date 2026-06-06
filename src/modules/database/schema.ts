@@ -110,6 +110,12 @@ CREATE TABLE IF NOT EXISTS recurring_event_tags (
   FOREIGN KEY (recurring_event_id) REFERENCES recurring_events(id),
   FOREIGN KEY (tag_id) REFERENCES tags(id)
 );
+
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 `;
 
 export const createIndexStatements = `
