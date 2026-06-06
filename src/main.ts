@@ -2,9 +2,10 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 import { loadAppConfig } from "@/core/app-config";
+import { getDatabase } from "@/modules/database/connection";
+import { ensureDefaultBook } from "@/modules/books/book.repository";
 import { registerPlugins } from "@/plugins";
 import router from "@/router";
-import { useAuthStore } from "@/stores/auth";
 import "./styles/main.scss";
 
 async function bootstrap() {
@@ -18,8 +19,8 @@ async function bootstrap() {
   registerPlugins(app, config);
   app.use(router);
 
-  const authStore = useAuthStore();
-  authStore.hydrate();
+  await getDatabase();
+  await ensureDefaultBook();
 
   await router.isReady();
   app.mount("#app");

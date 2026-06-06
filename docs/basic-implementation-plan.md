@@ -10,6 +10,22 @@
 
 ---
 
+## 当前实现状态
+
+已实现第一阶段核心 MVP：
+
+- 已创建 SQLite schema、索引、初始化入口和 Capacitor SQLite Web/Android 连接。
+- 已实现账本、账户、Tag、流水、周期事件的数据访问层、业务层和 Pinia 状态。
+- 已实现账本、账户、Tag、流水列表、流水创建、周期事件配置、到期周期事件手动批准/跳过/停用页面。
+- 已实现流水创建和软删除时的账户余额事务一致性。
+- 已实现周期事件批准时复制 Tag，并在同一事务中生成流水、更新余额、推进下一次触发日。
+- 已添加 Capacitor Android 平台和基础配置。
+
+当前差异和待验证项：
+
+- 数据导出/恢复当前使用 `@capacitor-community/sqlite` 的 JSON import/export 能力，未实现原始 SQLite 数据库文件导出。若必须导出 `.db` 文件，需要补充文件系统访问方案并确认 Web 与 Android 的交互要求。
+- 已执行 `npm run build` 和 `npx cap sync android`；尚未在 Android Studio 中手动构建 Debug APK。
+
 ## 范围
 
 第一阶段实现：

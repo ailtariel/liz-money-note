@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { getAppConfig } from '@/core/app-config';
-import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,39 +10,61 @@ const router = createRouter({
       children: [
         {
           path: '',
-          name: 'home',
-          component: () => import('@/views/home-view.vue'),
+          name: 'transactions',
+          component: () => import('@/pages/TransactionsPage.vue'),
           meta: {
-            title: 'Home'
+            title: '流水'
           }
         },
         {
-          path: 'dashboard',
-          name: 'dashboard',
-          component: () => import('@/views/dashboard-view.vue'),
+          path: 'transactions/new',
+          name: 'transaction-new',
+          component: () => import('@/pages/TransactionEditorPage.vue'),
           meta: {
-            title: 'Dashboard',
-            requiresAuth: true
+            title: '新增流水'
           }
         },
         {
-          path: 'about',
-          name: 'about',
-          component: () => import('@/views/about-view.vue'),
+          path: 'books',
+          name: 'books',
+          component: () => import('@/pages/BooksPage.vue'),
           meta: {
-            title: 'About'
+            title: '账本'
+          }
+        },
+        {
+          path: 'accounts',
+          name: 'accounts',
+          component: () => import('@/pages/AccountsPage.vue'),
+          meta: {
+            title: '账户'
+          }
+        },
+        {
+          path: 'tags',
+          name: 'tags',
+          component: () => import('@/pages/TagsPage.vue'),
+          meta: {
+            title: 'Tag'
+          }
+        },
+        {
+          path: 'recurring',
+          name: 'recurring',
+          component: () => import('@/pages/RecurringEventsPage.vue'),
+          meta: {
+            title: '周期事件'
+          }
+        },
+        {
+          path: 'data',
+          name: 'data',
+          component: () => import('@/pages/DataSettingsPage.vue'),
+          meta: {
+            title: '数据'
           }
         }
       ]
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/login-view.vue'),
-      meta: {
-        title: 'Login',
-        guestOnly: true
-      }
     },
     {
       path: '/:pathMatch(.*)*',
@@ -54,34 +75,6 @@ const router = createRouter({
       }
     }
   ]
-});
-
-router.beforeEach((to) => {
-  const config = getAppConfig();
-  const authStore = useAuthStore();
-
-  if (!authStore.hydrated) {
-    authStore.hydrate();
-  }
-
-  if (
-    config.enable_route_guard &&
-    to.meta.requiresAuth &&
-    !authStore.isAuthenticated
-  ) {
-    return {
-      name: 'login',
-      query: {
-        redirect: to.fullPath
-      }
-    };
-  }
-
-  if (to.meta.guestOnly && authStore.isAuthenticated) {
-    return config.default_route || '/';
-  }
-
-  return true;
 });
 
 router.afterEach((to) => {

@@ -13,3 +13,4 @@
 *.icns  -text
 *.msi   -text
 *.exe   -text
+*.wasm  -text

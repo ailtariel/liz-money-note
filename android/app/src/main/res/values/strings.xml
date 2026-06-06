@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Liz Money Note</string>
+    <string name="title_activity_main">Liz Money Note</string>
+    <string name="package_name">com.ailtariel.lizmoneynote</string>
+    <string name="custom_url_scheme">com.ailtariel.lizmoneynote</string>
+</resources>

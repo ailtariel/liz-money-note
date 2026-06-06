@@ -3,15 +3,20 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useTheme } from 'vuetify';
 import { getAppConfig } from '@/core/app-config';
-import { useAuthStore } from '@/stores/auth';
 
 const route = useRoute();
 const theme = useTheme();
 const appConfig = getAppConfig();
-const authStore = useAuthStore();
 
-const showAbout = computed(() => appConfig.feature_flags?.show_about !== false);
 const isDark = computed(() => theme.global.name.value === 'dark');
+const navItems = [
+  { title: '流水', name: 'transactions' },
+  { title: '账本', name: 'books' },
+  { title: '账户', name: 'accounts' },
+  { title: 'Tag', name: 'tags' },
+  { title: '周期', name: 'recurring' },
+  { title: '数据', name: 'data' }
+];
 
 function toggleTheme() {
   theme.global.name.value = isDark.value ? 'light' : 'dark';
@@ -25,54 +30,20 @@ function toggleTheme() {
         <div class="text-h6 font-weight-bold">{{ appConfig.app_title }}</div>
         <v-spacer />
         <v-btn
-          :to="{ name: 'home' }"
-          :active="route.name === 'home'"
+          v-for="item in navItems"
+          :key="item.name"
+          :to="{ name: item.name }"
+          :active="route.name === item.name"
           :icon="false"
-          prepend-icon="$dashboard"
           variant="text"
         >
-          Home
-        </v-btn>
-        <v-btn
-          :to="{ name: 'dashboard' }"
-          :active="route.name === 'dashboard'"
-          :icon="false"
-          prepend-icon="$profile"
-          variant="text"
-        >
-          Dashboard
-        </v-btn>
-        <v-btn
-          v-if="showAbout"
-          :to="{ name: 'about' }"
-          :active="route.name === 'about'"
-          :icon="false"
-          prepend-icon="$info"
-          variant="text"
-        >
-          About
+          {{ item.title }}
         </v-btn>
         <v-btn
           :icon="isDark ? '$themeLight' : '$themeDark'"
           variant="text"
           @click="toggleTheme"
         />
-        <v-btn
-          v-if="!authStore.isAuthenticated"
-          :to="{ name: 'login' }"
-          prepend-icon="$login"
-          variant="tonal"
-        >
-          Login
-        </v-btn>
-        <v-btn
-          v-else
-          prepend-icon="$logout"
-          variant="tonal"
-          @click="authStore.logout()"
-        >
-          Logout
-        </v-btn>
       </v-container>
     </v-app-bar>
 
