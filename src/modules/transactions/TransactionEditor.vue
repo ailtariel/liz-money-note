@@ -420,7 +420,11 @@ onMounted(async () => {
             autofocus
             required
           />
-          <v-text-field v-model="tagForm.color" :label="t('common.color')" />
+          <v-color-input
+            v-model="tagForm.color"
+            :label="t('common.color')"
+            hide-actions
+          />
           <div class="d-flex ga-2">
             <v-btn color="primary" type="submit">
               {{ t('common.add') }}

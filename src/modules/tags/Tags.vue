@@ -120,7 +120,11 @@ onMounted(() => store.load());
           </div>
           <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
             <v-text-field v-model="form.name" :label="t('common.name')" required />
-            <v-text-field v-model="form.color" :label="t('common.color')" />
+            <v-color-input
+              v-model="form.color"
+              :label="t('common.color')"
+              hide-actions
+            />
             <v-text-field
               v-model.number="form.sortOrder"
               :label="t('common.sortOrder')"
