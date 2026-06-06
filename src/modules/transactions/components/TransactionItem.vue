@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useI18n } from '@/i18n';
 import type { Transaction } from '@/modules/transactions/transaction.types';
 import type { TransactionListRow } from '@/modules/transactions/transaction-ui.types';
+import type { Tag } from '@/modules/tags/tag.types';
 import {
   formatShortDate,
   formatTime
@@ -9,6 +11,8 @@ import {
 
 import { formatMinorUnits } from '@/modules/shared/money';
 import useTransaction from '@/modules/transactions/useTransactionDisplay';
+import { useTagStore } from '@/modules/tags/tag.store';
+import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import AmountText from '@/components/shared/AmountText.vue';
 
 interface Props {
@@ -19,6 +23,16 @@ const emit = defineEmits(['openDetail']);
 
 const { t } = useI18n();
 const trans = useTransaction();
+const tagStore = useTagStore();
+const transactionStore = useTransactionStore();
+
+const showBook = computed(() => !transactionStore.filters.bookId);
+const showAccount = computed(() => !transactionStore.filters.accountId);
+
+const getTransactionTags = (transaction: Transaction): Tag[] =>
+  transaction.tagIds
+    .map((tagId) => tagStore.tags.find((tag) => tag.id === tagId))
+    .filter((tag): tag is Tag => Boolean(tag));
 
 const openDetail = (transaction: Transaction) => {
   emit('openDetail', transaction);
@@ -49,38 +63,68 @@ const openDetail = (transaction: Transaction) => {
     @keydown.enter="openDetail(item.transaction)"
   >
     <div class="transaction-content">
-      <v-avatar
-        :color="trans.getColor(item.transaction)"
-        size="36"
-        variant="tonal"
-      >
-        <v-icon :icon="trans.getIcon(item.transaction)" size="20" />
-      </v-avatar>
-      <div class="min-w-0 flex-grow-1">
-        <div class="transaction-title text-truncate">
-          {{ trans.getTitle(item.transaction) }}
-        </div>
-        <div class="transaction-subtitle text-medium-emphasis text-truncate">
-          {{ trans.getAccountName(item.transaction.accountId) }} ·
-          {{ trans.getBookName(item.transaction.bookId) }}
-        </div>
-        <div class="transaction-time text-medium-emphasis">
-          {{ formatTime(item.transaction.occurredAt) }}
-        </div>
+      <div class="transaction-icon-col">
+        <v-avatar
+          :color="trans.getColor(item.transaction)"
+          size="36"
+          variant="tonal"
+        >
+          <v-icon :icon="trans.getIcon(item.transaction)" size="20" />
+        </v-avatar>
       </div>
-      <AmountText
-        class="transaction-amount"
-        :amount="item.transaction.amount"
-        :currency="item.transaction.currency"
-        :signed="item.transaction.type !== 'transfer'"
-        :type="
-          item.transaction.type === 'income'
-            ? 'income'
-            : item.transaction.type === 'expense'
-              ? 'expense'
-              : 'neutral'
-        "
-      />
+      <div class="transaction-main min-w-0">
+        <v-row class="transaction-row" no-gutters>
+          <v-col class="min-w-0" cols="12">
+            <div class="transaction-title text-truncate">
+              {{ trans.getTitle(item.transaction) }}
+            </div>
+          </v-col>
+        </v-row>
+        <v-row class="transaction-row" no-gutters>
+          <v-col class="transaction-subtitle text-medium-emphasis min-w-0">
+            <span v-if="showBook" class="transaction-book text-truncate">
+              {{ trans.getBookName(item.transaction.bookId) }}
+            </span>
+            <v-chip
+              v-for="tag in getTransactionTags(item.transaction)"
+              :key="tag.id"
+              class="transaction-tag"
+              :color="tag.color || 'primary'"
+              size="x-small"
+              variant="tonal"
+            >
+              {{ tag.name }}
+            </v-chip>
+          </v-col>
+          <v-col class="transaction-amount-col" cols="auto">
+            <AmountText
+              class="transaction-amount"
+              :amount="item.transaction.amount"
+              :currency="item.transaction.currency"
+              :signed="item.transaction.type !== 'transfer'"
+              :type="
+                item.transaction.type === 'income'
+                  ? 'income'
+                  : item.transaction.type === 'expense'
+                    ? 'expense'
+                    : 'neutral'
+              "
+            />
+          </v-col>
+        </v-row>
+        <v-row class="transaction-row" no-gutters>
+          <v-col class="transaction-third-line text-medium-emphasis min-w-0">
+            {{ formatTime(item.transaction.occurredAt) }}
+          </v-col>
+          <v-col
+            v-if="showAccount"
+            class="transaction-account text-medium-emphasis text-truncate"
+            cols="auto"
+          >
+            {{ trans.getAccountName(item.transaction.accountId) }}
+          </v-col>
+        </v-row>
+      </div>
     </div>
   </v-card>
 </template>
@@ -90,7 +134,7 @@ const openDetail = (transaction: Transaction) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 2rem;
   padding: 1rem 0.875rem 0.625rem;
 }
 
@@ -112,8 +156,21 @@ const openDetail = (transaction: Transaction) => {
 
 .transaction-content {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 0.875rem;
+}
+
+.transaction-icon-col {
+  display: flex;
+  align-items: center;
+}
+
+.transaction-main {
+  flex: 1 1 auto;
+}
+
+.transaction-row {
+  align-items: center;
 }
 
 .transaction-title {
@@ -123,13 +180,45 @@ const openDetail = (transaction: Transaction) => {
 }
 
 .transaction-subtitle {
-  margin-top: 0.125rem;
+  display: flex;
+  min-height: 1.25rem;
+  min-width: 0;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
   font-size: 0.75rem;
   line-height: 1.45;
 }
 
-.transaction-time {
-  margin-top: 0.125rem;
+.transaction-book {
+  flex: 0 1 auto;
+}
+
+.transaction-tag {
+  flex: 0 0 auto;
+  max-width: 6rem;
+}
+
+.transaction-tag :deep(.v-chip__content) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transaction-third-line {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.transaction-amount-col,
+.transaction-account {
+  min-width: 0;
+  text-align: right;
+}
+
+.transaction-account {
+  max-width: 9rem;
   font-size: 0.75rem;
   line-height: 1.45;
 }

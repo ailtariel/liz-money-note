@@ -21,8 +21,8 @@ const currentMoreItem = computed(() =>
     item.routeNames?.includes(routeName.value ?? '')
   )
 );
-const currentPageTitle = computed(
-  () => (currentMoreItem.value ? t(currentMoreItem.value.titleKey) : pageTitle.value)
+const currentPageTitle = computed(() =>
+  currentMoreItem.value ? t(currentMoreItem.value.titleKey) : pageTitle.value
 );
 const breadcrumbItems = computed(() => [
   {
@@ -45,7 +45,7 @@ const breadcrumbItems = computed(() => [
 <template>
   <v-app-bar color="background" elevation="0" :height="appBarHeight">
     <v-breadcrumbs
-      class="app-bar-breadcrumbs"
+      class="app-bar-breadcrumbs ms-2"
       density="compact"
       :items="breadcrumbItems"
     >
@@ -84,5 +84,4 @@ const breadcrumbItems = computed(() => [
 .breadcrumb-divider {
   color: rgb(var(--v-theme-on-background), 0.54);
 }
-
 </style>

@@ -10,7 +10,7 @@ import type {
   Transaction,
   TransactionType
 } from '@/modules/transactions/transaction.types';
-import { formatMinorUnits } from '@/modules/shared/money';
+import type { CurrencyCode } from '@/modules/shared/money';
 import TransactionEditor from '@/modules/transactions/TransactionEditor.vue';
 import { transactionTypeOptions } from '@/components/shared/financeDisplay';
 import AppBarVue from '@/components/shared/app-bar.vue';
@@ -63,7 +63,7 @@ const bookFilterOptions = computed(() => [
 const accountFilterOptions = computed(() => [
   { title: t('common.allAccounts'), value: null },
   ...accountStore.accounts.map((account) => ({
-    title: account.name,
+    title: `${account.name}（${account.currency}）`,
     value: account.id
   }))
 ]);
@@ -76,17 +76,39 @@ const baseCurrency = computed(
   () => accountStore.accounts[0]?.currency ?? 'AED'
 );
 
-const monthlyIncome = computed(() =>
-  transactions.value
-    .filter((transaction) => transaction.type === 'income')
-    .reduce((sum, transaction) => sum + transaction.amount, 0)
-);
+const summaryCurrencies = computed<CurrencyCode[]>(() => {
+  const currencies = transactions.value.map((transaction) => transaction.currency);
+  return [...new Set(currencies.length ? currencies : [baseCurrency.value])];
+});
 
-const monthlyExpense = computed(() =>
-  transactions.value
-    .filter((transaction) => transaction.type === 'expense')
-    .reduce((sum, transaction) => sum + transaction.amount, 0)
-);
+function summarizeByCurrency(type: TransactionType) {
+  const totals = new Map<CurrencyCode, number>();
+
+  for (const transaction of transactions.value) {
+    if (transaction.type === type) {
+      totals.set(
+        transaction.currency,
+        (totals.get(transaction.currency) ?? 0) + transaction.amount
+      );
+    }
+  }
+
+  return summaryCurrencies.value.map((currency) => ({
+    currency,
+    amount: totals.get(currency) ?? 0
+  }));
+}
+
+const monthlyIncome = computed(() => summarizeByCurrency('income'));
+
+const monthlyExpense = computed(() => summarizeByCurrency('expense'));
+
+function formatSummaryAmount(amount: number, currency: CurrencyCode) {
+  return `${currency} ${new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount / 100)}`;
+}
 
 const summaryBookTitle = computed(() =>
   filters.bookId ? trans.getBookName(filters.bookId) : t('common.allBooks')
@@ -331,15 +353,23 @@ function handleEditorSaved() {
         <div class="summary-amounts">
           <div class="summary-amount-block">
             <div class="summary-label">{{ t('transaction.income') }}</div>
-            <div class="summary-amount amount-income">
-              {{ formatMinorUnits(monthlyIncome, baseCurrency) }}
+            <div
+              v-for="item in monthlyIncome"
+              :key="`income-${item.currency}`"
+              class="summary-amount amount-income"
+            >
+              {{ formatSummaryAmount(item.amount, item.currency) }}
             </div>
           </div>
           <div class="summary-line"></div>
           <div class="summary-amount-block">
             <div class="summary-label">{{ t('transaction.expense') }}</div>
-            <div class="summary-amount amount-expense">
-              {{ formatMinorUnits(monthlyExpense, baseCurrency) }}
+            <div
+              v-for="item in monthlyExpense"
+              :key="`expense-${item.currency}`"
+              class="summary-amount amount-expense"
+            >
+              {{ formatSummaryAmount(item.amount, item.currency) }}
             </div>
           </div>
         </div>
@@ -581,7 +611,7 @@ function handleEditorSaved() {
 .summary-amount {
   overflow: hidden;
   margin-top: 0.25rem;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
   line-height: 1.3;
   text-overflow: ellipsis;
