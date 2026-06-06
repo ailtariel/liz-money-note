@@ -1,62 +1,86 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useTheme } from 'vuetify';
-import { getAppConfig } from '@/core/app-config';
+import { useI18n } from '@/i18n';
 
 const route = useRoute();
-const theme = useTheme();
-const appConfig = getAppConfig();
+const { t } = useI18n();
 
-const isDark = computed(() => theme.global.name.value === 'dark');
-const navItems = [
-  { title: '流水', name: 'transactions' },
-  { title: '账本', name: 'books' },
-  { title: '账户', name: 'accounts' },
-  { title: 'Tag', name: 'tags' },
-  { title: '周期', name: 'recurring' },
-  { title: '数据', name: 'data' }
-];
+const navItems = computed(() => [
+  { title: t('nav.transactions'), name: 'transactions', icon: '$transactions' },
+  { title: t('nav.stats'), name: 'stats', icon: '$stats' },
+  { title: t('nav.assets'), name: 'assets', icon: '$assets' },
+  { title: t('nav.more'), name: 'more', icon: '$more' }
+]);
 
-function toggleTheme() {
-  theme.global.name.value = isDark.value ? 'light' : 'dark';
-}
+const bottomNavHeight = 82;
+const showBottomNav = computed(() => route.meta.bottomNav === true);
+const activeNav = computed(() => String(route.name ?? 'transactions'));
 </script>
 
 <template>
   <v-layout class="app-shell">
-    <v-app-bar color="surface" elevation="1">
-      <v-container class="d-flex align-center ga-2">
-        <div class="text-h6 font-weight-bold">{{ appConfig.app_title }}</div>
-        <v-spacer />
+    <v-main>
+      <RouterView />
+    </v-main>
+
+    <div v-if="showBottomNav" class="mobile-bottom-nav-host">
+      <v-bottom-navigation
+        :model-value="activeNav"
+        absolute
+        class="mobile-bottom-nav"
+        color="primary"
+        grow
+        :height="bottomNavHeight"
+        mandatory
+      >
         <v-btn
           v-for="item in navItems"
           :key="item.name"
           :to="{ name: item.name }"
-          :active="route.name === item.name"
-          :icon="false"
-          variant="text"
+          :value="item.name"
         >
-          {{ item.title }}
+          <v-icon :icon="item.icon" />
+          <span>{{ item.title }}</span>
         </v-btn>
-        <v-btn
-          :icon="isDark ? '$themeLight' : '$themeDark'"
-          variant="text"
-          @click="toggleTheme"
-        />
-      </v-container>
-    </v-app-bar>
-
-    <v-main>
-      <v-container class="py-8">
-        <RouterView />
-      </v-container>
-    </v-main>
+      </v-bottom-navigation>
+    </div>
   </v-layout>
 </template>
 
 <style scoped>
 .app-shell {
   min-height: 100vh;
+}
+
+.mobile-bottom-nav-host {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 1004;
+  width: min(100vw, 430px);
+  height: calc(var(--app-bottom-nav-height) + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.mobile-bottom-nav {
+  top: auto !important;
+  right: 0 !important;
+  bottom: env(safe-area-inset-bottom) !important;
+  left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: var(--app-bottom-nav-height) !important;
+  margin: 0 auto;
+  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.06);
+  box-shadow: 0 -12px 30px rgba(15, 23, 42, 0.08);
+  pointer-events: auto;
+  transform: none !important;
+}
+
+.mobile-bottom-nav :deep(.v-bottom-navigation__content) {
+  align-items: stretch;
+  height: var(--app-bottom-nav-height);
 }
 </style>

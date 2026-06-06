@@ -1,5 +1,12 @@
 :root {
   color-scheme: light dark;
+  --app-bottom-nav-height: 82px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html,
@@ -10,12 +17,55 @@ body,
 }
 
 body {
-  background:
-    radial-gradient(circle at top, rgba(15, 118, 110, 0.08), transparent 32%),
-    linear-gradient(180deg, #f7fbfc 0%, #eef6f8 100%);
+  background: #f6f8f7;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 }
 
 code {
   font-family: 'Cascadia Code', 'Consolas', monospace;
+}
+
+.mobile-page {
+  min-height: 100vh;
+  background: rgb(var(--v-theme-background));
+}
+
+.mobile-app-bar {
+  border-bottom: 0;
+}
+
+.mobile-title {
+  font-size: 1.625rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.mobile-page-content {
+  width: min(100vw, 430px);
+  margin: 0 auto;
+  padding: 16px 18px calc(var(--app-bottom-nav-height) + env(safe-area-inset-bottom) + 24px);
+}
+
+.mobile-page-content.editor-content {
+  padding-bottom: calc(108px + env(safe-area-inset-bottom));
+}
+
+.soft-card {
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.06);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.amount-income {
+  color: rgb(var(--v-theme-success));
+  font-weight: 800;
+}
+
+.amount-expense {
+  color: rgb(var(--v-theme-error));
+  font-weight: 800;
+}
+
+.amount-neutral {
+  color: rgb(var(--v-theme-on-surface));
+  font-weight: 800;
 }

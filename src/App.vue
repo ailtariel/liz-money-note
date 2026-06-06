@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from '@/i18n';
+import { useAppLocale } from '@/composables/useAppLocale';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useRecurringStore } from '@/modules/recurring/recurring.store';
-import { formatMinorUnits } from '@/modules/shared/money';
+import AmountText from '@/components/shared/AmountText.vue';
 
+const { t } = useI18n();
+const appLocale = useAppLocale();
 const recurringStore = useRecurringStore();
 const accountStore = useAccountStore();
-const dialogOpen = ref(false);
+const sheetOpen = ref(false);
 const error = ref('');
 
 const dueEvents = computed(() => recurringStore.dueEvents);
@@ -19,9 +23,9 @@ function accountName(id: number | null) {
   return accountStore.accounts.find((account) => account.id === id)?.name ?? '-';
 }
 
-async function refreshDueDialog() {
+async function refreshDueSheet() {
   await recurringStore.loadDue();
-  dialogOpen.value = dueEvents.value.length > 0;
+  sheetOpen.value = dueEvents.value.length > 0;
 }
 
 async function approve(index: number) {
@@ -29,9 +33,9 @@ async function approve(index: number) {
   try {
     await recurringStore.approve(dueEvents.value[index]);
     await accountStore.load();
-    dialogOpen.value = dueEvents.value.length > 0;
+    sheetOpen.value = dueEvents.value.length > 0;
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '批准周期事件失败。';
+    error.value = err instanceof Error ? err.message : t('recurring.approveFailed');
   }
 }
 
@@ -39,9 +43,9 @@ async function skip(index: number) {
   error.value = '';
   try {
     await recurringStore.skip(dueEvents.value[index]);
-    dialogOpen.value = dueEvents.value.length > 0;
+    sheetOpen.value = dueEvents.value.length > 0;
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '跳过周期事件失败。';
+    error.value = err instanceof Error ? err.message : t('recurring.skipFailed');
   }
 }
 
@@ -49,15 +53,16 @@ async function disable(index: number) {
   error.value = '';
   try {
     await recurringStore.disable(dueEvents.value[index].id);
-    dialogOpen.value = dueEvents.value.length > 0;
+    sheetOpen.value = dueEvents.value.length > 0;
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '停用周期事件失败。';
+    error.value = err instanceof Error ? err.message : t('recurring.disableFailed');
   }
 }
 
 onMounted(async () => {
+  appLocale.init();
   await accountStore.load();
-  await refreshDueDialog();
+  await refreshDueSheet();
 });
 </script>
 
@@ -65,48 +70,48 @@ onMounted(async () => {
   <v-app>
     <RouterView />
 
-    <v-dialog v-model="dialogOpen" max-width="780">
-      <v-card>
-        <v-card-title>待处理周期事件</v-card-title>
-        <v-card-text>
-          <v-alert v-if="error" class="mb-4" type="error" variant="tonal">
-            {{ error }}
-          </v-alert>
-          <v-table>
-            <thead>
-              <tr>
-                <th>触发日</th>
-                <th>账户</th>
-                <th>金额</th>
-                <th>备注</th>
-                <th class="text-right">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(event, index) in dueEvents" :key="event.id">
-                <td>{{ event.nextTriggerDate }}</td>
-                <td>
-                  {{ accountName(event.accountId) }}
-                  <span v-if="event.targetAccountId">
-                    → {{ accountName(event.targetAccountId) }}
-                  </span>
-                </td>
-                <td>{{ formatMinorUnits(event.amount, event.currency) }}</td>
-                <td>{{ event.note || '-' }}</td>
-                <td class="text-right">
-                  <v-btn size="small" variant="text" @click="approve(index)">批准</v-btn>
-                  <v-btn size="small" variant="text" @click="skip(index)">跳过</v-btn>
-                  <v-btn size="small" variant="text" @click="disable(index)">停用</v-btn>
-                </td>
-              </tr>
-            </tbody>
-          </v-table>
-        </v-card-text>
-        <v-card-actions>
+    <v-bottom-sheet v-model="sheetOpen">
+      <v-card class="pa-4">
+        <div class="d-flex align-center mb-3">
+          <div class="text-h6 font-weight-bold">{{ t('recurring.dueTitle') }}</div>
           <v-spacer />
-          <v-btn variant="text" @click="dialogOpen = false">稍后处理</v-btn>
-        </v-card-actions>
+          <v-btn icon="$close" variant="text" @click="sheetOpen = false" />
+        </div>
+
+        <v-alert v-if="error" class="mb-4" type="error" variant="tonal">
+          {{ error }}
+        </v-alert>
+
+        <v-list class="bg-transparent" lines="two">
+          <v-list-item v-for="(event, index) in dueEvents" :key="event.id" class="px-0">
+            <template #prepend>
+              <v-avatar color="primary" variant="tonal">
+                <v-icon icon="$recurring" />
+              </v-avatar>
+            </template>
+            <v-list-item-title class="font-weight-bold">
+              <AmountText :amount="event.amount" :currency="event.currency" />
+            </v-list-item-title>
+            <v-list-item-subtitle>
+              {{ event.nextTriggerDate }} · {{ accountName(event.accountId) }}
+              <span v-if="event.targetAccountId"> → {{ accountName(event.targetAccountId) }}</span>
+            </v-list-item-subtitle>
+            <template #append>
+              <div class="d-flex ga-1">
+                <v-btn size="small" variant="tonal" @click="approve(index)">
+                  {{ t('common.approve') }}
+                </v-btn>
+                <v-btn size="small" variant="text" @click="skip(index)">
+                  {{ t('common.skip') }}
+                </v-btn>
+                <v-btn size="small" variant="text" @click="disable(index)">
+                  {{ t('common.disable') }}
+                </v-btn>
+              </div>
+            </template>
+          </v-list-item>
+        </v-list>
       </v-card>
-    </v-dialog>
+    </v-bottom-sheet>
   </v-app>
 </template>

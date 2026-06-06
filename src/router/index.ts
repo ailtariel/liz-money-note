@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { i18n } from '@/i18n';
 import { getAppConfig } from '@/core/app-config';
 
 const router = createRouter({
@@ -11,57 +12,85 @@ const router = createRouter({
         {
           path: '',
           name: 'transactions',
-          component: () => import('@/pages/TransactionsPage.vue'),
+          component: () => import('@/components/Transactions.vue'),
           meta: {
-            title: '流水'
+            titleKey: 'nav.transactions',
+            bottomNav: true
+          }
+        },
+        {
+          path: 'stats',
+          name: 'stats',
+          component: () => import('@/components/Stats.vue'),
+          meta: {
+            titleKey: 'nav.stats',
+            bottomNav: true
+          }
+        },
+        {
+          path: 'assets',
+          name: 'assets',
+          component: () => import('@/components/Assets.vue'),
+          meta: {
+            titleKey: 'nav.assets',
+            bottomNav: true
+          }
+        },
+        {
+          path: 'more',
+          name: 'more',
+          component: () => import('@/components/More.vue'),
+          meta: {
+            titleKey: 'nav.more',
+            bottomNav: true
           }
         },
         {
           path: 'transactions/new',
           name: 'transaction-new',
-          component: () => import('@/pages/TransactionEditorPage.vue'),
+          component: () => import('@/components/TransactionEditor.vue'),
           meta: {
-            title: '新增流水'
+            titleKey: 'nav.newTransaction'
           }
         },
         {
           path: 'books',
           name: 'books',
-          component: () => import('@/pages/BooksPage.vue'),
+          component: () => import('@/components/Books.vue'),
           meta: {
-            title: '账本'
+            titleKey: 'nav.books'
           }
         },
         {
           path: 'accounts',
           name: 'accounts',
-          component: () => import('@/pages/AccountsPage.vue'),
+          component: () => import('@/components/Accounts.vue'),
           meta: {
-            title: '账户'
+            titleKey: 'nav.accounts'
           }
         },
         {
           path: 'tags',
           name: 'tags',
-          component: () => import('@/pages/TagsPage.vue'),
+          component: () => import('@/components/Tags.vue'),
           meta: {
-            title: 'Tag'
+            titleKey: 'nav.tags'
           }
         },
         {
           path: 'recurring',
           name: 'recurring',
-          component: () => import('@/pages/RecurringEventsPage.vue'),
+          component: () => import('@/components/Recurring.vue'),
           meta: {
-            title: '周期事件'
+            titleKey: 'nav.recurring'
           }
         },
         {
           path: 'data',
           name: 'data',
-          component: () => import('@/pages/DataSettingsPage.vue'),
+          component: () => import('@/components/Data.vue'),
           meta: {
-            title: '数据'
+            titleKey: 'nav.data'
           }
         }
       ]
@@ -80,7 +109,11 @@ const router = createRouter({
 router.afterEach((to) => {
   const config = getAppConfig();
   const title =
-    typeof to.meta.title === 'string' ? to.meta.title : config.app_title;
+    typeof to.meta.titleKey === 'string'
+      ? i18n.global.t(to.meta.titleKey)
+      : typeof to.meta.title === 'string'
+        ? to.meta.title
+        : config.app_title;
   document.title = `${title} | ${config.app_title}`;
 });
 

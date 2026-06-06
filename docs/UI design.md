@@ -10,6 +10,7 @@
 - Vuetify
 - Capacitor APK
 - Android 优先
+- vue-i18n
 
 设计尺寸：
 
@@ -25,6 +26,14 @@
 请从移动端产品角度重新设计信息架构和交互。
 
 ## 设计稿图片在docs\UI design。
+
+## 实现约束
+
+- 页面级 Vue 组件放在 `src/components/`，例如 `Transactions.vue`、`Stats.vue`、`Assets.vue`、`More.vue`。
+- 通用页面组件放在 `src/components/shared/`。
+- 不再新增 `src/pages/` 页面入口。
+- UI 文案必须支持 i18n，目前只支持 `zh-cn` 和 `en`。
+- 页面、导航、按钮、表单标签、空状态、错误提示等用户可见文案应通过 i18n key 管理。
 
 # 设计原则
 
