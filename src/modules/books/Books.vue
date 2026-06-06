@@ -88,19 +88,23 @@ onMounted(() => store.load());
       <div class="d-flex flex-column ga-4">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
-        <v-card v-for="book in store.books" :key="book.id" class="soft-card pa-4">
+        <v-card
+          v-for="book in store.books"
+          :key="book.id"
+          class="book-card soft-card"
+        >
           <div class="d-flex align-center ga-3">
-            <v-avatar color="primary" variant="tonal">
-              <v-icon icon="$book" />
+            <v-avatar color="primary" size="36" variant="tonal">
+              <v-icon icon="$book" size="20" />
             </v-avatar>
-            <div class="flex-grow-1" @click="editBook(book.id)">
-              <div class="text-subtitle-1 font-weight-bold">{{ book.name }}</div>
-              <div class="text-body-2 text-medium-emphasis">
+            <div class="flex-grow-1 min-w-0" @click="editBook(book.id)">
+              <div class="book-title text-truncate">{{ book.name }}</div>
+              <div class="book-subtitle text-medium-emphasis text-truncate">
                 {{ book.description || '-' }}
               </div>
               <v-chip
-                class="mt-2"
-                size="small"
+                class="book-status mt-2"
+                size="x-small"
                 :color="book.isArchived ? 'secondary' : 'success'"
                 variant="tonal"
               >
@@ -108,10 +112,11 @@ onMounted(() => store.load());
               </v-chip>
             </div>
             <div class="d-flex flex-column ga-1">
-              <v-btn size="small" variant="text" @click="editBook(book.id)">
+              <v-btn class="book-action" size="small" variant="text" @click="editBook(book.id)">
                 {{ t('common.edit') }}
               </v-btn>
               <v-btn
+                class="book-action"
                 :disabled="book.isArchived"
                 size="small"
                 variant="text"
@@ -149,3 +154,35 @@ onMounted(() => store.load());
     </v-container>
   </v-main>
 </template>
+
+<style scoped>
+.book-card {
+  padding: 1rem;
+}
+
+.book-title {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.book-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.book-status {
+  max-width: 6rem;
+}
+
+.book-status :deep(.v-chip__content) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.book-action {
+  font-size: 0.75rem;
+}
+</style>

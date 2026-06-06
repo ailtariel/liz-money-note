@@ -19,7 +19,8 @@ body,
 }
 
 body {
-  background: #f6f8f7;
+  background: rgb(var(--v-theme-background));
+  color: rgb(var(--v-theme-text-primary));
   font-family: settings.$body-font-family;
 }
 
@@ -28,21 +29,25 @@ code {
 }
 
 .soft-card {
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.06);
+  border: 1px solid rgb(var(--v-theme-card-border));
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
 }
 
+.text-medium-emphasis {
+  color: rgb(var(--v-theme-text-secondary)) !important;
+}
+
 .amount-income {
-  color: rgb(var(--v-theme-success));
+  color: rgb(var(--v-theme-income));
   font-weight: 600;
 }
 
 .amount-expense {
-  color: rgb(var(--v-theme-error));
+  color: rgb(var(--v-theme-expense));
   font-weight: 600;
 }
 
 .amount-neutral {
-  color: rgb(var(--v-theme-on-surface));
+  color: rgb(var(--v-theme-text-primary));
   font-weight: 600;
 }

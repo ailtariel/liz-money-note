@@ -92,21 +92,21 @@ onMounted(() => store.load());
       <div class="d-flex flex-column ga-4">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
-        <v-card v-for="tag in store.tags" :key="tag.id" class="soft-card pa-4">
+        <v-card v-for="tag in store.tags" :key="tag.id" class="tag-card soft-card">
           <div class="d-flex align-center ga-3">
-            <v-avatar :color="tag.color || 'primary'" variant="tonal">
-              <v-icon icon="$tag" />
+            <v-avatar :color="tag.color || 'primary'" size="36" variant="tonal">
+              <v-icon icon="$tag" size="20" />
             </v-avatar>
-            <div class="flex-grow-1" @click="editTag(tag.id)">
-              <div class="text-subtitle-1 font-weight-bold">{{ tag.name }}</div>
-              <div class="text-body-2 text-medium-emphasis">
+            <div class="flex-grow-1 min-w-0" @click="editTag(tag.id)">
+              <div class="tag-title text-truncate">{{ tag.name }}</div>
+              <div class="tag-subtitle text-medium-emphasis text-truncate">
                 {{ tag.color || '-' }} &middot; {{ tag.sortOrder }}
               </div>
             </div>
-            <v-btn size="small" variant="text" @click="editTag(tag.id)">
+            <v-btn class="tag-action" size="small" variant="text" @click="editTag(tag.id)">
               {{ t('common.edit') }}
             </v-btn>
-            <v-btn size="small" variant="text" @click="remove(tag.id)">
+            <v-btn class="tag-action" size="small" variant="text" @click="remove(tag.id)">
               {{ t('common.delete') }}
             </v-btn>
           </div>
@@ -144,3 +144,25 @@ onMounted(() => store.load());
     </v-container>
   </v-main>
 </template>
+
+<style scoped>
+.tag-card {
+  padding: 1rem;
+}
+
+.tag-title {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.tag-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.tag-action {
+  font-size: 0.75rem;
+}
+</style>

@@ -21,7 +21,6 @@ const activeNav = computed(() => String(route.name ?? 'transactions'));
   <v-bottom-navigation
     v-if="showBottomNav"
     :model-value="activeNav"
-    color="primary"
     grow
     :height="bottomNavHeight"
     mandatory
@@ -39,6 +38,15 @@ const activeNav = computed(() => String(route.name ?? 'transactions'));
 </template>
 
 <style scoped>
+.v-bottom-navigation {
+  background: rgb(var(--v-theme-surface));
+}
+
+.v-bottom-navigation :deep(.v-btn--selected) {
+  background: rgb(var(--v-theme-nav-active-bg));
+  color: rgb(var(--v-theme-nav-active-text));
+}
+
 .v-bottom-navigation :deep(.v-btn__content) {
   font-size: 0.75rem;
 }

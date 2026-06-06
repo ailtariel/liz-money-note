@@ -542,17 +542,13 @@ function handleEditorSaved() {
 .summary-amount-card {
   min-height: 7.75rem;
   padding: 1.25rem;
-  background: rgb(var(--v-theme-surface));
-}
-
-.summary-amount-card {
-  color: #ffffff;
-  background: linear-gradient(135deg, #34d399 0%, #059669 45%, #047857 100%);
+  color: rgb(var(--v-theme-summary-text));
+  background: rgb(var(--v-theme-summary));
 }
 
 .summary-amount-card .amount-income,
 .summary-amount-card .amount-expense {
-  color: #ffffff;
+  color: rgb(var(--v-theme-summary-text));
 }
 
 .summary-book {
@@ -619,7 +615,7 @@ function handleEditorSaved() {
 }
 
 .summary-line {
-  border-top: 1px solid rgba(255, 255, 255, 0.24);
+  border-top: 1px solid rgba(var(--v-theme-summary-text), 0.24);
 }
 
 .filter-row {
@@ -632,8 +628,8 @@ function handleEditorSaved() {
 
 .filter-chip {
   flex: 0 0 auto;
-  background: rgb(var(--v-theme-surface));
-  color: rgb(var(--v-theme-on-surface));
+  background: rgb(var(--v-theme-chip-bg));
+  color: rgb(var(--v-theme-chip-text));
   box-shadow: 0 0.375rem 1.125rem rgba(15, 23, 42, 0.08);
 }
 

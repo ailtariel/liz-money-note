@@ -30,29 +30,37 @@ onMounted(async () => {
     <v-container>
       <div class="d-flex flex-column ga-4">
         <v-card class="asset-hero pa-5 text-white">
-        <div class="text-body-2 opacity-80">{{ t('assets.total') }}</div>
-        <div class="text-h4 font-weight-bold mt-2">{{ formatMinorUnits(totalAssets, baseCurrency) }}</div>
-        <div class="text-caption opacity-80 mt-1">{{ t('assets.included') }}</div>
-      </v-card>
+          <div class="asset-hero-label opacity-80">{{ t('assets.total') }}</div>
+          <div class="asset-hero-amount mt-2">
+            {{ formatMinorUnits(totalAssets, baseCurrency) }}
+          </div>
+          <div class="asset-hero-caption opacity-80 mt-1">{{ t('assets.included') }}</div>
+        </v-card>
 
-      <v-card v-for="account in accounts" :key="account.id" class="soft-card pa-4">
-        <div class="d-flex align-center ga-3">
-          <v-avatar :color="account.isIncludedInAssets ? 'primary' : 'secondary'" variant="tonal">
-            <v-icon :icon="accountTypeIcon(account.type)" />
-          </v-avatar>
-          <div class="flex-grow-1">
-            <div class="text-subtitle-1 font-weight-bold">{{ account.name }}</div>
-            <div class="text-body-2 text-medium-emphasis">
-              {{ accountTypeLabel(account.type, t) }} · {{ account.currency }}
+        <v-card v-for="account in accounts" :key="account.id" class="asset-card soft-card">
+          <div class="d-flex align-center ga-3">
+            <v-avatar
+              :color="account.isIncludedInAssets ? 'primary' : 'secondary'"
+              size="36"
+              variant="tonal"
+            >
+              <v-icon :icon="accountTypeIcon(account.type)" size="20" />
+            </v-avatar>
+            <div class="flex-grow-1 min-w-0">
+              <div class="asset-title text-truncate">{{ account.name }}</div>
+              <div class="asset-subtitle text-medium-emphasis text-truncate">
+                {{ accountTypeLabel(account.type, t) }} &middot; {{ account.currency }}
+              </div>
+            </div>
+            <div class="asset-value-col text-right">
+              <div class="asset-amount">
+                {{ formatMinorUnits(account.currentBalance, account.currency) }}
+              </div>
+              <div class="asset-status text-medium-emphasis">
+                {{ account.isIncludedInAssets ? t('assets.included') : t('assets.excluded') }}
+              </div>
             </div>
           </div>
-          <div class="text-right">
-            <div class="font-weight-bold">{{ formatMinorUnits(account.currentBalance, account.currency) }}</div>
-            <div class="text-caption text-medium-emphasis">
-              {{ account.isIncludedInAssets ? t('assets.included') : t('assets.excluded') }}
-            </div>
-          </div>
-        </div>
         </v-card>
       </div>
     </v-container>
@@ -61,6 +69,53 @@ onMounted(async () => {
 
 <style scoped>
 .asset-hero {
-  background: linear-gradient(135deg, #0f766e, #2563eb);
+  color: rgb(var(--v-theme-summary-text));
+  background: rgb(var(--v-theme-summary));
+}
+
+.asset-hero-label,
+.asset-hero-caption {
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.asset-hero-amount {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.asset-card {
+  padding: 1rem;
+}
+
+.asset-title {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.asset-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.asset-value-col {
+  min-width: 0;
+  max-width: 10rem;
+}
+
+.asset-amount {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.asset-status {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
 }
 </style>

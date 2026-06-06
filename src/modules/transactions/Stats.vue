@@ -68,45 +68,70 @@ onMounted(async () => {
   <v-main>
     <v-container>
       <div class="d-flex flex-column ga-4">
-        <v-card class="soft-card pa-5">
-        <div class="text-subtitle-1 font-weight-bold mb-4">{{ t('stats.monthlyFlow') }}</div>
-        <div class="d-flex align-center justify-space-between mb-2">
-          <span>{{ t('stats.received') }}</span>
-          <AmountText :amount="income" :currency="baseCurrency" type="income" />
-        </div>
-        <v-progress-linear :model-value="(income / maxFlow) * 100" color="success" height="10" rounded />
-        <div class="d-flex align-center justify-space-between mt-5 mb-2">
-          <span>{{ t('stats.spent') }}</span>
-          <AmountText :amount="expense" :currency="baseCurrency" type="expense" />
-        </div>
-        <v-progress-linear :model-value="(expense / maxFlow) * 100" color="error" height="10" rounded />
-      </v-card>
-
-      <v-card class="soft-card pa-5">
-        <div class="text-subtitle-1 font-weight-bold mb-4">{{ t('stats.categoryShare') }}</div>
-        <div v-if="!categoryShare.length" class="text-medium-emphasis">{{ t('common.empty') }}</div>
-        <div v-for="item in categoryShare" :key="item.tag?.id ?? 0" class="mb-4">
-          <div class="d-flex align-center justify-space-between mb-1">
-            <span>{{ item.tag?.name ?? t('category.more') }}</span>
-            <span class="font-weight-bold">{{ formatMinorUnits(item.amount, baseCurrency) }}</span>
+        <v-card class="stats-card soft-card">
+          <div class="stats-card-title mb-4">{{ t('stats.monthlyFlow') }}</div>
+          <div class="stats-flow-row d-flex align-center justify-space-between mb-2">
+            <span>{{ t('stats.received') }}</span>
+            <AmountText
+              class="stats-amount"
+              :amount="income"
+              :currency="baseCurrency"
+              type="income"
+            />
           </div>
           <v-progress-linear
-            :model-value="(item.amount / Math.max(expense, 1)) * 100"
-            :color="item.tag?.color || 'primary'"
-            height="8"
+            :model-value="(income / maxFlow) * 100"
+            color="success"
+            height="10"
             rounded
           />
-        </div>
-      </v-card>
-
-      <v-card class="soft-card pa-5">
-        <div class="text-subtitle-1 font-weight-bold mb-4">{{ t('stats.monthTrend') }}</div>
-        <div class="trend-chart">
-          <div v-for="item in trend" :key="item.label" class="trend-item">
-            <div class="trend-bar" :style="{ height: `${Math.max((item.value / Math.max(expense, 1)) * 110, 8)}px` }" />
-            <div class="text-caption text-medium-emphasis">{{ item.label }}</div>
+          <div class="stats-flow-row d-flex align-center justify-space-between mt-5 mb-2">
+            <span>{{ t('stats.spent') }}</span>
+            <AmountText
+              class="stats-amount"
+              :amount="expense"
+              :currency="baseCurrency"
+              type="expense"
+            />
           </div>
-        </div>
+          <v-progress-linear
+            :model-value="(expense / maxFlow) * 100"
+            color="error"
+            height="10"
+            rounded
+          />
+        </v-card>
+
+        <v-card class="stats-card soft-card">
+          <div class="stats-card-title mb-4">{{ t('stats.categoryShare') }}</div>
+          <div v-if="!categoryShare.length" class="stats-empty text-medium-emphasis">
+            {{ t('common.empty') }}
+          </div>
+          <div v-for="item in categoryShare" :key="item.tag?.id ?? 0" class="mb-4">
+            <div class="stats-category-row d-flex align-center justify-space-between mb-1">
+              <span class="text-truncate">{{ item.tag?.name ?? t('category.more') }}</span>
+              <span class="stats-amount">{{ formatMinorUnits(item.amount, baseCurrency) }}</span>
+            </div>
+            <v-progress-linear
+              :model-value="(item.amount / Math.max(expense, 1)) * 100"
+              :color="item.tag?.color || 'primary'"
+              height="8"
+              rounded
+            />
+          </div>
+        </v-card>
+
+        <v-card class="stats-card soft-card">
+          <div class="stats-card-title mb-4">{{ t('stats.monthTrend') }}</div>
+          <div class="trend-chart">
+            <div v-for="item in trend" :key="item.label" class="trend-item">
+              <div
+                class="trend-bar"
+                :style="{ height: `${Math.max((item.value / Math.max(expense, 1)) * 110, 8)}px` }"
+              />
+              <div class="trend-label text-medium-emphasis">{{ item.label }}</div>
+            </div>
+          </div>
         </v-card>
       </div>
     </v-container>
@@ -114,6 +139,36 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.stats-card {
+  padding: 1rem;
+}
+
+.stats-card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.stats-flow-row,
+.stats-category-row,
+.stats-empty,
+.trend-label {
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.stats-category-row {
+  gap: 0.75rem;
+}
+
+.stats-amount {
+  flex: 0 0 auto;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
 .trend-chart {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -134,6 +189,10 @@ onMounted(async () => {
   width: 100%;
   max-width: 34px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #34d399, #0f766e);
+  background: linear-gradient(
+    180deg,
+    rgb(var(--v-theme-income)),
+    rgb(var(--v-theme-primary))
+  );
 }
 </style>
