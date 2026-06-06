@@ -1,11 +1,20 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
+import { VDataTable, VDateInput } from 'vuetify/components';
 import { useBookStore } from '@/modules/books/book.store';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useTagStore } from '@/modules/tags/tag.store';
 import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import type { TransactionType } from '@/modules/transactions/transaction.types';
 import { formatMinorUnits } from '@/modules/shared/money';
+
+type TableHeader = {
+  title: string;
+  key: string;
+  align?: 'start' | 'end' | 'center';
+  sortable?: boolean;
+  nowrap?: boolean;
+};
 
 const bookStore = useBookStore();
 const accountStore = useAccountStore();
@@ -18,8 +27,8 @@ const filters = reactive({
   accountId: null as number | null,
   type: null as TransactionType | null,
   tagId: null as number | null,
-  dateFrom: '',
-  dateTo: ''
+  dateFrom: null as Date | null,
+  dateTo: null as Date | null
 });
 
 const typeOptions = [
@@ -27,6 +36,38 @@ const typeOptions = [
   { title: '支出', value: 'expense' },
   { title: '转账', value: 'transfer' }
 ];
+
+const headers: TableHeader[] = [
+  { title: '日期', key: 'occurredAt', sortable: false, nowrap: true },
+  { title: '类型', key: 'type', sortable: false, nowrap: true },
+  { title: '账本', key: 'bookId', sortable: false },
+  { title: '账户', key: 'accountId', sortable: false },
+  { title: '金额', key: 'amount', align: 'end', sortable: false, nowrap: true },
+  { title: 'Tag', key: 'tagIds', sortable: false },
+  { title: '操作', key: 'actions', align: 'end', sortable: false, nowrap: true }
+];
+
+const mobileHeaders: TableHeader[] = [
+  { title: '日期', key: 'occurredAt', sortable: false, nowrap: true },
+  { title: '类型', key: 'type', sortable: false, nowrap: true },
+  { title: '账户', key: 'accountId', sortable: false },
+  { title: '金额', key: 'amount', align: 'end', sortable: false, nowrap: true },
+  { title: '操作', key: 'actions', align: 'end', sortable: false, nowrap: true }
+];
+
+const transactions = computed(() => transactionStore.transactions);
+
+function toIsoDate(date: Date | null) {
+  if (!date) {
+    return null;
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
 
 function accountName(id: number | null) {
   if (!id) {
@@ -53,8 +94,8 @@ async function applyFilters() {
     accountId: filters.accountId,
     type: filters.type,
     tagId: filters.tagId,
-    dateFrom: filters.dateFrom || null,
-    dateTo: filters.dateTo || null
+    dateFrom: toIsoDate(filters.dateFrom),
+    dateTo: toIsoDate(filters.dateTo)
   });
 }
 
@@ -91,7 +132,7 @@ onMounted(async () => {
 
     <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
-    <div class="d-flex flex-wrap ga-3 align-start">
+    <v-form class="d-flex flex-column flex-sm-row flex-sm-wrap ga-3 align-sm-start" @submit.prevent="applyFilters">
       <v-select
         v-model="filters.bookId"
         :items="bookStore.books"
@@ -100,6 +141,9 @@ onMounted(async () => {
         item-value="id"
         label="账本"
         max-width="180"
+        width="100%"
+        density="comfortable"
+        hide-details
         variant="outlined"
       />
       <v-select
@@ -110,6 +154,9 @@ onMounted(async () => {
         item-value="id"
         label="账户"
         max-width="180"
+        width="100%"
+        density="comfortable"
+        hide-details
         variant="outlined"
       />
       <v-select
@@ -118,6 +165,9 @@ onMounted(async () => {
         clearable
         label="类型"
         max-width="150"
+        width="100%"
+        density="comfortable"
+        hide-details
         variant="outlined"
       />
       <v-select
@@ -128,55 +178,71 @@ onMounted(async () => {
         item-value="id"
         label="Tag"
         max-width="160"
+        width="100%"
+        density="comfortable"
+        hide-details
         variant="outlined"
       />
-      <v-text-field
+      <v-date-input
         v-model="filters.dateFrom"
         label="开始"
         max-width="160"
-        type="date"
+        width="100%"
+        clearable
+        density="comfortable"
+        hide-details
+        ok-text="确定"
+        cancel-text="取消"
         variant="outlined"
       />
-      <v-text-field
+      <v-date-input
         v-model="filters.dateTo"
         label="结束"
         max-width="160"
-        type="date"
+        width="100%"
+        clearable
+        density="comfortable"
+        hide-details
+        ok-text="确定"
+        cancel-text="取消"
         variant="outlined"
       />
-      <v-btn variant="tonal" @click="applyFilters">筛选</v-btn>
-    </div>
+      <v-btn block class="flex-sm-grow-0" type="submit" variant="tonal">筛选</v-btn>
+    </v-form>
 
-    <v-table>
-      <thead>
-        <tr>
-          <th>日期</th>
-          <th>类型</th>
-          <th>账本</th>
-          <th>账户</th>
-          <th>金额</th>
-          <th>Tag</th>
-          <th class="text-right">操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="transaction in transactionStore.transactions" :key="transaction.id">
-          <td>{{ transaction.occurredAt.slice(0, 10) }}</td>
-          <td>{{ typeOptions.find((item) => item.value === transaction.type)?.title }}</td>
-          <td>{{ bookName(transaction.bookId) }}</td>
-          <td>
-            {{ accountName(transaction.accountId) }}
-            <span v-if="transaction.targetAccountId">
-              → {{ accountName(transaction.targetAccountId) }}
-            </span>
-          </td>
-          <td>{{ formatMinorUnits(transaction.amount, transaction.currency) }}</td>
-          <td>{{ tagNames(transaction.tagIds) || '-' }}</td>
-          <td class="text-right">
-            <v-btn size="small" variant="text" @click="remove(transaction.id)">删除</v-btn>
-          </td>
-        </tr>
-      </tbody>
-    </v-table>
+    <v-data-table
+      :headers="$vuetify.display.xs ? mobileHeaders : headers"
+      :items="transactions"
+      density="comfortable"
+      hover
+      item-value="id"
+      mobile-breakpoint="sm"
+      no-data-text="暂无流水"
+    >
+      <template #item.occurredAt="{ item }">
+        {{ item.occurredAt.slice(0, 10) }}
+      </template>
+      <template #item.type="{ item }">
+        {{ typeOptions.find((option) => option.value === item.type)?.title }}
+      </template>
+      <template #item.bookId="{ item }">
+        {{ bookName(item.bookId) }}
+      </template>
+      <template #item.accountId="{ item }">
+        {{ accountName(item.accountId) }}
+        <span v-if="item.targetAccountId">
+          → {{ accountName(item.targetAccountId) }}
+        </span>
+      </template>
+      <template #item.amount="{ item }">
+        {{ formatMinorUnits(item.amount, item.currency) }}
+      </template>
+      <template #item.tagIds="{ item }">
+        {{ tagNames(item.tagIds) || '-' }}
+      </template>
+      <template #item.actions="{ item }">
+        <v-btn size="small" variant="text" @click="remove(item.id)">删除</v-btn>
+      </template>
+    </v-data-table>
   </div>
 </template>
