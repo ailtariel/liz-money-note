@@ -5,14 +5,29 @@ import { useBookStore } from '@/modules/books/book.store';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useTagStore } from '@/modules/tags/tag.store';
 import { useTransactionStore } from '@/modules/transactions/transaction.store';
-import type { Transaction, TransactionType } from '@/modules/transactions/transaction.types';
+import type {
+  Transaction,
+  TransactionType
+} from '@/modules/transactions/transaction.types';
 import { formatMinorUnits } from '@/modules/shared/money';
 import AmountText from '@/components/shared/AmountText.vue';
+import MobilePage from '@/components/shared/MobilePage.vue';
 import TransactionEditor from '@/components/TransactionEditor.vue';
-import { formatShortDate, formatTime, transactionTypeOptions } from '@/components/shared/financeDisplay';
+import {
+  formatShortDate,
+  formatTime,
+  transactionTypeOptions
+} from '@/components/shared/financeDisplay';
 
 type TransactionListRow =
-  | { kind: 'date'; key: string; date: string; income: number; expense: number; currency: Transaction['currency'] }
+  | {
+      kind: 'date';
+      key: string;
+      date: string;
+      income: number;
+      expense: number;
+      currency: Transaction['currency'];
+    }
   | { kind: 'item'; key: string; transaction: Transaction };
 
 const { t } = useI18n();
@@ -34,7 +49,9 @@ const filters = reactive({
 
 const typeOptions = computed(() => transactionTypeOptions(t));
 const transactions = computed(() => transactionStore.transactions);
-const baseCurrency = computed(() => accountStore.accounts[0]?.currency ?? 'AED');
+const baseCurrency = computed(
+  () => accountStore.accounts[0]?.currency ?? 'AED'
+);
 
 const monthlyIncome = computed(() =>
   transactions.value
@@ -48,7 +65,9 @@ const monthlyExpense = computed(() =>
     .reduce((sum, transaction) => sum + transaction.amount, 0)
 );
 
-const monthlyBalance = computed(() => monthlyIncome.value - monthlyExpense.value);
+const monthlyBalance = computed(
+  () => monthlyIncome.value - monthlyExpense.value
+);
 
 const listRows = computed<TransactionListRow[]>(() => {
   const rows: TransactionListRow[] = [];
@@ -99,7 +118,9 @@ function accountName(id: number | null) {
     return '-';
   }
 
-  return accountStore.accounts.find((account) => account.id === id)?.name ?? '-';
+  return (
+    accountStore.accounts.find((account) => account.id === id)?.name ?? '-'
+  );
 }
 
 function bookName(id: number) {
@@ -141,7 +162,12 @@ function transactionColor(transaction: Transaction) {
 }
 
 function transactionTitle(transaction: Transaction) {
-  return transaction.note || primaryTag(transaction)?.name || typeOptions.value.find((item) => item.value === transaction.type)?.title || '-';
+  return (
+    transaction.note ||
+    primaryTag(transaction)?.name ||
+    typeOptions.value.find((item) => item.value === transaction.type)?.title ||
+    '-'
+  );
 }
 
 function filterLabel(kind: 'book' | 'account' | 'type') {
@@ -150,11 +176,14 @@ function filterLabel(kind: 'book' | 'account' | 'type') {
   }
 
   if (kind === 'account') {
-    return filters.accountId ? accountName(filters.accountId) : t('common.allAccounts');
+    return filters.accountId
+      ? accountName(filters.accountId)
+      : t('common.allAccounts');
   }
 
   return filters.type
-    ? typeOptions.value.find((item) => item.value === filters.type)?.title ?? t('common.allTypes')
+    ? (typeOptions.value.find((item) => item.value === filters.type)?.title ??
+        t('common.allTypes'))
     : t('common.allTypes');
 }
 
@@ -183,7 +212,8 @@ async function removeSelected() {
     await accountStore.load();
     detailSheetOpen.value = false;
   } catch (err) {
-    error.value = err instanceof Error ? err.message : t('transaction.deleteFailed');
+    error.value =
+      err instanceof Error ? err.message : t('transaction.deleteFailed');
   }
 }
 
@@ -203,31 +233,49 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="d-flex flex-column ga-4">
-    <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+  <MobilePage :title="t('nav.transactions')">
+    <template #actions>
+      <v-btn icon="$search" variant="text" />
+      <v-btn icon="$filter" variant="text" @click="filterSheetOpen = true" />
+    </template>
+
+    <div class="d-flex flex-column ga-4">
+      <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
       <v-card class="overview-card pa-5 text-white">
         <v-row gap="0">
           <v-col cols="4">
-            <div class="text-body-2 opacity-80">{{ t('transaction.income') }}</div>
+            <div class="text-body-2 opacity-80">
+              {{ t('transaction.income') }}
+            </div>
             <div class="text-subtitle-1 font-weight-bold mt-1">
               {{ formatMinorUnits(monthlyIncome, baseCurrency) }}
             </div>
-            <div class="text-caption opacity-80">{{ t('common.thisMonth') }}</div>
+            <div class="text-caption opacity-80">
+              {{ t('common.thisMonth') }}
+            </div>
           </v-col>
           <v-col class="overview-divider" cols="4">
-            <div class="text-body-2 opacity-80">{{ t('transaction.expense') }}</div>
+            <div class="text-body-2 opacity-80">
+              {{ t('transaction.expense') }}
+            </div>
             <div class="text-subtitle-1 font-weight-bold mt-1">
               {{ formatMinorUnits(monthlyExpense, baseCurrency) }}
             </div>
-            <div class="text-caption opacity-80">{{ t('common.thisMonth') }}</div>
+            <div class="text-caption opacity-80">
+              {{ t('common.thisMonth') }}
+            </div>
           </v-col>
           <v-col class="overview-divider" cols="4">
-            <div class="text-body-2 opacity-80">{{ t('transaction.balance') }}</div>
+            <div class="text-body-2 opacity-80">
+              {{ t('transaction.balance') }}
+            </div>
             <div class="text-subtitle-1 font-weight-bold mt-1">
               {{ formatMinorUnits(monthlyBalance, baseCurrency) }}
             </div>
-            <div class="text-caption opacity-80">{{ t('common.thisMonth') }}</div>
+            <div class="text-caption opacity-80">
+              {{ t('common.thisMonth') }}
+            </div>
           </v-col>
         </v-row>
       </v-card>
@@ -248,16 +296,26 @@ onMounted(async () => {
       </v-chip-group>
 
       <v-card v-if="!listRows.length" class="soft-card pa-6 text-center">
-        <div class="text-body-1 font-weight-medium">{{ t('transaction.noRecords') }}</div>
+        <div class="text-body-1 font-weight-medium">
+          {{ t('transaction.noRecords') }}
+        </div>
       </v-card>
 
       <v-virtual-scroll v-else :items="listRows" class="transaction-scroll">
         <template #default="{ item }">
           <div v-if="item.kind === 'date'" class="date-row">
-            <div class="font-weight-bold">{{ formatShortDate(item.date, t) }}</div>
+            <div class="font-weight-bold">
+              {{ formatShortDate(item.date, t) }}
+            </div>
             <div class="text-body-2 text-medium-emphasis">
-              <span v-if="item.income">{{ t('transaction.income') }} {{ formatMinorUnits(item.income, item.currency) }}</span>
-              <span v-if="item.expense" class="ml-2">{{ t('transaction.expense') }} {{ formatMinorUnits(item.expense, item.currency) }}</span>
+              <span v-if="item.income"
+                >{{ t('transaction.income') }}
+                {{ formatMinorUnits(item.income, item.currency) }}</span
+              >
+              <span v-if="item.expense" class="ml-2"
+                >{{ t('transaction.expense') }}
+                {{ formatMinorUnits(item.expense, item.currency) }}</span
+              >
             </div>
           </div>
 
@@ -270,7 +328,11 @@ onMounted(async () => {
             @keydown.enter="openDetail(item.transaction)"
           >
             <div class="d-flex align-center ga-3">
-              <v-avatar :color="transactionColor(item.transaction)" size="52" variant="tonal">
+              <v-avatar
+                :color="transactionColor(item.transaction)"
+                size="52"
+                variant="tonal"
+              >
                 <v-icon :icon="transactionIcon(item.transaction)" />
               </v-avatar>
               <div class="min-w-0 flex-grow-1">
@@ -278,7 +340,8 @@ onMounted(async () => {
                   {{ transactionTitle(item.transaction) }}
                 </div>
                 <div class="text-body-2 text-medium-emphasis text-truncate">
-                  {{ accountName(item.transaction.accountId) }} · {{ bookName(item.transaction.bookId) }}
+                  {{ accountName(item.transaction.accountId) }} ·
+                  {{ bookName(item.transaction.bookId) }}
                 </div>
                 <div class="text-body-2 text-medium-emphasis">
                   {{ formatTime(item.transaction.occurredAt) }}
@@ -288,22 +351,29 @@ onMounted(async () => {
                 :amount="item.transaction.amount"
                 :currency="item.transaction.currency"
                 :signed="item.transaction.type !== 'transfer'"
-                :type="item.transaction.type === 'income' ? 'income' : item.transaction.type === 'expense' ? 'expense' : 'neutral'"
+                :type="
+                  item.transaction.type === 'income'
+                    ? 'income'
+                    : item.transaction.type === 'expense'
+                      ? 'expense'
+                      : 'neutral'
+                "
               />
             </div>
           </v-card>
         </template>
-    </v-virtual-scroll>
+      </v-virtual-scroll>
+    </div>
 
+    <!-- <Teleport to="body"> -->
     <v-fab
-      app
+      class="transaction-fab"
       color="primary"
       icon="$add"
       location="bottom end"
-      offset
-      order="1"
       @click="editorOpen = true"
     />
+    <!-- </Teleport> -->
 
     <v-dialog
       v-model="editorOpen"
@@ -320,7 +390,9 @@ onMounted(async () => {
 
     <v-bottom-sheet v-model="filterSheetOpen">
       <v-card class="pa-4">
-        <div class="text-h6 font-weight-bold mb-4">{{ t('transaction.filters.title') }}</div>
+        <div class="text-h6 font-weight-bold mb-4">
+          {{ t('transaction.filters.title') }}
+        </div>
         <v-select
           v-model="filters.bookId"
           :items="bookStore.books"
@@ -352,30 +424,64 @@ onMounted(async () => {
     <v-bottom-sheet v-model="detailSheetOpen">
       <v-card v-if="selectedTransaction" class="pa-4">
         <div class="d-flex align-center mb-4">
-          <div class="text-h6 font-weight-bold">{{ t('transaction.detail') }}</div>
+          <div class="text-h6 font-weight-bold">
+            {{ t('transaction.detail') }}
+          </div>
           <v-spacer />
-          <v-btn icon="$close" variant="text" @click="detailSheetOpen = false" />
+          <v-btn
+            icon="$close"
+            variant="text"
+            @click="detailSheetOpen = false"
+          />
         </div>
         <div class="text-center mb-4">
-          <div class="text-caption text-medium-emphasis">{{ t('transaction.amount') }}</div>
+          <div class="text-caption text-medium-emphasis">
+            {{ t('transaction.amount') }}
+          </div>
           <div class="text-h4 font-weight-bold">
             <AmountText
               :amount="selectedTransaction.amount"
               :currency="selectedTransaction.currency"
               :signed="selectedTransaction.type !== 'transfer'"
-              :type="selectedTransaction.type === 'income' ? 'income' : selectedTransaction.type === 'expense' ? 'expense' : 'neutral'"
+              :type="
+                selectedTransaction.type === 'income'
+                  ? 'income'
+                  : selectedTransaction.type === 'expense'
+                    ? 'expense'
+                    : 'neutral'
+              "
             />
           </div>
         </div>
         <v-list class="bg-transparent">
-          <v-list-item :title="t('transaction.category')" :subtitle="transactionTitle(selectedTransaction)" />
-          <v-list-item :title="t('transaction.account')" :subtitle="accountName(selectedTransaction.accountId)" />
-          <v-list-item :title="t('transaction.book')" :subtitle="bookName(selectedTransaction.bookId)" />
-          <v-list-item :title="t('transaction.occurredAt')" :subtitle="selectedTransaction.occurredAt" />
-          <v-list-item :title="t('common.note')" :subtitle="selectedTransaction.note || '-'" />
+          <v-list-item
+            :title="t('transaction.category')"
+            :subtitle="transactionTitle(selectedTransaction)"
+          />
+          <v-list-item
+            :title="t('transaction.account')"
+            :subtitle="accountName(selectedTransaction.accountId)"
+          />
+          <v-list-item
+            :title="t('transaction.book')"
+            :subtitle="bookName(selectedTransaction.bookId)"
+          />
+          <v-list-item
+            :title="t('transaction.occurredAt')"
+            :subtitle="selectedTransaction.occurredAt"
+          />
+          <v-list-item
+            :title="t('common.note')"
+            :subtitle="selectedTransaction.note || '-'"
+          />
         </v-list>
         <div v-if="selectedTags.length" class="d-flex flex-wrap ga-2 mt-2">
-          <v-chip v-for="tag in selectedTags" :key="tag!.id" :color="tag!.color || undefined" variant="tonal">
+          <v-chip
+            v-for="tag in selectedTags"
+            :key="tag!.id"
+            :color="tag!.color || undefined"
+            variant="tonal"
+          >
             {{ tag!.name }}
           </v-chip>
         </div>
@@ -388,7 +494,7 @@ onMounted(async () => {
         </div>
       </v-card>
     </v-bottom-sheet>
-  </div>
+  </MobilePage>
 </template>
 
 <style scoped>
@@ -421,4 +527,12 @@ onMounted(async () => {
   margin-bottom: 10px;
 }
 
+.transaction-fab {
+  right: calc(max((100vw - 430px) / 2, 0px) + 22px) !important;
+  bottom: calc(
+    var(--app-bottom-nav-height) + env(safe-area-inset-bottom) + 22px
+  ) !important;
+  left: auto !important;
+  z-index: 1005;
+}
 </style>

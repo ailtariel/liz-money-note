@@ -12,7 +12,8 @@ const router = createRouter({
         {
           path: '',
           name: 'transactions',
-          component: () => import('@/components/Transactions.vue'),
+          component: () =>
+            import('@/components/transactions/Transactions-page.vue'),
           meta: {
             titleKey: 'nav.transactions',
             bottomNav: true
