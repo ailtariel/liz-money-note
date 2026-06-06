@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
 import { exportDatabaseJson, importDatabaseJson } from '@/modules/database/backup';
@@ -8,12 +9,26 @@ import type { ImportBatchResult } from '@/modules/import/import.types';
 import { currencies, type CurrencyCode } from '@/modules/shared/money';
 
 const { t } = useI18n();
+const route = useRoute();
 const message = ref('');
 const error = ref('');
 const importText = ref('');
 const selectedFiles = ref<File[]>([]);
 const importCurrency = ref<CurrencyCode | 'auto'>('auto');
 const importResult = ref<ImportBatchResult | null>(null);
+const dataRouteName = computed(() => route.name);
+const showExport = computed(() =>
+  ['data', 'data-export', 'data-backup'].includes(String(dataRouteName.value ?? ''))
+);
+const showRestore = computed(() =>
+  ['data', 'data-restore'].includes(String(dataRouteName.value ?? ''))
+);
+const showImport = computed(() =>
+  ['data', 'data-import'].includes(String(dataRouteName.value ?? ''))
+);
+const exportButtonLabel = computed(() =>
+  dataRouteName.value === 'data-backup' ? t('more.backup') : t('more.export')
+);
 
 async function exportData() {
   error.value = '';
@@ -105,13 +120,13 @@ async function importSelectedFiles() {
         <v-alert v-if="message" type="success" variant="tonal">{{ message }}</v-alert>
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
-        <v-card class="soft-card pa-4">
+        <v-card v-if="showExport" class="soft-card pa-4">
           <v-btn block color="primary" prepend-icon="$download" @click="exportData">
-            {{ t('more.export') }}
+            {{ exportButtonLabel }}
           </v-btn>
         </v-card>
 
-        <v-card class="soft-card pa-4">
+        <v-card v-if="showRestore" class="soft-card pa-4">
           <v-textarea v-model="importText" :label="t('data.pasteJson')" rows="8" />
           <v-btn
             :disabled="!importText"
@@ -124,7 +139,7 @@ async function importSelectedFiles() {
           </v-btn>
         </v-card>
 
-        <v-card class="soft-card pa-4">
+        <v-card v-if="showImport" class="soft-card pa-4">
           <div class="text-subtitle-1 font-weight-bold">
             {{ t('data.importText') }}
           </div>
@@ -156,7 +171,7 @@ async function importSelectedFiles() {
           </v-btn>
         </v-card>
 
-        <v-card v-if="importResult" class="soft-card pa-4">
+        <v-card v-if="showImport && importResult" class="soft-card pa-4">
           <v-list class="bg-transparent">
             <v-list-item v-for="file in importResult.files" :key="file.fileName">
               <v-list-item-title>{{ file.fileName }}</v-list-item-title>
@@ -168,7 +183,7 @@ async function importSelectedFiles() {
           </v-list>
         </v-card>
 
-        <v-alert v-if="importResult?.issueCount" type="warning" variant="tonal">
+        <v-alert v-if="showImport && importResult?.issueCount" type="warning" variant="tonal">
           {{ t('data.issueWarning', { count: importResult.issueCount }) }}
         </v-alert>
       </div>

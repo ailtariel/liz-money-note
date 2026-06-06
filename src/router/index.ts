@@ -8,6 +8,7 @@ const router = createRouter({
     {
       path: '/',
       component: () => import('@/components/layouts/default-layout.vue'),
+      redirect: 'transactions',
       children: [
         {
           path: 'transactions',
@@ -83,6 +84,38 @@ const router = createRouter({
           component: () => import('@/modules/database/Data.vue'),
           meta: {
             titleKey: 'nav.data'
+          }
+        },
+        {
+          path: 'data/import',
+          name: 'data-import',
+          component: () => import('@/modules/database/Data.vue'),
+          meta: {
+            titleKey: 'more.import'
+          }
+        },
+        {
+          path: 'data/export',
+          name: 'data-export',
+          component: () => import('@/modules/database/Data.vue'),
+          meta: {
+            titleKey: 'more.export'
+          }
+        },
+        {
+          path: 'data/backup',
+          name: 'data-backup',
+          component: () => import('@/modules/database/Data.vue'),
+          meta: {
+            titleKey: 'more.backup'
+          }
+        },
+        {
+          path: 'data/restore',
+          name: 'data-restore',
+          component: () => import('@/modules/database/Data.vue'),
+          meta: {
+            titleKey: 'more.restore'
           }
         }
       ]

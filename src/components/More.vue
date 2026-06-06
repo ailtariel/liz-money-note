@@ -1,49 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { RouteLocationRaw } from 'vue-router';
 import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
+import { moreNavigationSections } from '@/components/shared/more-navigation';
 
 const { t } = useI18n();
 
-type MoreItem = {
-  title: string;
-  icon: string;
-  to?: RouteLocationRaw;
-};
-
-const sections = computed<Array<{ title: string; items: MoreItem[] }>>(() => [
-  {
-    title: t('more.basicData'),
-    items: [
-      { title: t('nav.books'), icon: '$book', to: { name: 'books' } },
-      { title: t('nav.accounts'), icon: '$account', to: { name: 'accounts' } },
-      { title: t('nav.tags'), icon: '$tag', to: { name: 'tags' } },
-      {
-        title: t('nav.recurring'),
-        icon: '$recurring',
-        to: { name: 'recurring' }
-      }
-    ]
-  },
-  {
-    title: t('more.data'),
-    items: [
-      { title: t('more.import'), icon: '$upload', to: { name: 'data' } },
-      { title: t('more.export'), icon: '$download', to: { name: 'data' } },
-      { title: t('more.backup'), icon: '$data', to: { name: 'data' } },
-      { title: t('more.restore'), icon: '$restore', to: { name: 'data' } }
-    ]
-  },
-  {
-    title: t('more.settings'),
-    items: [
-      { title: t('more.theme'), icon: '$themeDark' },
-      { title: t('more.defaultCurrency'), icon: '$cash' },
-      { title: t('more.about'), icon: '$info' }
-    ]
-  }
-]);
+const sections = computed(() =>
+  moreNavigationSections.map((section) => ({
+    title: t(section.titleKey),
+    items: section.items.map((item) => ({
+      title: t(item.titleKey),
+      icon: item.icon,
+      to: item.to
+    }))
+  }))
+);
 </script>
 
 <template>

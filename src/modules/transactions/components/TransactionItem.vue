@@ -118,7 +118,7 @@ const openDetail = (transaction: Transaction) => {
 
 .transaction-title {
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.45;
 }
 

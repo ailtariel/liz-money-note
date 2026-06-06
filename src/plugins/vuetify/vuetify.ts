@@ -161,6 +161,7 @@ export function createAppVuetify(config: RuntimeAppConfig) {
         themeDark: mdiMoonWaxingCrescent,
         profile: mdiAccountCircleOutline,
         transactions: mdiFormatListBulletedSquare,
+        home: mdiHomeOutline,
         stats: mdiChartPie,
         assets: mdiWalletOutline,
         wallet: mdiWalletOutline,

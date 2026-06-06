@@ -1,3 +1,5 @@
+@use './settings' as settings;
+
 :root {
   color-scheme: light dark;
 }
@@ -18,14 +20,7 @@ body,
 
 body {
   background: #f6f8f7;
-  font-family:
-    'Noto Sans SC',
-    'Noto Sans CJK SC',
-    'Noto Sans',
-    'Segoe UI',
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
+  font-family: settings.$body-font-family;
 }
 
 code {
