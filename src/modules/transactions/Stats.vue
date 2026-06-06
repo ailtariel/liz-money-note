@@ -5,6 +5,7 @@ import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import { useTagStore } from '@/modules/tags/tag.store';
 import { formatMinorUnits } from '@/modules/shared/money';
 import AmountText from '@/components/shared/AmountText.vue';
+import AppBarVue from '@/components/shared/app-bar.vue';
 
 const { t } = useI18n();
 const transactionStore = useTransactionStore();
@@ -55,8 +56,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="d-flex flex-column ga-4">
-    <v-card class="soft-card pa-5">
+  <AppBarVue />
+  <v-main>
+    <v-container>
+      <div class="d-flex flex-column ga-4">
+        <v-card class="soft-card pa-5">
         <div class="text-subtitle-1 font-weight-bold mb-4">{{ t('stats.monthlyFlow') }}</div>
         <div class="d-flex align-center justify-space-between mb-2">
           <span>{{ t('stats.received') }}</span>
@@ -95,8 +99,10 @@ onMounted(async () => {
             <div class="text-caption text-medium-emphasis">{{ item.label }}</div>
           </div>
         </div>
-    </v-card>
-  </div>
+        </v-card>
+      </div>
+    </v-container>
+  </v-main>
 </template>
 
 <style scoped>
