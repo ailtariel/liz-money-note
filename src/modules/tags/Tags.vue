@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
 import { useI18n } from '@/i18n';
+import AppBarVue from '@/components/shared/app-bar.vue';
 import { useTagStore } from '@/modules/tags/tag.store';
 
 const { t } = useI18n();
 const store = useTagStore();
 const error = ref('');
 const editingId = ref<number | null>(null);
+const editorOpen = ref(false);
 const form = reactive({
   name: '',
   color: '#0f766e',
@@ -20,6 +22,11 @@ function resetForm() {
   form.sortOrder = 0;
 }
 
+function startCreate() {
+  resetForm();
+  editorOpen.value = true;
+}
+
 function editTag(tagId: number) {
   const tag = store.tags.find((item) => item.id === tagId);
   if (!tag) {
@@ -30,6 +37,7 @@ function editTag(tagId: number) {
   form.name = tag.name;
   form.color = tag.color ?? '#0f766e';
   form.sortOrder = tag.sortOrder;
+  editorOpen.value = true;
 }
 
 async function submit() {
@@ -48,6 +56,7 @@ async function submit() {
     }
 
     resetForm();
+    editorOpen.value = false;
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('tag.saveFailed');
   }
@@ -66,37 +75,68 @@ onMounted(() => store.load());
 </script>
 
 <template>
-  <div class="d-flex flex-column ga-4">
-    <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+  <AppBarVue>
+    <template #actions>
+      <v-btn
+        color="primary"
+        icon="$add"
+        size="small"
+        variant="flat"
+        @click="startCreate"
+      />
+    </template>
+  </AppBarVue>
 
-      <v-card class="soft-card pa-4">
-        <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
-          <v-text-field v-model="form.name" :label="t('common.name')" required />
-          <v-text-field v-model="form.color" :label="t('common.color')" />
-          <v-text-field v-model.number="form.sortOrder" :label="t('common.sortOrder')" type="number" />
-          <div class="d-flex ga-2">
-            <v-btn color="primary" type="submit">
-              {{ editingId ? t('common.save') : t('common.add') }}
+  <v-main>
+    <v-container>
+      <div class="d-flex flex-column ga-4">
+        <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+
+        <v-card v-for="tag in store.tags" :key="tag.id" class="soft-card pa-4">
+          <div class="d-flex align-center ga-3">
+            <v-avatar :color="tag.color || 'primary'" variant="tonal">
+              <v-icon icon="$tag" />
+            </v-avatar>
+            <div class="flex-grow-1" @click="editTag(tag.id)">
+              <div class="text-subtitle-1 font-weight-bold">{{ tag.name }}</div>
+              <div class="text-body-2 text-medium-emphasis">
+                {{ tag.color || '-' }} &middot; {{ tag.sortOrder }}
+              </div>
+            </div>
+            <v-btn size="small" variant="text" @click="editTag(tag.id)">
+              {{ t('common.edit') }}
             </v-btn>
-            <v-btn v-if="editingId" variant="text" @click="resetForm">
-              {{ t('common.cancel') }}
+            <v-btn size="small" variant="text" @click="remove(tag.id)">
+              {{ t('common.delete') }}
             </v-btn>
           </div>
-        </v-form>
-      </v-card>
+        </v-card>
+      </div>
 
-      <v-card v-for="tag in store.tags" :key="tag.id" class="soft-card pa-4">
-        <div class="d-flex align-center ga-3">
-          <v-avatar :color="tag.color || 'primary'" variant="tonal">
-            <v-icon icon="$tag" />
-          </v-avatar>
-          <div class="flex-grow-1">
-            <div class="text-subtitle-1 font-weight-bold">{{ tag.name }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ tag.color || '-' }} · {{ tag.sortOrder }}</div>
+      <v-bottom-sheet v-model="editorOpen">
+        <v-card class="pa-4">
+          <div class="text-h6 font-weight-bold mb-4">
+            {{ editingId ? t('common.edit') : t('common.add') }}
           </div>
-          <v-btn size="small" variant="text" @click="editTag(tag.id)">{{ t('common.edit') }}</v-btn>
-          <v-btn size="small" variant="text" @click="remove(tag.id)">{{ t('common.delete') }}</v-btn>
-        </div>
-    </v-card>
-  </div>
+          <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
+            <v-text-field v-model="form.name" :label="t('common.name')" required />
+            <v-text-field v-model="form.color" :label="t('common.color')" />
+            <v-text-field
+              v-model.number="form.sortOrder"
+              :label="t('common.sortOrder')"
+              type="number"
+            />
+            <div class="d-flex ga-2">
+              <v-btn color="primary" type="submit">
+                {{ editingId ? t('common.save') : t('common.add') }}
+              </v-btn>
+              <v-btn variant="text" @click="editorOpen = false">
+                {{ t('common.cancel') }}
+              </v-btn>
+            </div>
+          </v-form>
+        </v-card>
+      </v-bottom-sheet>
+    </v-container>
+  </v-main>
 </template>
