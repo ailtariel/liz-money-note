@@ -122,7 +122,6 @@ async function submit() {
       note: form.note || categories.value.find((item) => item.value === form.category)?.title || null,
       tagIds: form.tagIds
     });
-    await accountStore.load();
     emit('saved');
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('transaction.saveFailed');

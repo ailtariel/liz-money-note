@@ -16,17 +16,7 @@ import AppBarVue from '@/components/shared/app-bar.vue';
 import TransactionItemVue from './components/TransactionItem.vue';
 import TransactionDetailVue from './components/TransactionDetail.vue';
 import useTransaction from './useTransactionDisplay';
-
-type TransactionListRow =
-  | {
-      kind: 'date';
-      key: string;
-      date: string;
-      income: number;
-      expense: number;
-      currency: Transaction['currency'];
-    }
-  | { kind: 'item'; key: string; transaction: Transaction };
+import type { TransactionListRow } from './transaction-ui.types';
 
 const { t } = useI18n();
 const bookStore = useBookStore();
@@ -179,8 +169,8 @@ function handleEditorSaved() {
       @saved="handleEditorSaved"
     />
   </v-dialog>
-  <v-container>
-    <div class="d-flex flex-column ga-4">
+  <v-main>
+    <v-container>
       <v-card class="overview-card pa-5 text-white">
         <v-row gap="0">
           <v-col cols="4">
@@ -288,8 +278,8 @@ function handleEditorSaved() {
           @close="detailSheetOpen = false"
         />
       </v-bottom-sheet>
-    </div>
-  </v-container>
+    </v-container>
+  </v-main>
 </template>
 
 <style scoped>
@@ -308,17 +298,5 @@ function handleEditorSaved() {
 .transaction-scroll {
   height: auto;
   min-height: 0;
-}
-
-.date-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 14px 8px;
-}
-
-.transaction-card {
-  padding: 16px;
-  margin-bottom: 10px;
 }
 </style>

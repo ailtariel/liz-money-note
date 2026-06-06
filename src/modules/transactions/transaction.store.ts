@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { useAccountStore } from '@/modules/accounts/account.store';
 import {
   createTransaction,
   deleteTransaction
@@ -15,6 +16,7 @@ export const useTransactionStore = defineStore('transactions', () => {
   const transactions = ref<Transaction[]>([]);
   const filters = ref<TransactionFilters>({});
   const loading = ref(false);
+  const accountStore = useAccountStore();
 
   async function load(nextFilters: TransactionFilters = filters.value) {
     filters.value = { ...nextFilters };
@@ -28,12 +30,12 @@ export const useTransactionStore = defineStore('transactions', () => {
 
   async function create(input: TransactionInput) {
     await createTransaction(input);
-    await load();
+    await Promise.all([load(), accountStore.load()]);
   }
 
   async function remove(id: number) {
     await deleteTransaction(id);
-    await load();
+    await Promise.all([load(), accountStore.load()]);
   }
 
   return {

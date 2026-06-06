@@ -18,10 +18,28 @@ This document defines repository-level rules for frontend layout, page structure
 
 - `App.vue` loads the application-level providers, global modules, and top-level overlays that apply to the entire app.
 - `src/components/layouts/` contains route layouts. A screens layout, a login layout, and other shell variants should be separate layout components.
-- Headers, footers, bottom navigation, drawers, and other common shell elements belong in layout components, not in page components.
-- Actual route pages are rendered inside `v-main` and should focus on feature content and local interaction state.
-- Page components should not create their own app-level header, footer, bottom navigation, or scroll container unless the route explicitly uses a different layout.
+- Route layouts own stable shell structure such as route rendering, bottom navigation, drawers, and shared shell boundaries.
+- `v-main` belongs to the concrete content page, not the route layout. Each page should compose its own `AppBarVue`, `v-main`, content container, padding, scroll region, and local layout structure.
+- A shared app bar component may be rendered by a page when its actions are page-specific. Do not force page-specific actions into a route layout through route-name branching.
+- If an app bar is rendered by a page, it must still use the shared app bar component and Vuetify layout APIs so the shell remains visually and behaviorally consistent.
+- Actual route pages should focus on feature content and local interaction state.
+- Page components should not create their own bottom navigation, drawer, footer, or scroll container unless the route explicitly uses a different layout.
 - Avoid page wrapper components that only reproduce responsibilities already owned by the app or layout layer.
+
+## Feature Module Boundaries
+
+- Feature pages with domain data, stores, repositories, services, feature composables, and private components belong under `src/modules/<feature>/`.
+- `src/components/` is for lightweight UI, shared app shell pieces, and cross-feature display components that do not own domain business flow.
+- `src/components/shared/` is only for components reused by multiple features and not bound to one business domain.
+- Types used by only one Vue file may stay in that Vue file. Types shared across multiple files should move to the nearest feature-level `*.types.ts` or UI-specific types file.
+
+## State, Data Sync, and Messages
+
+- Vue and Pinia state should be treated as the source of UI reactivity. Components should not manually reload data after a mutation merely to make Vue update.
+- Store actions that mutate persisted data are responsible for refreshing or updating their own state and directly related store state when that is required for UI consistency.
+- Component-level messages are for local form validation or inline page feedback.
+- System-level operation feedback, global errors, confirmation flows, toast/snackbar messages, and cross-page interaction prompts should go through a global message module.
+- Feature composables may cache a single instance when the module intentionally avoids repeated store/computed/helper setup. Keep this pattern explicit and scoped to the feature.
 
 ## Styling Rules
 

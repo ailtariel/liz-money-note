@@ -88,7 +88,6 @@ function createInstance() {
     }
 
     await transactionStore.remove(id);
-    await accountStore.load();
   };
 
   return reactive({

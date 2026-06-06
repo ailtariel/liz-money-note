@@ -9,6 +9,7 @@ import {
 
 import { formatMinorUnits } from '@/modules/shared/money';
 import useTransaction from '@/modules/transactions/useTransactionDisplay';
+import AmountText from '@/components/shared/AmountText.vue';
 
 interface Props {
   item: TransactionListRow;
@@ -19,7 +20,6 @@ const emit = defineEmits(['openDetail']);
 const { t } = useI18n();
 const trans = useTransaction();
 
-// actions
 const openDetail = (transaction: Transaction) => {
   emit('openDetail', transaction);
 };
@@ -83,3 +83,17 @@ const openDetail = (transaction: Transaction) => {
     </div>
   </v-card>
 </template>
+
+<style scoped>
+.date-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 8px;
+}
+
+.transaction-card {
+  padding: 16px;
+  margin-bottom: 10px;
+}
+</style>

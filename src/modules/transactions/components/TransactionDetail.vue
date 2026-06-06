@@ -4,12 +4,14 @@ import type { Transaction } from '@/modules/transactions/transaction.types';
 import { useI18n } from '@/i18n';
 import useTransaction from '@/modules/transactions/useTransactionDisplay';
 import { useTagStore } from '@/modules/tags/tag.store';
+import type { Tag } from '@/modules/tags/tag.types';
+import AmountText from '@/components/shared/AmountText.vue';
 
 interface Props {
   transaction: Transaction | null;
 }
 const props = defineProps<Props>();
-const emit = defineEmits(['close', 'removeSelected']);
+const emit = defineEmits(['close']);
 
 const { t } = useI18n();
 const trans = useTransaction();
@@ -19,7 +21,7 @@ const selectedTags = computed(() =>
   props.transaction
     ? props.transaction.tagIds
         .map((id) => tagStore.tags.find((tag) => tag.id === id))
-        .filter(Boolean)
+        .filter((tag): tag is Tag => Boolean(tag))
     : []
 );
 
@@ -83,11 +85,11 @@ const removeTransaction = async () => {
     <div v-if="selectedTags.length" class="d-flex flex-wrap ga-2 mt-2">
       <v-chip
         v-for="tag in selectedTags"
-        :key="tag!.id"
-        :color="tag!.color || undefined"
+        :key="tag.id"
+        :color="tag.color || undefined"
         variant="tonal"
       >
-        {{ tag!.name }}
+        {{ tag.name }}
       </v-chip>
     </div>
     <div class="d-flex ga-2 mt-5">
