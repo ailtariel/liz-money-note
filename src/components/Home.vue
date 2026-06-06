@@ -19,7 +19,8 @@ const configItems = computed(() => [
       <h1 class="text-h3 font-weight-bold mb-3">Vue, Vite, Vuetify, Router</h1>
       <p class="text-body-1 text-medium-emphasis">
         This skeleton keeps runtime config, routing, state, request bootstrap,
-        and container delivery in one place so new projects start from a stable baseline.
+        and container delivery in one place so new projects start from a stable
+        baseline.
       </p>
     </section>
 

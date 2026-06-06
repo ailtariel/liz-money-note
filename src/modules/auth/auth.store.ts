@@ -1,6 +1,10 @@
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
-import { clearAuthSession, getAuthSession, setAuthSession } from '@/services/auth-session';
+import {
+  clearAuthSession,
+  getAuthSession,
+  setAuthSession
+} from '@/modules/auth/auth-session';
 
 export interface AuthUser {
   id: string;

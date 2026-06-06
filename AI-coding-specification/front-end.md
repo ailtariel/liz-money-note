@@ -17,7 +17,7 @@ This document defines repository-level rules for frontend layout, page structure
 ## App, Layout, and Page Boundaries
 
 - `App.vue` loads the application-level providers, global modules, and top-level overlays that apply to the entire app.
-- `src/layouts/` contains route layouts. A screens layout, a login layout, and other shell variants should be separate layout components.
+- `src/components/layouts/` contains route layouts. A screens layout, a login layout, and other shell variants should be separate layout components.
 - Headers, footers, bottom navigation, drawers, and other common shell elements belong in layout components, not in page components.
 - Actual route pages are rendered inside `v-main` and should focus on feature content and local interaction state.
 - Page components should not create their own app-level header, footer, bottom navigation, or scroll container unless the route explicitly uses a different layout.

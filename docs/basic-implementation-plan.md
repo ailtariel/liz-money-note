@@ -68,41 +68,54 @@ src/modules/books/
   book.types.ts             账本类型
   book.repository.ts        账本数据访问
   book.store.ts             账本状态
+  Books.vue                 账本管理页
+  components/               账本功能私有组件
 
 src/modules/accounts/
   account.types.ts          账户类型
   account.repository.ts     账户数据访问
   account.store.ts          账户状态
+  Accounts.vue              账户管理页
+  components/               账户功能私有组件
 
 src/modules/tags/
   tag.types.ts              Tag 类型
   tag.repository.ts         Tag 数据访问
   tag.store.ts              Tag 状态
+  Tags.vue                  Tag 管理页
+  components/               Tag 功能私有组件
 
 src/modules/transactions/
   transaction.types.ts      流水类型
   transaction.repository.ts 流水和流水 Tag 数据访问
   transaction.service.ts    收入、支出、转账业务规则
   transaction.store.ts      流水状态
+  Transactions.vue          流水列表页
+  TransactionEditor.vue     流水编辑入口
+  components/               流水功能私有组件
 
 src/modules/recurring/
   recurring.types.ts        周期事件类型
   recurring.repository.ts   周期事件和周期事件 Tag 数据访问
   recurring.service.ts      到期检测、批准、跳过、下次日期计算
   recurring.store.ts        周期事件状态
+  RecurringEvents.vue       周期事件管理页
+  components/               周期事件功能私有组件
 
-src/pages/
-  BooksPage.vue             账本管理页
-  AccountsPage.vue          账户管理页
-  TagsPage.vue              Tag 管理页
-  TransactionsPage.vue      流水列表页
-  TransactionEditorPage.vue 流水编辑页
-  RecurringEventsPage.vue   周期事件管理页
+src/modules/database/
+  DataSettings.vue          数据导入、导出、备份、恢复页
 
 docs/
   basic-data-design.md      基础数据设计方案
   basic-implementation-plan.md 基础功能实施计划
 ```
+
+文件边界规则：
+
+- 带较多数据业务、领域状态、筛选逻辑、数据加载或业务交互的功能页面和功能内组件应放在对应 `src/modules/<feature>/` 下。
+- `src/components/` 只放轻量纯 UI 组件、应用级页面壳、跨功能展示组件，或不持有领域数据业务的组件。
+- `src/components/shared/` 只放跨多个功能复用且不绑定单一业务领域的共享组件。
+- 不再新增 `src/pages/` 页面入口。
 
 ## 任务 1：初始化 SQLite 数据库
 
@@ -132,7 +145,7 @@ Expected: TypeScript 类型检查通过。
 - Create: `src/modules/books/book.types.ts`
 - Create: `src/modules/books/book.repository.ts`
 - Create: `src/modules/books/book.store.ts`
-- Create: `src/pages/BooksPage.vue`
+- Create: `src/modules/books/Books.vue`
 
 - [ ] 实现账本创建、编辑、归档、列表读取。
 - [ ] 创建默认账本逻辑；首次启动如果没有账本，创建一个默认账本。
@@ -155,7 +168,7 @@ Expected: 可以在页面创建账本，并在刷新后保留。
 - Create: `src/modules/accounts/account.types.ts`
 - Create: `src/modules/accounts/account.repository.ts`
 - Create: `src/modules/accounts/account.store.ts`
-- Create: `src/pages/AccountsPage.vue`
+- Create: `src/modules/accounts/Accounts.vue`
 
 - [ ] 实现账户创建、编辑、归档、列表读取。
 - [ ] 支持账户类型：现金、银行卡、信用卡、支付宝、微信、其他。
@@ -179,7 +192,7 @@ Expected: 可以创建不同币种账户，并在刷新后保留。
 - Create: `src/modules/tags/tag.types.ts`
 - Create: `src/modules/tags/tag.repository.ts`
 - Create: `src/modules/tags/tag.store.ts`
-- Create: `src/pages/TagsPage.vue`
+- Create: `src/modules/tags/Tags.vue`
 
 - [ ] 实现 Tag 创建、编辑、删除、排序字段维护。
 - [ ] Tag 名称保持唯一。
@@ -203,7 +216,7 @@ Expected: 可以维护 Tag，并阻止删除已被使用的 Tag。
 - Create: `src/modules/transactions/transaction.repository.ts`
 - Create: `src/modules/transactions/transaction.service.ts`
 - Create: `src/modules/transactions/transaction.store.ts`
-- Create: `src/pages/TransactionEditorPage.vue`
+- Create: `src/modules/transactions/TransactionEditor.vue`
 
 - [ ] 实现收入创建：向 `transactions` 写入 `income`，增加账户余额。
 - [ ] 实现支出创建：向 `transactions` 写入 `expense`，减少账户余额。
@@ -227,7 +240,7 @@ Expected: 创建收入、支出、转账后，账户余额与流水一致。
 
 - Modify: `src/modules/transactions/transaction.repository.ts`
 - Modify: `src/modules/transactions/transaction.store.ts`
-- Create: `src/pages/TransactionsPage.vue`
+- Create: `src/modules/transactions/Transactions.vue`
 
 - [ ] 按 `occurred_at` 倒序展示流水。
 - [ ] 支持按账本筛选。
@@ -254,7 +267,7 @@ Expected: 筛选结果与数据库数据一致，已软删除流水不出现在�
 - Create: `src/modules/recurring/recurring.repository.ts`
 - Create: `src/modules/recurring/recurring.service.ts`
 - Create: `src/modules/recurring/recurring.store.ts`
-- Create: `src/pages/RecurringEventsPage.vue`
+- Create: `src/modules/recurring/RecurringEvents.vue`
 
 - [ ] 实现周期事件创建、编辑、停用、列表读取。
 - [ ] 支持 `daily`、`weekly`、`monthly`、`yearly`。
@@ -303,7 +316,7 @@ Expected: 到期周期事件只提示，不自动生成流水；批准后才写�
 **Files:**
 
 - Create: `src/modules/database/backup.ts`
-- Create: `src/pages/DataSettingsPage.vue`
+- Create: `src/modules/database/DataSettings.vue`
 
 - [ ] 实现 SQLite 数据库文件导出。
 - [ ] 实现从 SQLite 数据库文件恢复。
@@ -326,7 +339,7 @@ Expected: 导出后可恢复同一份账本、账户、Tag、流水和周期事�
 - Create: `src/modules/import/import.types.ts`
 - Create: `src/modules/import/text-import.parser.ts`
 - Create: `src/modules/import/import.service.ts`
-- Modify: `src/pages/DataSettingsPage.vue`
+- Modify: `src/modules/database/DataSettings.vue`
 - Modify: `docs/basic-data-design.md`
 
 - [x] 支持选择多个 `.csv` / `.txt` 文件。

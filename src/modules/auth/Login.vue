@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/modules/auth/auth.store';
 import { getAppConfig } from '@/core/app-config';
 
 const route = useRoute();
@@ -10,9 +10,10 @@ const appConfig = getAppConfig();
 
 async function handleLogin() {
   authStore.loginDemo();
-  const redirect = typeof route.query.redirect === 'string'
-    ? route.query.redirect
-    : appConfig.default_route;
+  const redirect =
+    typeof route.query.redirect === 'string'
+      ? route.query.redirect
+      : appConfig.default_route;
   await router.replace(redirect || '/');
 }
 </script>
@@ -25,7 +26,8 @@ async function handleLogin() {
           <v-card-title class="text-h5">Login placeholder</v-card-title>
           <v-card-text class="d-flex flex-column ga-4">
             <div>
-              Route guards are wired. Replace this button with your real login flow.
+              Route guards are wired. Replace this button with your real login
+              flow.
             </div>
             <v-btn block color="primary" size="large" @click="handleLogin">
               Sign in with demo session

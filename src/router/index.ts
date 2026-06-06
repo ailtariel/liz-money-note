@@ -7,13 +7,12 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: () => import('@/layouts/default-layout.vue'),
+      component: () => import('@/components/layouts/default-layout.vue'),
       children: [
         {
           path: '',
           name: 'transactions',
-          component: () =>
-            import('@/components/transactions/Transactions-page.vue'),
+          component: () => import('@/modules/transactions/Transactions.vue'),
           meta: {
             titleKey: 'nav.transactions',
             bottomNav: true
@@ -22,7 +21,7 @@ const router = createRouter({
         {
           path: 'stats',
           name: 'stats',
-          component: () => import('@/components/Stats.vue'),
+          component: () => import('@/modules/transactions/Stats.vue'),
           meta: {
             titleKey: 'nav.stats',
             bottomNav: true
@@ -31,7 +30,7 @@ const router = createRouter({
         {
           path: 'assets',
           name: 'assets',
-          component: () => import('@/components/Assets.vue'),
+          component: () => import('@/modules/accounts/Assets.vue'),
           meta: {
             titleKey: 'nav.assets',
             bottomNav: true
@@ -49,7 +48,7 @@ const router = createRouter({
         {
           path: 'books',
           name: 'books',
-          component: () => import('@/components/Books.vue'),
+          component: () => import('@/modules/books/Books.vue'),
           meta: {
             titleKey: 'nav.books'
           }
@@ -57,7 +56,7 @@ const router = createRouter({
         {
           path: 'accounts',
           name: 'accounts',
-          component: () => import('@/components/Accounts.vue'),
+          component: () => import('@/modules/accounts/Accounts.vue'),
           meta: {
             titleKey: 'nav.accounts'
           }
@@ -65,7 +64,7 @@ const router = createRouter({
         {
           path: 'tags',
           name: 'tags',
-          component: () => import('@/components/Tags.vue'),
+          component: () => import('@/modules/tags/Tags.vue'),
           meta: {
             titleKey: 'nav.tags'
           }
@@ -73,7 +72,7 @@ const router = createRouter({
         {
           path: 'recurring',
           name: 'recurring',
-          component: () => import('@/components/Recurring.vue'),
+          component: () => import('@/modules/recurring/Recurring.vue'),
           meta: {
             titleKey: 'nav.recurring'
           }
@@ -81,7 +80,7 @@ const router = createRouter({
         {
           path: 'data',
           name: 'data',
-          component: () => import('@/components/Data.vue'),
+          component: () => import('@/modules/database/Data.vue'),
           meta: {
             titleKey: 'nav.data'
           }
@@ -91,7 +90,7 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
-      component: () => import('@/views/not-found-view.vue'),
+      component: () => import('@/components/NotFound.vue'),
       meta: {
         title: 'Not Found'
       }

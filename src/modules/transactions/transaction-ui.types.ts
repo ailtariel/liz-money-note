@@ -1,7 +1,4 @@
-import type {
-  Transaction,
-  TransactionType
-} from '@/modules/transactions/transaction.types';
+import type { Transaction } from '@/modules/transactions/transaction.types';
 
 export type TransactionListRow =
   | {

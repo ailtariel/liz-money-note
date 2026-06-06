@@ -10,17 +10,12 @@ import type {
   TransactionType
 } from '@/modules/transactions/transaction.types';
 import { formatMinorUnits } from '@/modules/shared/money';
-import AmountText from '@/components/shared/AmountText.vue';
-import TransactionEditor from '@/components/TransactionEditor.vue';
-import {
-  formatShortDate,
-  formatTime,
-  transactionTypeOptions
-} from '@/components/shared/financeDisplay';
+import TransactionEditor from '@/modules/transactions/TransactionEditor.vue';
+import { transactionTypeOptions } from '@/components/shared/financeDisplay';
 import AppBarVue from '@/components/shared/app-bar.vue';
-import TransactionItemVue from './transaction-item.vue';
-import TransactionDetailVue from './transaction-detail.vue';
-import useTransaction from './useTransactions.ts';
+import TransactionItemVue from './components/TransactionItem.vue';
+import TransactionDetailVue from './components/TransactionDetail.vue';
+import useTransaction from './useTransactionDisplay';
 
 type TransactionListRow =
   | {
@@ -154,7 +149,7 @@ onMounted(async () => {
     editor
 ------------------------*/
 const editorOpen = ref(false);
-async function handleEditorSaved() {
+function handleEditorSaved() {
   editorOpen.value = false;
 }
 </script>

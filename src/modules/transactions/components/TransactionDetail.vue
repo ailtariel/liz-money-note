@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import type { Transaction } from '@/modules/transactions/transaction.types';
 import { useI18n } from '@/i18n';
-import useTransaction from './useTransactions';
+import useTransaction from '@/modules/transactions/useTransactionDisplay';
 import { useTagStore } from '@/modules/tags/tag.store';
 
 interface Props {

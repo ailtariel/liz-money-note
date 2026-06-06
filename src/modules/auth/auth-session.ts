@@ -1,4 +1,4 @@
-import type { AuthUser } from '@/stores/auth';
+import type { AuthUser } from '@/modules/auth/auth.store';
 
 const STORAGE_KEY = 'vue-skeleton:auth';
 

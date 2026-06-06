@@ -29,8 +29,10 @@
 
 ## 实现约束
 
-- 页面级 Vue 组件放在 `src/components/`，例如 `Transactions.vue`、`Stats.vue`、`Assets.vue`、`More.vue`。
-- 通用页面组件放在 `src/components/shared/`。
+- 带较多数据业务、领域状态、筛选逻辑、数据加载或业务交互的功能页面和功能内组件应放在对应 `src/modules/<feature>/` 下。
+- `src/modules/<feature>/` 可以同时包含领域类型、repository、service、store、feature composable、页面入口和该功能私有组件，但职责仍应清晰分层。
+- `src/components/` 只放轻量纯 UI 组件、应用级页面壳、跨功能展示组件，或不持有领域数据业务的组件。
+- 通用共享组件放在 `src/components/shared/`；只有被多个功能复用且不绑定单一业务领域时才放在 shared。
 - 不再新增 `src/pages/` 页面入口。
 - UI 文案必须支持 i18n，目前只支持 `zh-cn` 和 `en`。
 - 页面、导航、按钮、表单标签、空状态、错误提示等用户可见文案应通过 i18n key 管理。

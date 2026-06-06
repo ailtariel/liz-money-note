@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { useI18n } from '@/i18n';
 import type { Transaction } from '@/modules/transactions/transaction.types';
-import type { TransactionListRow } from './types';
+import type { TransactionListRow } from '@/modules/transactions/transaction-ui.types';
 import {
   formatShortDate,
   formatTime
 } from '@/components/shared/financeDisplay';
 
 import { formatMinorUnits } from '@/modules/shared/money';
-import useTransaction from './useTransactions';
+import useTransaction from '@/modules/transactions/useTransactionDisplay';
 
 interface Props {
   item: TransactionListRow;
