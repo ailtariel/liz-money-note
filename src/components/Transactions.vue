@@ -303,14 +303,16 @@ onMounted(async () => {
       </v-virtual-scroll>
     </div>
 
-    <v-fab
-      class="transaction-fab"
-      color="primary"
-      icon="$add"
-      location="bottom end"
-      position="fixed"
-      @click="editorOpen = true"
-    />
+    <Teleport to="body">
+      <v-fab
+        class="transaction-fab"
+        color="primary"
+        icon="$add"
+        location="bottom end"
+        position="fixed"
+        @click="editorOpen = true"
+      />
+    </Teleport>
 
     <v-dialog
       v-model="editorOpen"
