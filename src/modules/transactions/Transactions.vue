@@ -36,6 +36,24 @@ const filters = reactive({
 });
 
 const typeOptions = computed(() => transactionTypeOptions(t));
+const bookFilterOptions = computed(() => [
+  { title: t('common.allBooks'), value: null },
+  ...bookStore.books.map((book) => ({
+    title: book.name,
+    value: book.id
+  }))
+]);
+const accountFilterOptions = computed(() => [
+  { title: t('common.allAccounts'), value: null },
+  ...accountStore.accounts.map((account) => ({
+    title: account.name,
+    value: account.id
+  }))
+]);
+const typeFilterOptions = computed(() => [
+  { title: t('common.allTypes'), value: null },
+  ...typeOptions.value
+]);
 const transactions = computed(() => transactionStore.transactions);
 const baseCurrency = computed(
   () => accountStore.accounts[0]?.currency ?? 'AED'
@@ -53,8 +71,8 @@ const monthlyExpense = computed(() =>
     .reduce((sum, transaction) => sum + transaction.amount, 0)
 );
 
-const monthlyBalance = computed(
-  () => monthlyIncome.value - monthlyExpense.value
+const summaryBookTitle = computed(() =>
+  filters.bookId ? trans.getBookName(filters.bookId) : t('common.allBooks')
 );
 
 const listRows = computed<TransactionListRow[]>(() => {
@@ -155,6 +173,11 @@ function handleEditorSaved() {
         @click="editorOpen = true"
       />
       <v-btn icon="$search" variant="text" />
+      <v-btn
+        icon="$tune"
+        variant="text"
+        @click="filterSheetOpen = true"
+      />
     </template>
   </AppBarVue>
   <v-dialog
@@ -171,58 +194,76 @@ function handleEditorSaved() {
   </v-dialog>
   <v-main>
     <v-container>
-      <v-card class="overview-card pa-5 text-white">
-        <v-row gap="0">
-          <v-col cols="4">
-            <div class="text-body-2 opacity-80">
-              {{ t('transaction.income') }}
+      <div class="summary-grid">
+        <v-card class="summary-book-card">
+          <button
+            class="summary-book"
+            type="button"
+            @click="filterSheetOpen = true"
+          >
+            <v-avatar
+              class="summary-book-icon"
+              color="success"
+              size="56"
+              variant="tonal"
+            >
+              <v-icon icon="$book" />
+            </v-avatar>
+            <div class="summary-book-name text-truncate">
+              {{ summaryBookTitle }}
+              <v-icon class="summary-book-arrow" icon="$dropdown" size="18" />
             </div>
-            <div class="text-subtitle-1 font-weight-bold mt-1">
-              {{ formatMinorUnits(monthlyIncome, baseCurrency) }}
-            </div>
-            <div class="text-caption opacity-80">
-              {{ t('common.thisMonth') }}
-            </div>
-          </v-col>
-          <v-col class="overview-divider" cols="4">
-            <div class="text-body-2 opacity-80">
-              {{ t('transaction.expense') }}
-            </div>
-            <div class="text-subtitle-1 font-weight-bold mt-1">
-              {{ formatMinorUnits(monthlyExpense, baseCurrency) }}
-            </div>
-            <div class="text-caption opacity-80">
-              {{ t('common.thisMonth') }}
-            </div>
-          </v-col>
-          <v-col class="overview-divider" cols="4">
-            <div class="text-body-2 opacity-80">
-              {{ t('transaction.balance') }}
-            </div>
-            <div class="text-subtitle-1 font-weight-bold mt-1">
-              {{ formatMinorUnits(monthlyBalance, baseCurrency) }}
-            </div>
-            <div class="text-caption opacity-80">
-              {{ t('common.thisMonth') }}
-            </div>
-          </v-col>
-        </v-row>
-      </v-card>
+          </button>
+        </v-card>
 
-      <v-chip-group class="filter-chips">
-        <v-chip prepend-icon="$book" @click="filterSheetOpen = true">
+        <v-card class="summary-amount-card">
+          <div class="summary-amounts">
+            <div class="summary-amount-block">
+              <div class="summary-label">{{ t('transaction.income') }}</div>
+              <div class="summary-amount amount-income">
+                {{ formatMinorUnits(monthlyIncome, baseCurrency) }}
+              </div>
+            </div>
+            <div class="summary-line"></div>
+            <div class="summary-amount-block">
+              <div class="summary-label">{{ t('transaction.expense') }}</div>
+              <div class="summary-amount amount-expense">
+                {{ formatMinorUnits(monthlyExpense, baseCurrency) }}
+              </div>
+            </div>
+          </div>
+        </v-card>
+      </div>
+
+      <div class="filter-row">
+        <v-chip
+          class="filter-chip"
+          prepend-icon="$book"
+          variant="flat"
+          @click="filterSheetOpen = true"
+        >
           {{ filterLabel('book') }}
         </v-chip>
-        <v-chip prepend-icon="$account" @click="filterSheetOpen = true">
+        <v-chip
+          class="filter-chip"
+          prepend-icon="$account"
+          variant="flat"
+          @click="filterSheetOpen = true"
+        >
           {{ filterLabel('account') }}
         </v-chip>
-        <v-chip prepend-icon="$filter" @click="filterSheetOpen = true">
+        <v-chip
+          class="filter-chip"
+          prepend-icon="$filter"
+          variant="flat"
+          @click="filterSheetOpen = true"
+        >
           {{ filterLabel('type') }}
         </v-chip>
-        <v-chip prepend-icon="$calendar">
+        <v-chip class="filter-chip" prepend-icon="$calendar" variant="flat">
           {{ t('common.thisMonth') }}
         </v-chip>
-      </v-chip-group>
+      </div>
 
       <v-card v-if="!listRows.length" class="soft-card pa-6 text-center">
         <div class="text-body-1 font-weight-medium">
@@ -246,24 +287,21 @@ function handleEditorSaved() {
           </div>
           <v-select
             v-model="filters.bookId"
-            :items="bookStore.books"
-            clearable
-            item-title="name"
-            item-value="id"
+            :items="bookFilterOptions"
+            item-title="title"
+            item-value="value"
             :label="t('transaction.filters.book')"
           />
           <v-select
             v-model="filters.accountId"
-            :items="accountStore.accounts"
-            clearable
-            item-title="name"
-            item-value="id"
+            :items="accountFilterOptions"
+            item-title="title"
+            item-value="value"
             :label="t('transaction.filters.account')"
           />
           <v-select
             v-model="filters.type"
-            :items="typeOptions"
-            clearable
+            :items="typeFilterOptions"
             :label="t('transaction.filters.type')"
           />
           <v-btn block color="primary" @click="applyFilters">
@@ -283,16 +321,109 @@ function handleEditorSaved() {
 </template>
 
 <style scoped>
-.overview-card {
+.summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+  gap: 1rem;
+}
+
+.summary-book-card,
+.summary-amount-card {
+  min-height: 7.75rem;
+  padding: 1.25rem;
+  background: rgb(var(--v-theme-surface));
+}
+
+.summary-amount-card {
+  color: #ffffff;
   background: linear-gradient(135deg, #34d399 0%, #059669 45%, #047857 100%);
 }
 
-.overview-divider {
-  border-left: 1px solid rgba(255, 255, 255, 0.28);
+.summary-amount-card .amount-income,
+.summary-amount-card .amount-expense {
+  color: #ffffff;
 }
 
-.filter-chips {
+.summary-book {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 0.875rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.summary-book-icon {
+  flex: 0 0 auto;
+}
+
+.summary-book-name {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.summary-book-arrow {
+  flex: 0 0 auto;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+}
+
+.summary-amounts {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.625rem;
+}
+
+.summary-amount-block {
+  min-width: 0;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.summary-amount {
+  overflow: hidden;
+  margin-top: 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary-line {
+  border-top: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.filter-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.625rem;
   overflow-x: auto;
+  padding: 1.25rem 0 0.875rem;
+}
+
+.filter-chip {
+  flex: 0 0 auto;
+  background: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-on-surface));
+  box-shadow: 0 0.375rem 1.125rem rgba(15, 23, 42, 0.08);
 }
 
 .transaction-scroll {

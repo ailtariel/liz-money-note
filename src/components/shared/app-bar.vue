@@ -30,3 +30,11 @@ const pageTitle = computed(() =>
     <slot name="actions"></slot>
   </v-app-bar>
 </template>
+
+<style scoped>
+.mobile-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+</style>

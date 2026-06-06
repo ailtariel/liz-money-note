@@ -53,32 +53,62 @@ export function createAppVuetify(config: RuntimeAppConfig) {
       VAppBar: {
         flat: true
       },
+      VAppBarTitle: {
+        style: {
+          fontSize: '1.5rem',
+          fontWeight: 700,
+          letterSpacing: 0
+        }
+      },
       VBtn: {
         rounded: 'xl',
-        class: 'text-none'
+        class: 'text-none',
+        style: {
+          letterSpacing: 0
+        }
       },
       VCard: {
         rounded: 'xl',
         elevation: 0
       },
       VChip: {
-        rounded: 'xl'
+        rounded: 'xl',
+        style: {
+          fontSize: '0.75rem'
+        }
       },
       VTextField: {
         variant: 'outlined',
-        color: 'primary'
+        color: 'primary',
+        style: {
+          fontSize: '0.875rem'
+        }
       },
       VTextarea: {
         variant: 'outlined',
-        color: 'primary'
+        color: 'primary',
+        style: {
+          fontSize: '0.875rem'
+        }
       },
       VSelect: {
         variant: 'outlined',
-        color: 'primary'
+        color: 'primary',
+        style: {
+          fontSize: '0.875rem'
+        }
       },
       VFileInput: {
         variant: 'outlined',
-        color: 'primary'
+        color: 'primary',
+        style: {
+          fontSize: '0.875rem'
+        }
+      },
+      VBottomNavigation: {
+        style: {
+          fontSize: '0.75rem'
+        }
       },
       VBottomSheet: {
         contentClass: 'rounded-t-xl overflow-hidden'

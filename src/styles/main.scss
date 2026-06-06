@@ -18,7 +18,14 @@ body,
 
 body {
   background: #f6f8f7;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-family:
+    'Noto Sans SC',
+    'Noto Sans CJK SC',
+    'Noto Sans',
+    'Segoe UI',
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
 }
 
 code {
@@ -32,15 +39,15 @@ code {
 
 .amount-income {
   color: rgb(var(--v-theme-success));
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .amount-expense {
   color: rgb(var(--v-theme-error));
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .amount-neutral {
   color: rgb(var(--v-theme-on-surface));
-  font-weight: 800;
+  font-weight: 600;
 }

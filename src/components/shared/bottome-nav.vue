@@ -37,3 +37,9 @@ const activeNav = computed(() => String(route.name ?? 'transactions'));
     </v-btn>
   </v-bottom-navigation>
 </template>
+
+<style scoped>
+.v-bottom-navigation :deep(.v-btn__content) {
+  font-size: 0.75rem;
+}
+</style>

@@ -342,6 +342,7 @@ onMounted(async () => {
 
     <v-card-actions class="pa-4 pt-2">
       <v-btn
+        class="save-button"
         block
         color="primary"
         variant="flat"
@@ -461,12 +462,17 @@ onMounted(async () => {
 
 .amount-field :deep(.v-field__input) {
   color: rgb(var(--v-theme-primary));
+  font-size: 3.25rem;
   font-weight: 400;
   line-height: 1.1;
 }
 
+.save-button {
+  font-size: 1.125rem;
+}
+
 .plain-date-input {
-  max-width: 150px;
+  max-width: 9.375rem;
   border: 0;
   background: transparent;
   color: rgb(var(--v-theme-on-surface));
