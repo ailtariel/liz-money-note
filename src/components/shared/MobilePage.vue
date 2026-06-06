@@ -36,7 +36,7 @@ function handleBack(backAction: 'router' | 'emit') {
 </script>
 
 <template>
-  <div :class="['mobile-page', hasFooter ? 'mobile-page--with-footer' : 'mobile-page--without-footer']">
+  <v-layout :class="['mobile-page', hasFooter ? 'mobile-page--with-footer' : 'mobile-page--without-footer']">
     <v-app-bar
       class="mobile-app-bar"
       color="background"
@@ -50,8 +50,10 @@ function handleBack(backAction: 'router' | 'emit') {
       <slot name="actions" />
     </v-app-bar>
 
-    <div :class="['mobile-page-content', contentClass]">
-      <slot />
-    </div>
-  </div>
+    <v-main class="mobile-main">
+      <div :class="['mobile-page-content', contentClass]">
+        <slot />
+      </div>
+    </v-main>
+  </v-layout>
 </template>

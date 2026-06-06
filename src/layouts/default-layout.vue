@@ -19,38 +19,40 @@ const activeNav = computed(() => String(route.name ?? 'transactions'));
 </script>
 
 <template>
-  <v-layout class="app-shell">
-    <v-main>
-      <RouterView />
-    </v-main>
+  <div class="app-shell">
+    <RouterView />
 
     <div v-if="showBottomNav" class="mobile-bottom-nav-host">
-      <v-bottom-navigation
-        :model-value="activeNav"
-        absolute
-        class="mobile-bottom-nav"
-        color="primary"
-        grow
-        :height="bottomNavHeight"
-        mandatory
-      >
-        <v-btn
-          v-for="item in navItems"
-          :key="item.name"
-          :to="{ name: item.name }"
-          :value="item.name"
+      <v-layout class="mobile-bottom-nav-layout">
+        <v-bottom-navigation
+          :model-value="activeNav"
+          absolute
+          class="mobile-bottom-nav"
+          color="primary"
+          grow
+          :height="bottomNavHeight"
+          mandatory
         >
-          <v-icon :icon="item.icon" />
-          <span>{{ item.title }}</span>
-        </v-btn>
-      </v-bottom-navigation>
+          <v-btn
+            v-for="item in navItems"
+            :key="item.name"
+            :to="{ name: item.name }"
+            :value="item.name"
+          >
+            <v-icon :icon="item.icon" />
+            <span>{{ item.title }}</span>
+          </v-btn>
+        </v-bottom-navigation>
+      </v-layout>
     </div>
-  </v-layout>
+  </div>
 </template>
 
 <style scoped>
 .app-shell {
+  height: 100dvh;
   min-height: 100vh;
+  overflow: hidden;
 }
 
 .mobile-bottom-nav-host {
@@ -62,6 +64,11 @@ const activeNav = computed(() => String(route.name ?? 'transactions'));
   height: calc(var(--app-bottom-nav-height) + env(safe-area-inset-bottom));
   transform: translateX(-50%);
   pointer-events: none;
+}
+
+.mobile-bottom-nav-layout {
+  width: 100%;
+  height: var(--app-bottom-nav-height);
 }
 
 .mobile-bottom-nav {

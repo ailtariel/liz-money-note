@@ -15,7 +15,9 @@ html,
 body,
 #app {
   margin: 0;
+  height: 100%;
   min-height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -32,6 +34,11 @@ code {
   min-height: 100vh;
   overflow: hidden;
   background: rgb(var(--v-theme-background));
+}
+
+.mobile-main {
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .mobile-app-bar {
