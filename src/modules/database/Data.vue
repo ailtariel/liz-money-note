@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from '@/i18n';
+import AppBarVue from '@/components/shared/app-bar.vue';
 import { exportDatabaseJson, importDatabaseJson } from '@/modules/database/backup';
 import { importTextFiles } from '@/modules/import/import.service';
 import type { ImportBatchResult } from '@/modules/import/import.types';
@@ -84,7 +85,9 @@ async function importSelectedFiles() {
     );
 
     importResult.value = await importTextFiles(files);
-    message.value = t('data.importDone', { count: importResult.value.importedRows });
+    message.value = t('data.importDone', {
+      count: importResult.value.importedRows
+    });
     selectedFiles.value = [];
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('data.importFailed');
@@ -93,59 +96,82 @@ async function importSelectedFiles() {
 </script>
 
 <template>
-  <div class="d-flex flex-column ga-4">
-    <div class="text-body-2 text-medium-emphasis">{{ t('data.subtitle') }}</div>
-      <v-alert v-if="message" type="success" variant="tonal">{{ message }}</v-alert>
-      <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+  <AppBarVue />
 
-      <v-card class="soft-card pa-4">
-        <v-btn block color="primary" prepend-icon="$download" @click="exportData">
-          {{ t('more.export') }}
-        </v-btn>
-      </v-card>
+  <v-main>
+    <v-container>
+      <div class="d-flex flex-column ga-4">
+        <div class="text-body-2 text-medium-emphasis">{{ t('data.subtitle') }}</div>
+        <v-alert v-if="message" type="success" variant="tonal">{{ message }}</v-alert>
+        <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
-      <v-card class="soft-card pa-4">
-        <v-textarea v-model="importText" :label="t('data.pasteJson')" rows="8" />
-        <v-btn :disabled="!importText" block color="error" variant="tonal" @click="restoreData">
-          {{ t('more.restore') }}
-        </v-btn>
-      </v-card>
+        <v-card class="soft-card pa-4">
+          <v-btn block color="primary" prepend-icon="$download" @click="exportData">
+            {{ t('more.export') }}
+          </v-btn>
+        </v-card>
 
-      <v-card class="soft-card pa-4">
-        <div class="text-subtitle-1 font-weight-bold">{{ t('data.importText') }}</div>
-        <div class="text-body-2 text-medium-emphasis mb-4">{{ t('data.importHint') }}</div>
-        <v-file-input
-          v-model="selectedFiles"
-          accept=".csv,.txt,text/csv,text/plain"
-          :label="t('data.chooseFiles')"
-          multiple
-        />
-        <v-select
-          v-model="importCurrency"
-          :items="[
-            { title: t('data.autoCurrency'), value: 'auto' },
-            ...currencies.map((currency) => ({ title: currency, value: currency }))
-          ]"
-          :label="t('data.currency')"
-        />
-        <v-btn :disabled="selectedFiles.length === 0" block color="primary" prepend-icon="$upload" @click="importSelectedFiles">
-          {{ t('more.import') }}
-        </v-btn>
-      </v-card>
+        <v-card class="soft-card pa-4">
+          <v-textarea v-model="importText" :label="t('data.pasteJson')" rows="8" />
+          <v-btn
+            :disabled="!importText"
+            block
+            color="error"
+            variant="tonal"
+            @click="restoreData"
+          >
+            {{ t('more.restore') }}
+          </v-btn>
+        </v-card>
 
-      <v-card v-if="importResult" class="soft-card pa-4">
-        <v-list class="bg-transparent">
-          <v-list-item v-for="file in importResult.files" :key="file.fileName">
-            <v-list-item-title>{{ file.fileName }}</v-list-item-title>
-            <v-list-item-subtitle>
-              {{ file.bookName }} · {{ file.currency }} · {{ t('data.imported') }} {{ file.importedRows }}
-            </v-list-item-subtitle>
-          </v-list-item>
-        </v-list>
-      </v-card>
+        <v-card class="soft-card pa-4">
+          <div class="text-subtitle-1 font-weight-bold">
+            {{ t('data.importText') }}
+          </div>
+          <div class="text-body-2 text-medium-emphasis mb-4">
+            {{ t('data.importHint') }}
+          </div>
+          <v-file-input
+            v-model="selectedFiles"
+            accept=".csv,.txt,text/csv,text/plain"
+            :label="t('data.chooseFiles')"
+            multiple
+          />
+          <v-select
+            v-model="importCurrency"
+            :items="[
+              { title: t('data.autoCurrency'), value: 'auto' },
+              ...currencies.map((currency) => ({ title: currency, value: currency }))
+            ]"
+            :label="t('data.currency')"
+          />
+          <v-btn
+            :disabled="selectedFiles.length === 0"
+            block
+            color="primary"
+            prepend-icon="$upload"
+            @click="importSelectedFiles"
+          >
+            {{ t('more.import') }}
+          </v-btn>
+        </v-card>
 
-      <v-alert v-if="importResult?.issueCount" type="warning" variant="tonal">
-        {{ t('data.issueWarning', { count: importResult.issueCount }) }}
-    </v-alert>
-  </div>
+        <v-card v-if="importResult" class="soft-card pa-4">
+          <v-list class="bg-transparent">
+            <v-list-item v-for="file in importResult.files" :key="file.fileName">
+              <v-list-item-title>{{ file.fileName }}</v-list-item-title>
+              <v-list-item-subtitle>
+                {{ file.bookName }} &middot; {{ file.currency }} &middot;
+                {{ t('data.imported') }} {{ file.importedRows }}
+              </v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+        </v-card>
+
+        <v-alert v-if="importResult?.issueCount" type="warning" variant="tonal">
+          {{ t('data.issueWarning', { count: importResult.issueCount }) }}
+        </v-alert>
+      </div>
+    </v-container>
+  </v-main>
 </template>

@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useI18n } from '@/i18n';
+import AppBarVue from '@/components/shared/app-bar.vue';
 import { useBookStore } from '@/modules/books/book.store';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useTagStore } from '@/modules/tags/tag.store';
 import { useRecurringStore } from '@/modules/recurring/recurring.store';
 import type { RepeatType } from '@/modules/recurring/recurring.types';
 import type { TransactionType } from '@/modules/transactions/transaction.types';
-import { formatMinorUnits, parseMoneyToMinorUnits } from '@/modules/shared/money';
+import {
+  formatMinorUnits,
+  parseMoneyToMinorUnits
+} from '@/modules/shared/money';
 import { todayIsoDate } from '@/modules/shared/date';
-import { repeatTypeOptions, transactionTypeOptions } from '@/components/shared/financeDisplay';
+import {
+  repeatTypeOptions,
+  transactionTypeOptions
+} from '@/components/shared/financeDisplay';
 
 const { t } = useI18n();
 const bookStore = useBookStore();
@@ -18,6 +25,7 @@ const tagStore = useTagStore();
 const recurringStore = useRecurringStore();
 const error = ref('');
 const editingId = ref<number | null>(null);
+const editorOpen = ref(false);
 
 const form = reactive({
   bookId: null as number | null,
@@ -63,6 +71,11 @@ function resetForm() {
   form.tagIds = [];
 }
 
+function startCreate() {
+  resetForm();
+  editorOpen.value = true;
+}
+
 function editEvent(eventId: number) {
   const event = recurringStore.events.find((item) => item.id === eventId);
   if (!event) {
@@ -82,6 +95,7 @@ function editEvent(eventId: number) {
   form.nextTriggerDate = event.nextTriggerDate;
   form.note = event.note ?? '';
   form.tagIds = [...event.tagIds];
+  editorOpen.value = true;
 }
 
 watch(
@@ -140,6 +154,7 @@ async function submit() {
     }
 
     resetForm();
+    editorOpen.value = false;
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('recurring.saveFailed');
   }
@@ -166,60 +181,147 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="d-flex flex-column ga-4">
-    <div class="text-body-2 text-medium-emphasis">{{ t('recurring.subtitle') }}</div>
-      <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+  <AppBarVue>
+    <template #actions>
+      <v-btn
+        color="primary"
+        icon="$add"
+        size="small"
+        variant="flat"
+        @click="startCreate"
+      />
+    </template>
+  </AppBarVue>
 
-      <v-card class="soft-card pa-4">
-        <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
-          <v-tabs v-model="form.type" grow>
-            <v-tab v-for="item in typeOptions" :key="item.value" :value="item.value">
-              {{ item.title }}
-            </v-tab>
-          </v-tabs>
-          <v-text-field v-model="form.amount" :label="t('transaction.amount')" />
-          <v-select v-model="form.bookId" :items="bookStore.activeBooks" item-title="name" item-value="id" :label="t('transaction.book')" />
-          <v-select v-model="form.accountId" :items="accountStore.activeAccounts" item-title="name" item-value="id" :label="t('transaction.account')" />
-          <v-select v-if="form.type === 'transfer'" v-model="form.targetAccountId" :items="targetAccounts" item-title="name" item-value="id" :label="t('transaction.toAccount')" />
-          <div class="d-flex ga-3">
-            <v-select v-model="form.repeatType" :items="repeatOptions" :label="t('recurring.repeat')" />
-            <v-text-field v-model.number="form.repeatInterval" :label="t('recurring.interval')" min="1" type="number" />
-          </div>
-          <v-text-field v-model="form.startDate" :label="t('recurring.startDate')" type="date" />
-          <v-text-field v-model="form.endDate" :label="t('recurring.endDate')" type="date" />
-          <v-text-field v-model="form.nextTriggerDate" :label="t('recurring.nextTrigger')" type="date" />
-          <v-select v-model="form.tagIds" :items="tagStore.tags" chips item-title="name" item-value="id" :label="t('transaction.tags')" multiple />
-          <v-textarea v-model="form.note" :label="t('common.note')" rows="2" />
-          <div class="d-flex ga-2">
-            <v-btn color="primary" type="submit">
-              {{ editingId ? t('common.save') : t('common.add') }}
-            </v-btn>
-            <v-btn v-if="editingId" variant="text" @click="resetForm">{{ t('common.cancel') }}</v-btn>
-          </div>
-        </v-form>
-      </v-card>
-
-      <v-card v-for="event in recurringStore.events" :key="event.id" class="soft-card pa-4">
-        <div class="d-flex align-center ga-3">
-          <v-avatar :color="event.isActive ? 'primary' : 'secondary'" variant="tonal">
-            <v-icon icon="$recurring" />
-          </v-avatar>
-          <div class="flex-grow-1">
-            <div class="font-weight-bold">{{ formatMinorUnits(event.amount, event.currency) }}</div>
-            <div class="text-body-2 text-medium-emphasis">
-              {{ accountName(event.accountId) }} · {{ event.nextTriggerDate }}
-            </div>
-            <v-chip class="mt-2" size="small" variant="tonal">
-              {{ repeatOptions.find((item) => item.value === event.repeatType)?.title }} / {{ event.repeatInterval }}
-            </v-chip>
-          </div>
-          <div class="d-flex flex-column ga-1">
-            <v-btn size="small" variant="text" @click="editEvent(event.id)">{{ t('common.edit') }}</v-btn>
-            <v-btn :disabled="!event.isActive" size="small" variant="text" @click="disable(event.id)">
-              {{ t('common.disable') }}
-            </v-btn>
-          </div>
+  <v-main>
+    <v-container>
+      <div class="d-flex flex-column ga-4">
+        <div class="text-body-2 text-medium-emphasis">
+          {{ t('recurring.subtitle') }}
         </div>
-    </v-card>
-  </div>
+        <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+
+        <v-card
+          v-for="event in recurringStore.events"
+          :key="event.id"
+          class="soft-card pa-4"
+        >
+          <div class="d-flex align-center ga-3">
+            <v-avatar :color="event.isActive ? 'primary' : 'secondary'" variant="tonal">
+              <v-icon icon="$recurring" />
+            </v-avatar>
+            <div class="flex-grow-1" @click="editEvent(event.id)">
+              <div class="font-weight-bold">
+                {{ formatMinorUnits(event.amount, event.currency) }}
+              </div>
+              <div class="text-body-2 text-medium-emphasis">
+                {{ accountName(event.accountId) }} &middot; {{ event.nextTriggerDate }}
+              </div>
+              <v-chip class="mt-2" size="small" variant="tonal">
+                {{ repeatOptions.find((item) => item.value === event.repeatType)?.title }}
+                / {{ event.repeatInterval }}
+              </v-chip>
+            </div>
+            <div class="d-flex flex-column ga-1">
+              <v-btn size="small" variant="text" @click="editEvent(event.id)">
+                {{ t('common.edit') }}
+              </v-btn>
+              <v-btn
+                :disabled="!event.isActive"
+                size="small"
+                variant="text"
+                @click="disable(event.id)"
+              >
+                {{ t('common.disable') }}
+              </v-btn>
+            </div>
+          </div>
+        </v-card>
+      </div>
+
+      <v-bottom-sheet v-model="editorOpen">
+        <v-card class="pa-4">
+          <div class="text-h6 font-weight-bold mb-4">
+            {{ editingId ? t('common.edit') : t('common.add') }}
+          </div>
+          <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
+            <v-tabs v-model="form.type" grow>
+              <v-tab v-for="item in typeOptions" :key="item.value" :value="item.value">
+                {{ item.title }}
+              </v-tab>
+            </v-tabs>
+            <v-text-field v-model="form.amount" :label="t('transaction.amount')" />
+            <v-select
+              v-model="form.bookId"
+              :items="bookStore.activeBooks"
+              item-title="name"
+              item-value="id"
+              :label="t('transaction.book')"
+            />
+            <v-select
+              v-model="form.accountId"
+              :items="accountStore.activeAccounts"
+              item-title="name"
+              item-value="id"
+              :label="t('transaction.account')"
+            />
+            <v-select
+              v-if="form.type === 'transfer'"
+              v-model="form.targetAccountId"
+              :items="targetAccounts"
+              item-title="name"
+              item-value="id"
+              :label="t('transaction.toAccount')"
+            />
+            <div class="d-flex ga-3">
+              <v-select
+                v-model="form.repeatType"
+                :items="repeatOptions"
+                :label="t('recurring.repeat')"
+              />
+              <v-text-field
+                v-model.number="form.repeatInterval"
+                :label="t('recurring.interval')"
+                min="1"
+                type="number"
+              />
+            </div>
+            <v-text-field
+              v-model="form.startDate"
+              :label="t('recurring.startDate')"
+              type="date"
+            />
+            <v-text-field
+              v-model="form.endDate"
+              :label="t('recurring.endDate')"
+              type="date"
+            />
+            <v-text-field
+              v-model="form.nextTriggerDate"
+              :label="t('recurring.nextTrigger')"
+              type="date"
+            />
+            <v-select
+              v-model="form.tagIds"
+              :items="tagStore.tags"
+              chips
+              item-title="name"
+              item-value="id"
+              :label="t('transaction.tags')"
+              multiple
+            />
+            <v-textarea v-model="form.note" :label="t('common.note')" rows="2" />
+            <div class="d-flex ga-2">
+              <v-btn color="primary" type="submit">
+                {{ editingId ? t('common.save') : t('common.add') }}
+              </v-btn>
+              <v-btn variant="text" @click="editorOpen = false">
+                {{ t('common.cancel') }}
+              </v-btn>
+            </div>
+          </v-form>
+        </v-card>
+      </v-bottom-sheet>
+    </v-container>
+  </v-main>
 </template>
