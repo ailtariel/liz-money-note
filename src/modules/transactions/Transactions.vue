@@ -22,7 +22,7 @@ import TransactionDateFilterSheet from './components/TransactionDateFilterSheet.
 import useTransaction from './useTransactionDisplay';
 import type { TransactionListRow } from './transaction-ui.types';
 
-type DateFilterMode = 'month' | 'year' | 'custom';
+type DateFilterMode = 'all' | 'month' | 'year' | 'custom';
 
 const { t } = useI18n();
 const bookStore = useBookStore();
@@ -48,7 +48,7 @@ const filters = reactive({
   tagIds: [] as number[],
   dateFrom: null as string | null,
   dateTo: null as string | null,
-  dateMode: 'month' as DateFilterMode,
+  dateMode: 'all' as DateFilterMode,
   search: null as string | null
 });
 
@@ -166,6 +166,10 @@ function filterLabel(kind: 'account' | 'type' | 'tag' | 'date') {
   }
 
   if (kind === 'date') {
+    if (!filters.dateFrom && !filters.dateTo) {
+      return t('common.allPeriods');
+    }
+
     if (filters.dateMode === 'month') {
       return t('common.thisMonth');
     }
@@ -177,7 +181,7 @@ function filterLabel(kind: 'account' | 'type' | 'tag' | 'date') {
     if (filters.dateFrom && filters.dateTo) {
       return `${filters.dateFrom} - ${filters.dateTo}`;
     }
-    return t('common.thisMonth');
+    return t('common.allPeriods');
   }
 
   return filters.type
@@ -495,6 +499,7 @@ function handleEditorSaved() {
 
       <v-bottom-sheet v-model="dateFilterOpen">
         <TransactionDateFilterSheet
+          :all-label="t('common.unlimited')"
           :confirm-label="t('common.confirm')"
           :custom-label="t('common.custom')"
           :date-from="filters.dateFrom"

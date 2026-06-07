@@ -18,22 +18,35 @@ export const useCurrencyStore = defineStore('currency', () => {
   const currency = ref<CurrencyCode>(fallbackCurrency);
   const currencies = ref<CurrencyCode[]>([]);
   const loaded = ref(false);
+  let loadPromise: Promise<void> | null = null;
 
   async function load() {
-    const [storedCurrency, storedCurrencies] = await Promise.all([
-      getSetting(defaultCurrencyKey),
-      listCurrencies()
-    ]);
-    currencies.value = storedCurrencies;
-
-    if (storedCurrency && currencies.value.includes(storedCurrency)) {
-      currency.value = storedCurrency;
-    } else {
-      currency.value = fallbackCurrency;
-      await setSetting(defaultCurrencyKey, fallbackCurrency);
+    if (loadPromise) {
+      return loadPromise;
     }
 
-    loaded.value = true;
+    loadPromise = (async () => {
+      const [storedCurrency, storedCurrencies] = await Promise.all([
+        getSetting(defaultCurrencyKey),
+        listCurrencies()
+      ]);
+      currencies.value = storedCurrencies;
+
+      if (storedCurrency && currencies.value.includes(storedCurrency)) {
+        currency.value = storedCurrency;
+      } else {
+        currency.value = fallbackCurrency;
+        await setSetting(defaultCurrencyKey, fallbackCurrency);
+      }
+
+      loaded.value = true;
+    })();
+
+    try {
+      await loadPromise;
+    } finally {
+      loadPromise = null;
+    }
   }
 
   async function setCurrency(value: CurrencyCode) {

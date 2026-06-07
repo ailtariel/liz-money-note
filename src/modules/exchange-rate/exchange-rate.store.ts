@@ -66,9 +66,15 @@ export const useExchangeRateStore = defineStore('exchangeRate', () => {
   async function refreshOnline(
     currencies: CurrencyCode[],
     targetCurrency: CurrencyCode,
-    force = false
+    force = false,
+    sourceCurrencyFilter: CurrencyCode[] | null = null
   ) {
-    const sourceCurrencies = currencies.filter((currency) => currency !== targetCurrency);
+    const sourceCurrencies = [
+      ...new Set(
+        (sourceCurrencyFilter ?? currencies)
+          .filter((currency) => currency !== targetCurrency)
+      )
+    ];
     if (sourceCurrencies.length === 0) {
       rates.value = [];
       return;

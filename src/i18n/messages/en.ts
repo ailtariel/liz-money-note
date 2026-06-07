@@ -20,6 +20,8 @@ export default {
     allBooks: 'All books',
     allAccounts: 'All accounts',
     allTypes: 'All types',
+    allPeriods: 'All periods',
+    unlimited: 'Unlimited',
     thisMonth: 'This month',
     thisYear: 'This year',
     custom: 'Custom',
@@ -147,7 +149,13 @@ export default {
     categoryShare: 'Category share',
     monthTrend: 'Monthly trend',
     spent: 'Spent',
-    received: 'Received'
+    received: 'Received',
+    currency: 'Currency',
+    totalSpent: 'Total spent',
+    totalIncome: 'Total income',
+    untagged: 'Untagged',
+    missingExchangeRates:
+      'Unable to fetch exchange rates from {currencies} to {currency}. Related transactions are not included in statistics.'
   },
   assets: {
     total: 'Total assets',

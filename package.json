@@ -17,6 +17,7 @@
     "@capacitor/core": "^8.4.0",
     "@mdi/js": "^7.4.47",
     "axios": "^1.13.6",
+    "echarts": "^6.1.0",
     "jeep-sqlite": "^2.8.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.35",

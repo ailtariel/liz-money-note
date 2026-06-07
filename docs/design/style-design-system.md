@@ -273,6 +273,12 @@ defaults: {
 
 卡片列表、页面区块和表单分组使用 `--app-section-gap` 作为默认间距。
 
+## Layout 尺寸单位
+
+- 用于布局尺寸的 `width` / `height` / `min-width` / `min-height` / `max-width` / `max-height` 应使用百分比或 `px`。
+- 优先使用百分比表达随容器变化的尺寸；只有固定格式控件、图表画布、图标、触控目标或稳定高度要求明确时才使用 `px`。
+- 不使用 `rem`、`em`、`vw`、`vh` 作为布局宽高单位；这些单位可以继续用于字体、间距、圆角或阴影等非宽高属性。
+
 ---
 
 ## Typography 使用规范

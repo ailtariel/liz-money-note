@@ -20,6 +20,8 @@ export default {
     allBooks: '全部账本',
     allAccounts: '全部账户',
     allTypes: '全部交易',
+    allPeriods: '全部时段',
+    unlimited: '不限',
     thisMonth: '本月',
     thisYear: '本年',
     custom: '自定义',
@@ -145,9 +147,15 @@ export default {
   stats: {
     monthlyFlow: '本月收支',
     categoryShare: '分类占比',
-    monthTrend: '月趋势',
+    monthTrend: '趋势',
     spent: '已支出',
-    received: '已收入'
+    received: '已收入',
+    currency: '货币',
+    totalSpent: '总支出',
+    totalIncome: '总收入',
+    untagged: '未标记',
+    missingExchangeRates:
+      '无法获取 {currencies} 到 {currency} 的汇率，相关流水未计入统计。'
   },
   assets: {
     total: '总资产',

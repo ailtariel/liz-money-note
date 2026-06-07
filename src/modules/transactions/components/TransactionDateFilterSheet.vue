@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 
-type QuickRange = 'month' | 'year' | 'custom';
+type QuickRange = 'all' | 'month' | 'year' | 'custom';
 
 interface Props {
   title: string;
   dateFrom: string | null;
   dateTo: string | null;
+  allLabel: string;
   monthLabel: string;
   yearLabel: string;
   customLabel: string;
@@ -30,6 +31,7 @@ const selectedDates = ref<Date[]>([]);
 const updatingFromQuickRange = ref(false);
 
 const quickRangeItems = computed(() => [
+  { title: props.allLabel, value: 'all' },
   { title: props.monthLabel, value: 'month' },
   { title: props.yearLabel, value: 'year' },
   { title: props.customLabel, value: 'custom' }
@@ -39,7 +41,8 @@ watch(
   () => [props.dateFrom, props.dateTo],
   ([dateFrom, dateTo]) => {
     if (!dateFrom && !dateTo) {
-      setQuickRangeDates('month');
+      quickRange.value = 'all';
+      selectedDates.value = [];
       return;
     }
 
@@ -52,13 +55,18 @@ watch(
 );
 
 watch(quickRange, (value) => {
+  if (value === 'all') {
+    selectedDates.value = [];
+    return;
+  }
+
   if (value === 'custom') {
     return;
   }
   setQuickRangeDates(value);
 });
 
-function setQuickRangeDates(value: Exclude<QuickRange, 'custom'>) {
+function setQuickRangeDates(value: Exclude<QuickRange, 'all' | 'custom'>) {
   updatingFromQuickRange.value = true;
   const now = new Date();
   const start =
@@ -100,7 +108,7 @@ function inferQuickRange(
   return 'custom';
 }
 
-function getQuickRangeDateStrings(value: Exclude<QuickRange, 'custom'>) {
+function getQuickRangeDateStrings(value: Exclude<QuickRange, 'all' | 'custom'>) {
   const now = new Date();
   const start =
     value === 'month'
@@ -124,6 +132,15 @@ function formatDate(date: Date) {
 }
 
 function applyDateRange() {
+  if (quickRange.value === 'all') {
+    emit('apply', {
+      dateFrom: null,
+      dateTo: null,
+      mode: 'all'
+    });
+    return;
+  }
+
   const sortedDates = [...selectedDates.value].sort(
     (left, right) => left.getTime() - right.getTime()
   );
@@ -157,6 +174,7 @@ function applyDateRange() {
     </v-btn-toggle>
 
     <v-date-picker
+      v-if="quickRange !== 'all'"
       :model-value="selectedDates"
       class="date-filter-picker"
       color="primary"

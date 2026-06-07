@@ -22,7 +22,7 @@ const router = createRouter({
         {
           path: 'stats',
           name: 'stats',
-          component: () => import('@/modules/transactions/Stats.vue'),
+          component: () => import('@/modules/statistics/Statistics.vue'),
           meta: {
             titleKey: 'nav.stats',
             bottomNav: true

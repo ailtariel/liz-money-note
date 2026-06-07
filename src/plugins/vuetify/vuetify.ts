@@ -64,7 +64,6 @@ export function createAppVuetify(config: RuntimeAppConfig) {
         }
       },
       VBtn: {
-        rounded: 'xl',
         class: 'text-none',
         style: {
           letterSpacing: 0
