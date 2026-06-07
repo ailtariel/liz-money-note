@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from '@/i18n';
+import { moreNavigationItems } from '@/components/shared/more-navigation';
 
 const route = useRoute();
 const { t } = useI18n();
@@ -14,8 +15,16 @@ const navItems = computed(() => [
 ]);
 
 const bottomNavHeight = 82;
-const showBottomNav = computed(() => route.meta.bottomNav === true);
-const activeNav = computed(() => String(route.name ?? 'transactions'));
+const moreRouteNames = computed(() =>
+  moreNavigationItems.flatMap((item) => item.routeNames ?? [])
+);
+const isMoreRoute = computed(() =>
+  moreRouteNames.value.includes(String(route.name ?? ''))
+);
+const showBottomNav = computed(() => route.meta.bottomNav === true || isMoreRoute.value);
+const activeNav = computed(() =>
+  isMoreRoute.value ? 'more' : String(route.name ?? 'transactions')
+);
 </script>
 <template>
   <v-bottom-navigation

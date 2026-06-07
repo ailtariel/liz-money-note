@@ -1,22 +1,27 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
+import CurrencyAutocomplete from '@/components/shared/CurrencyAutocomplete.vue';
 import {
-  getCurrencyDisplayName,
-  normalizeCurrencyCode,
+  currencyOptions,
   type CurrencyCode
 } from '@/modules/shared/money';
 import { useDefaultCurrencyStore } from './default-currency.store';
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const store = useDefaultCurrencyStore();
 const error = ref('');
-const newCurrency = ref('');
-const normalizedNewCurrency = computed(() => normalizeCurrencyCode(newCurrency.value));
+const newCurrency = ref<CurrencyCode | null>(null);
 
 function currencyName(currency: CurrencyCode) {
-  return getCurrencyDisplayName(currency, String(locale.value));
+  const option = currencyOptions.find((item) => item.code === currency);
+  return option ? t(option.name) : currency;
+}
+
+function currencyCountry(currency: CurrencyCode) {
+  const option = currencyOptions.find((item) => item.code === currency);
+  return option ? t(option.country) : '';
 }
 
 async function chooseCurrency(value: CurrencyCode) {
@@ -30,9 +35,13 @@ async function chooseCurrency(value: CurrencyCode) {
 
 async function addCurrency() {
   error.value = '';
+  if (!newCurrency.value) {
+    return;
+  }
+
   try {
     await store.addCurrency(newCurrency.value);
-    newCurrency.value = '';
+    newCurrency.value = null;
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('settings.currency.addFailed');
   }
@@ -74,7 +83,7 @@ onMounted(async () => {
               </template>
               <v-list-item-title>{{ currency }}</v-list-item-title>
               <v-list-item-subtitle>
-                {{ currencyName(currency) }}
+                {{ currencyName(currency) }} · {{ currencyCountry(currency) }}
               </v-list-item-subtitle>
               <template #append>
                 <v-icon v-if="store.currency === currency" icon="$check" />
@@ -88,15 +97,13 @@ onMounted(async () => {
             {{ t('settings.currency.addCurrency') }}
           </div>
           <v-form class="d-flex flex-column ga-3" @submit.prevent="addCurrency">
-            <v-text-field
+            <CurrencyAutocomplete
               v-model="newCurrency"
+              :disabled-currencies="store.currencies"
               :label="t('settings.currency.currencyCode')"
-              maxlength="3"
-              :hint="normalizedNewCurrency || t('settings.currency.currencyCodeHint')"
-              persistent-hint
             />
             <v-btn
-              :disabled="normalizedNewCurrency.length !== 3"
+              :disabled="!newCurrency || store.currencies.includes(newCurrency)"
               color="primary"
               type="submit"
             >

@@ -2,6 +2,7 @@
 import { onMounted, reactive, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
+import CurrencyAutocomplete from '@/components/shared/CurrencyAutocomplete.vue';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useDefaultCurrencyStore } from '@/modules/settings/default-currency.store';
 import type { AccountType } from '@/modules/accounts/account.types';
@@ -182,9 +183,9 @@ onMounted(async () => {
                 </v-chip>
               </v-slide-group-item>
             </v-slide-group>
-            <v-select
+            <CurrencyAutocomplete
               v-model="form.currency"
-              :items="defaultCurrencyStore.currencies"
+              :currencies="defaultCurrencyStore.currencies"
               :label="t('data.currency')"
             />
             <v-text-field
