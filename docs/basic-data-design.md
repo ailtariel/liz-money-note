@@ -9,7 +9,7 @@
 - `books` 作为基础分类，不再设计二级分类或收支分类。
 - `tags` 用于灵活标记流水和周期事件。
 - 流水类型固定为收入、支出、转账。
-- 金额支持人民币、美元、阿联酋迪拉姆。
+- 金额支持用户已配置的 3 位 ISO 4217 货币代码，默认包含人民币、美元、阿联酋迪拉姆。
 - 不支持跨币种转账。
 - 周期性收支只作为规则配置，不自动写入流水；每次打开 App 时显式提示用户手动批准。
 
@@ -50,7 +50,7 @@ CREATE TABLE accounts (
   updated_at TEXT NOT NULL,
 
   CHECK (type IN ('cash', 'bank_card', 'credit_card', 'alipay', 'wechat', 'other')),
-  CHECK (currency IN ('CNY', 'USD', 'AED'))
+  CHECK (currency GLOB '[A-Z][A-Z][A-Z]')
 );
 ```
 
@@ -103,7 +103,7 @@ CREATE TABLE transactions (
   FOREIGN KEY (recurring_event_id) REFERENCES recurring_events(id),
 
   CHECK (type IN ('income', 'expense', 'transfer')),
-  CHECK (currency IN ('CNY', 'USD', 'AED')),
+  CHECK (currency GLOB '[A-Z][A-Z][A-Z]'),
   CHECK (amount > 0)
 );
 ```
@@ -162,7 +162,7 @@ CREATE TABLE recurring_events (
   FOREIGN KEY (target_account_id) REFERENCES accounts(id),
 
   CHECK (type IN ('income', 'expense', 'transfer')),
-  CHECK (currency IN ('CNY', 'USD', 'AED')),
+  CHECK (currency GLOB '[A-Z][A-Z][A-Z]'),
   CHECK (amount > 0),
   CHECK (repeat_type IN ('daily', 'weekly', 'monthly', 'yearly')),
   CHECK (repeat_interval > 0)

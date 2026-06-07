@@ -1,6 +1,44 @@
-export type CurrencyCode = 'CNY' | 'USD' | 'AED';
+export type CurrencyCode = string;
 
-export const currencies: CurrencyCode[] = ['CNY', 'USD', 'AED'];
+export const defaultCurrencies: CurrencyCode[] = ['CNY', 'USD', 'AED'];
+export const currencies = defaultCurrencies;
+
+export function normalizeCurrencyCode(value: string) {
+  return value.trim().toUpperCase();
+}
+
+export function isCurrencyCode(value: string): value is CurrencyCode {
+  const normalized = normalizeCurrencyCode(value);
+
+  if (!/^[A-Z]{3}$/.test(normalized)) {
+    return false;
+  }
+
+  if (typeof Intl.supportedValuesOf === 'function') {
+    return Intl.supportedValuesOf('currency').includes(normalized);
+  }
+
+  try {
+    new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: normalized
+    }).format(1);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function getCurrencyDisplayName(currency: CurrencyCode, locale?: string) {
+  try {
+    const displayNames = new Intl.DisplayNames(locale ? [locale] : undefined, {
+      type: 'currency'
+    });
+    return displayNames.of(currency) ?? currency;
+  } catch {
+    return currency;
+  }
+}
 
 export function parseMoneyToMinorUnits(value: string | number) {
   const normalized = String(value).trim();

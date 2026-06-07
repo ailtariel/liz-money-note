@@ -6,7 +6,6 @@ import { useAccountStore } from '@/modules/accounts/account.store';
 import { useDefaultCurrencyStore } from '@/modules/settings/default-currency.store';
 import type { AccountType } from '@/modules/accounts/account.types';
 import {
-  currencies,
   formatMinorUnits,
   parseMoneyToMinorUnits,
   type CurrencyCode
@@ -185,7 +184,7 @@ onMounted(async () => {
             </v-slide-group>
             <v-select
               v-model="form.currency"
-              :items="currencies"
+              :items="defaultCurrencyStore.currencies"
               :label="t('data.currency')"
             />
             <v-text-field

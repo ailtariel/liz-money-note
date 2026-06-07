@@ -163,7 +163,7 @@ export default {
     backup: '备份',
     restore: '恢复',
     theme: '主题',
-    defaultCurrency: '默认货币',
+    defaultCurrency: '货币',
     about: '关于'
   },
   theme: {
@@ -188,6 +188,13 @@ export default {
       CNY: '人民币',
       USD: '美元',
       AED: '阿联酋迪拉姆'
+    },
+    currency: {
+      defaultCurrency: '默认货币',
+      addCurrency: '添加货币',
+      currencyCode: '货币代码',
+      currencyCodeHint: '使用 3 位 ISO 4217 货币代码，例如 EUR 或 JPY。',
+      addFailed: '添加货币失败。'
     }
   },
   data: {

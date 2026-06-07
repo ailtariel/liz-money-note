@@ -163,7 +163,7 @@ export default {
     backup: 'Backup',
     restore: 'Restore',
     theme: 'Theme',
-    defaultCurrency: 'Default currency',
+    defaultCurrency: 'Currency',
     about: 'About'
   },
   theme: {
@@ -188,6 +188,13 @@ export default {
       CNY: 'Chinese yuan',
       USD: 'US dollar',
       AED: 'UAE dirham'
+    },
+    currency: {
+      defaultCurrency: 'Default currency',
+      addCurrency: 'Add currency',
+      currencyCode: 'Currency code',
+      currencyCodeHint: 'Use a 3-letter ISO 4217 code, such as EUR or JPY.',
+      addFailed: 'Failed to add currency.'
     }
   },
   data: {

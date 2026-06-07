@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS accounts (
   updated_at TEXT NOT NULL,
 
   CHECK (type IN ('cash', 'bank_card', 'credit_card', 'alipay', 'wechat', 'other')),
-  CHECK (currency IN ('CNY', 'USD', 'AED'))
+  CHECK (currency GLOB '[A-Z][A-Z][A-Z]')
 );
 
 CREATE TABLE IF NOT EXISTS tags (
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   FOREIGN KEY (recurring_event_id) REFERENCES recurring_events(id),
 
   CHECK (type IN ('income', 'expense', 'transfer')),
-  CHECK (currency IN ('CNY', 'USD', 'AED')),
+  CHECK (currency GLOB '[A-Z][A-Z][A-Z]'),
   CHECK (amount > 0)
 );
 
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS recurring_events (
   FOREIGN KEY (target_account_id) REFERENCES accounts(id),
 
   CHECK (type IN ('income', 'expense', 'transfer')),
-  CHECK (currency IN ('CNY', 'USD', 'AED')),
+  CHECK (currency GLOB '[A-Z][A-Z][A-Z]'),
   CHECK (amount > 0),
   CHECK (repeat_type IN ('daily', 'weekly', 'monthly', 'yearly')),
   CHECK (repeat_interval > 0)

@@ -83,8 +83,8 @@ export const moreNavigationSections: MoreNavigationSection[] = [
       {
         titleKey: 'more.defaultCurrency',
         icon: '$cash',
-        to: { name: 'default-currency' },
-        routeNames: ['default-currency']
+        to: { name: 'currency' },
+        routeNames: ['currency']
       },
       { titleKey: 'more.about', icon: '$info' }
     ]
