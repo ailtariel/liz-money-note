@@ -77,7 +77,9 @@ const baseCurrency = computed(
 );
 
 const summaryCurrencies = computed<CurrencyCode[]>(() => {
-  const currencies = transactions.value.map((transaction) => transaction.currency);
+  const currencies = transactions.value.map(
+    (transaction) => transaction.currency
+  );
   return [...new Set(currencies.length ? currencies : [baseCurrency.value])];
 });
 
@@ -98,10 +100,6 @@ function summarizeByCurrency(type: TransactionType) {
     amount: totals.get(currency) ?? 0
   }));
 }
-
-const monthlyIncome = computed(() => summarizeByCurrency('income'));
-
-const monthlyExpense = computed(() => summarizeByCurrency('expense'));
 
 function formatSummaryAmount(amount: number, currency: CurrencyCode) {
   return `${currency} ${new Intl.NumberFormat(undefined, {
@@ -278,6 +276,21 @@ onMounted(async () => {
   ]);
 });
 
+const summaryItems = computed(() => {
+  return [
+    {
+      key: 'income',
+      name: 'transaction.income',
+      statistics: summarizeByCurrency('income')
+    },
+    {
+      key: 'expense',
+      name: 'transaction.expense',
+      statistics: summarizeByCurrency('expense')
+    }
+  ];
+});
+
 /*------------------------
     editor
 ------------------------*/
@@ -326,59 +339,53 @@ function handleEditorSaved() {
     />
   </v-dialog>
   <v-main>
-    <v-container>
-      <!-- <div class="summary-grid"> -->
-      <v-card class="summary-book-card mb-2">
-        <button
-          class="summary-book"
-          type="button"
+    <v-container class="d-flex flex-column ga-4 pa-4">
+      <v-card class="" color="transparent">
+        <v-btn
+          class="justify-start px-2"
+          variant="text"
           @click="bookFilterOpen = true"
         >
-          <v-avatar
-            class="summary-book-icon"
-            color="success"
-            size="48"
-            variant="tonal"
-          >
-            <v-icon icon="$book" />
-          </v-avatar>
-          <div class="summary-book-name text-truncate">
+          <template #prepend>
+            <v-avatar color="primary" size="36" variant="tonal">
+              <v-icon icon="$book" />
+            </v-avatar>
+          </template>
+          <span class="text-body-medium">
             {{ summaryBookTitle }}
-            <v-icon class="summary-book-arrow" icon="$dropdown" size="18" />
-          </div>
-        </button>
+          </span>
+          <template #append>
+            <v-icon class="text-medium-emphasis" icon="$dropdown" size="18" />
+          </template>
+        </v-btn>
+      </v-card>
+      <v-card class="summary-amount-card pa-5" color="summary">
+        <template v-for="(item, idx) in summaryItems">
+          <v-row no-gutters class="">
+            <v-col cols="2" class="text-body-medium">
+              <span class="d-sm-inline-block">{{ t(item.name) }}</span>
+            </v-col>
+            <v-col class="">
+              <span
+                v-for="s in item.statistics"
+                :key="`${item.key}-${s.currency}`"
+                class="d-block text-title-small font-weight-bold statistics-amount"
+              >
+                {{ formatSummaryAmount(s.amount, s.currency) }}
+              </span>
+            </v-col>
+          </v-row>
+          <v-divider
+            v-if="idx < summaryItems.length - 1"
+            class="summary-divider my-3"
+          />
+        </template>
       </v-card>
 
-      <v-card class="summary-amount-card">
-        <div class="summary-amounts">
-          <div class="summary-amount-block">
-            <div class="summary-label">{{ t('transaction.income') }}</div>
-            <div
-              v-for="item in monthlyIncome"
-              :key="`income-${item.currency}`"
-              class="summary-amount amount-income"
-            >
-              {{ formatSummaryAmount(item.amount, item.currency) }}
-            </div>
-          </div>
-          <div class="summary-line"></div>
-          <div class="summary-amount-block">
-            <div class="summary-label">{{ t('transaction.expense') }}</div>
-            <div
-              v-for="item in monthlyExpense"
-              :key="`expense-${item.currency}`"
-              class="summary-amount amount-expense"
-            >
-              {{ formatSummaryAmount(item.amount, item.currency) }}
-            </div>
-          </div>
-        </div>
-      </v-card>
-      <!-- </div> -->
-
-      <div class="filter-row">
+      <div class="d-flex ga-2 overflow-x-auto pb-1">
         <v-chip
-          class="filter-chip"
+          class="flex-shrink-0 border"
+          color="surface"
           prepend-icon="$account"
           variant="flat"
           @click="accountFilterOpen = true"
@@ -386,7 +393,8 @@ function handleEditorSaved() {
           {{ filterLabel('account') }}
         </v-chip>
         <v-chip
-          class="filter-chip"
+          class="flex-shrink-0 border"
+          color="surface"
           prepend-icon="$filter"
           variant="flat"
           @click="typeFilterOpen = true"
@@ -394,7 +402,8 @@ function handleEditorSaved() {
           {{ filterLabel('type') }}
         </v-chip>
         <v-chip
-          class="filter-chip"
+          class="flex-shrink-0 border"
+          color="surface"
           prepend-icon="$tag"
           variant="flat"
           @click="tagFilterOpen = true"
@@ -402,7 +411,8 @@ function handleEditorSaved() {
           {{ filterLabel('tag') }}
         </v-chip>
         <v-chip
-          class="filter-chip"
+          class="flex-shrink-0 border"
+          color="surface"
           prepend-icon="$calendar"
           variant="flat"
           @click="dateFilterOpen = true"
@@ -411,7 +421,10 @@ function handleEditorSaved() {
         </v-chip>
       </div>
 
-      <div v-if="selectedTags.length" class="selected-tag-row">
+      <div
+        v-if="selectedTags.length"
+        class="d-flex flex-wrap ga-2 align-center pb-1"
+      >
         <v-chip
           v-for="tag in selectedTags"
           :key="tag.id"
@@ -428,12 +441,12 @@ function handleEditorSaved() {
       </div>
 
       <v-card v-if="!listRows.length" class="soft-card pa-6 text-center">
-        <div class="text-body-1 font-weight-medium">
+        <div class="text-body-large font-weight-medium">
           {{ t('transaction.noRecords') }}
         </div>
       </v-card>
 
-      <v-virtual-scroll v-else :items="listRows" class="transaction-scroll">
+      <v-virtual-scroll v-else :items="listRows">
         <template #default="{ item }">
           <TransactionItemVue
             :item="item"
@@ -494,8 +507,8 @@ function handleEditorSaved() {
       </v-bottom-sheet>
 
       <v-bottom-sheet v-model="searchOpen">
-        <v-card class="search-sheet pa-4">
-          <div class="search-sheet-title">
+        <v-card class="pa-4" color="surface">
+          <div class="mb-4 text-title-large font-weight-bold">
             {{ t('transaction.search.title') }}
           </div>
           <v-text-field
@@ -508,7 +521,7 @@ function handleEditorSaved() {
             :label="t('transaction.search.placeholder')"
             @keydown.enter="applySearch"
           />
-          <div class="search-sheet-actions">
+          <div class="d-flex justify-end ga-3 pt-4">
             <v-btn variant="text" color="primary" @click="clearSearch">
               {{ t('common.clear') }}
             </v-btn>
@@ -530,107 +543,18 @@ function handleEditorSaved() {
 </template>
 
 <style scoped>
-.summary-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
-  gap: 1rem;
-}
-
-.summary-book-card {
-  background-color: transparent;
-}
 .summary-amount-card {
-  min-height: 7.75rem;
-  padding: 1.25rem;
-  color: rgb(var(--v-theme-summary-text));
-  background: rgb(var(--v-theme-summary));
+  color: rgb(var(--v-theme-on-primary));
+  box-shadow: var(--app-card-shadow);
 }
 
-.summary-amount-card .amount-income,
-.summary-amount-card .amount-expense {
-  color: rgb(var(--v-theme-summary-text));
+.summary-amount-card .statistics-amount {
+  color: rgb(var(--v-theme-on-primary));
 }
 
-.summary-book {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  align-items: center;
-  gap: 0.875rem;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  padding: 0;
-  text-align: left;
-}
-
-.summary-book-icon {
-  flex: 0 0 auto;
-}
-
-.summary-book-name {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  line-height: 1.35;
-}
-
-.summary-book-arrow {
-  flex: 0 0 auto;
-  color: rgba(var(--v-theme-on-surface), 0.7);
-}
-
-.summary-amounts {
-  display: flex;
-  height: 100%;
-  min-width: 0;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.625rem;
-}
-
-.summary-amount-block {
-  min-width: 0;
-}
-
-.summary-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.summary-amount {
-  overflow: hidden;
-  margin-top: 0.25rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  line-height: 1.3;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.summary-line {
-  border-top: 1px solid rgba(var(--v-theme-summary-text), 0.24);
-}
-
-.filter-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.625rem;
-  overflow-x: auto;
-  padding: 1.25rem 0 0.875rem;
-}
-
-.filter-chip {
-  flex: 0 0 auto;
-  background: rgb(var(--v-theme-chip-bg));
-  color: rgb(var(--v-theme-chip-text));
-  box-shadow: 0 0.375rem 1.125rem rgba(15, 23, 42, 0.08);
+.summary-divider {
+  border-top: 1px solid rgba(var(--v-theme-on-primary), 1);
+  opacity: 0.3 !important;
 }
 
 .search-keyword-chip {
@@ -641,36 +565,5 @@ function handleEditorSaved() {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.selected-tag-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.625rem;
-  align-items: center;
-  padding-bottom: 0.875rem;
-}
-
-.search-sheet {
-  border-radius: 1rem 1rem 0 0;
-}
-
-.search-sheet-title {
-  margin-bottom: 1rem;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.4;
-}
-
-.search-sheet-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding-top: 1rem;
-}
-
-.transaction-scroll {
-  height: auto;
-  min-height: 0;
 }
 </style>

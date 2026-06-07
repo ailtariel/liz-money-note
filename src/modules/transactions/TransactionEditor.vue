@@ -184,19 +184,19 @@ onMounted(async () => {
 </script>
 
 <template>
-  <v-card class="h-100 d-flex flex-column" rounded="0">
-    <v-toolbar color="background" elevation="0" height="88">
+  <v-card class="h-100 d-flex flex-column" color="background" rounded="0">
+    <v-toolbar color="background" elevation="0" height="64">
       <v-btn icon="$close" variant="text" @click="emit('close')" />
-      <v-toolbar-title class="mobile-title">
+      <v-toolbar-title class="text-title-medium font-weight-bold">
         {{ t('nav.newTransaction') }}
       </v-toolbar-title>
     </v-toolbar>
 
-    <v-card-text class="flex-grow-1 overflow-y-auto px-4 pb-4">
+    <v-card-text class="flex-grow-1 overflow-y-auto pa-4">
       <v-form class="d-flex flex-column ga-4" @submit.prevent="submit">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
-        <v-card class="soft-card pa-1">
+        <v-card class="soft-card pa-1" color="surface">
           <v-tabs
             v-model="form.type"
             grow
@@ -214,7 +214,7 @@ onMounted(async () => {
           </v-tabs>
         </v-card>
 
-        <v-card class="soft-card pa-5">
+        <v-card class="soft-card pa-5" color="surface-variant">
           <v-text-field
             :model-value="displayAmount"
             :label="t('transaction.amount')"
@@ -239,7 +239,7 @@ onMounted(async () => {
         </v-card>
 
         <v-card class="soft-card pa-4">
-          <div class="text-subtitle-1 font-weight-bold mb-4">
+          <div class="text-title-medium font-weight-bold mb-4">
             {{ t('transaction.tags') }} ({{ t('common.optional') }})
           </div>
           <div class="d-flex flex-wrap ga-2">
@@ -263,7 +263,7 @@ onMounted(async () => {
         </v-card>
 
         <v-card class="soft-card">
-          <v-list class="bg-transparent">
+          <v-list lines="two">
             <v-list-item @click="accountSheetOpen = true">
               <template #prepend>
                 <v-avatar color="primary" variant="tonal">
@@ -275,15 +275,6 @@ onMounted(async () => {
               }}</v-list-item-title>
               <v-list-item-subtitle>
                 {{ selectedAccount?.name || '-' }}
-                <span v-if="selectedAccount">
-                  · {{ t('account.balance') }}
-                  {{
-                    formatMinorUnits(
-                      selectedAccount.currentBalance,
-                      selectedAccount.currency
-                    )
-                  }}</span
-                >
               </v-list-item-subtitle>
               <template #append><v-icon icon="$next" /></template>
             </v-list-item>
@@ -308,7 +299,7 @@ onMounted(async () => {
         </v-card>
 
         <v-card class="soft-card">
-          <v-list class="bg-transparent">
+          <v-list>
             <v-list-item>
               <template #prepend><v-icon icon="$calendar" /></template>
               <v-list-item-title>{{ t('common.date') }}</v-list-item-title>
@@ -347,9 +338,9 @@ onMounted(async () => {
       </v-form>
     </v-card-text>
 
-    <v-card-actions class="pa-4 pt-2">
+    <v-card-actions class="pa-4 pt-2 bg-surface">
       <v-btn
-        class="save-button"
+        class="text-label-large font-weight-bold"
         block
         color="primary"
         variant="flat"
@@ -361,11 +352,11 @@ onMounted(async () => {
     </v-card-actions>
 
     <v-bottom-sheet v-model="accountSheetOpen">
-      <v-card class="pa-4">
-        <div class="text-h6 font-weight-bold mb-3">
+      <v-card class="pa-4" color="surface">
+        <div class="text-title-large font-weight-bold mb-3">
           {{ t('transaction.account') }}
         </div>
-        <v-list class="bg-transparent">
+        <v-list>
           <v-list-item
             v-for="account in accountStore.activeAccounts"
             :key="account.id"
@@ -385,11 +376,11 @@ onMounted(async () => {
     </v-bottom-sheet>
 
     <v-bottom-sheet v-model="bookSheetOpen">
-      <v-card class="pa-4">
-        <div class="text-h6 font-weight-bold mb-3">
+      <v-card class="pa-4" color="surface">
+        <div class="text-title-large font-weight-bold mb-3">
           {{ t('transaction.book') }}
         </div>
-        <v-list class="bg-transparent">
+        <v-list>
           <v-list-item
             v-for="book in bookStore.activeBooks"
             :key="book.id"
@@ -406,8 +397,8 @@ onMounted(async () => {
     </v-bottom-sheet>
 
     <v-bottom-sheet v-model="tagSheetOpen">
-      <v-card class="pa-4">
-        <div class="text-h6 font-weight-bold mb-3">
+      <v-card class="pa-4" color="surface">
+        <div class="text-title-large font-weight-bold mb-3">
           {{ t('transaction.addTag') }}
         </div>
         <v-alert v-if="tagError" class="mb-3" type="error" variant="tonal">
@@ -457,29 +448,17 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.mobile-title {
-  font-size: 1.625rem;
-  font-weight: 800;
-  letter-spacing: 0;
-}
-
 .editor-tab-active {
-  background: rgba(var(--v-theme-primary), 0.1);
-}
-
-.amount-card {
-  min-height: 150px;
+  background: rgb(var(--v-theme-accent));
+  color: rgb(var(--v-theme-primary));
+  font-weight: 700;
 }
 
 .amount-field :deep(.v-field__input) {
   color: rgb(var(--v-theme-primary));
   font-size: 3.25rem;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.1;
-}
-
-.save-button {
-  font-size: 1.125rem;
 }
 
 .plain-date-input {
@@ -489,5 +468,6 @@ onMounted(async () => {
   color: rgb(var(--v-theme-on-surface));
   font: inherit;
   text-align: right;
+  accent-color: rgb(var(--v-theme-primary));
 }
 </style>

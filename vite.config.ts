@@ -10,9 +10,6 @@ function createPlugins(mode: string, command: "serve" | "build"): PluginOption[]
     vue(),
     vuetify({
       autoImport: true,
-      styles: {
-        configFile: "src/plugins/vuetify/style.scss",
-      },
     }),
     generateEnvTemplate(),
   ];

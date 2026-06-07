@@ -53,6 +53,7 @@ export function createAppVuetify(config: RuntimeAppConfig) {
   return createVuetify({
     defaults: {
       VAppBar: {
+        color: 'background',
         flat: true
       },
       VAppBarTitle: {
@@ -81,31 +82,45 @@ export function createAppVuetify(config: RuntimeAppConfig) {
       },
       VTextField: {
         variant: 'outlined',
+        density: 'comfortable',
         color: 'primary',
+        rounded: 'lg',
         style: {
           fontSize: '0.875rem'
         }
       },
       VTextarea: {
         variant: 'outlined',
+        density: 'comfortable',
         color: 'primary',
+        rounded: 'lg',
         style: {
           fontSize: '0.875rem'
         }
       },
       VSelect: {
         variant: 'outlined',
+        density: 'comfortable',
         color: 'primary',
+        rounded: 'lg',
         style: {
           fontSize: '0.875rem'
         }
       },
       VFileInput: {
         variant: 'outlined',
+        density: 'comfortable',
         color: 'primary',
+        rounded: 'lg',
         style: {
           fontSize: '0.875rem'
         }
+      },
+      VList: {
+        bgColor: 'transparent'
+      },
+      VListItem: {
+        rounded: 'lg'
       },
       VBottomNavigation: {
         style: {
@@ -130,97 +145,121 @@ export function createAppVuetify(config: RuntimeAppConfig) {
         greenLight: {
           dark: false,
           colors: {
-            background: '#F4F8F6',
-            surface: '#FFFFFF',
-            primary: '#0F766E',
-            secondary: '#14B8A6',
-            accent: '#DFF5EF',
-            summary: '#10B981',
+            'background': '#F4F8F6',
+            'surface': '#FFFFFF',
+            'surface-variant': '#F0F6F3',
+            'primary': '#0F766E',
+            'secondary': '#14B8A6',
+            'accent': '#DFF5EF',
+            'outline': '#DDEBE6',
+            'on-background': '#111827',
+            'on-surface': '#111827',
+            'on-primary': '#FFFFFF',
+            'on-secondary': '#062F2B',
+            'summary': '#10B981',
+            'income': '#059669',
+            'expense': '#DC2626',
+            'success': '#059669',
+            'error': '#DC2626',
+            'warning': '#D97706',
             'summary-text': '#FFFFFF',
-            income: '#059669',
-            expense: '#DC2626',
-            success: '#059669',
-            error: '#DC2626',
             'chip-bg': '#FFFFFF',
             'chip-text': '#111827',
             'nav-active-bg': '#DFF5EF',
             'nav-active-text': '#0F766E',
             'card-border': '#DDEBE6',
             'text-primary': '#111827',
-            'text-secondary': '#6B7280',
-            warning: '#d97706'
+            'text-secondary': '#6B7280'
           }
         },
         greenDark: {
           dark: true,
           colors: {
-            background: '#071412',
-            surface: '#10201D',
-            primary: '#2DD4BF',
-            secondary: '#5EEAD4',
-            accent: '#134E4A',
-            summary: '#0F766E',
+            'background': '#071412',
+            'surface': '#10201D',
+            'surface-variant': '#172A26',
+            'primary': '#2DD4BF',
+            'secondary': '#5EEAD4',
+            'accent': '#134E4A',
+            'outline': '#21413B',
+            'on-background': '#F9FAFB',
+            'on-surface': '#F9FAFB',
+            'on-primary': '#042F2E',
+            'on-secondary': '#042F2E',
+            'summary': '#0F766E',
+            'income': '#34D399',
+            'expense': '#F87171',
+            'success': '#34D399',
+            'error': '#F87171',
+            'warning': '#FBBF24',
             'summary-text': '#ECFDF5',
-            income: '#34D399',
-            expense: '#F87171',
-            success: '#34D399',
-            error: '#F87171',
             'chip-bg': '#172A26',
             'chip-text': '#F9FAFB',
             'nav-active-bg': '#134E4A',
             'nav-active-text': '#5EEAD4',
             'card-border': '#21413B',
             'text-primary': '#F9FAFB',
-            'text-secondary': '#CBD5E1',
-            warning: '#fbbf24'
+            'text-secondary': '#CBD5E1'
           }
         },
         orangeLight: {
           dark: false,
           colors: {
-            background: '#F8F5EF',
-            surface: '#FFFFFF',
-            primary: '#F97316',
-            secondary: '#FDBA74',
-            accent: '#FFEDD5',
-            summary: '#FDBA74',
+            'background': '#F8F5EF',
+            'surface': '#FFFFFF',
+            'surface-variant': '#FFF7ED',
+            'primary': '#F97316',
+            'secondary': '#FDBA74',
+            'accent': '#FFEDD5',
+            'outline': '#F1E7D8',
+            'on-background': '#111827',
+            'on-surface': '#111827',
+            'on-primary': '#FFFFFF',
+            'on-secondary': '#431407',
+            'summary': '#FDBA74',
+            'income': '#059669',
+            'expense': '#DC2626',
+            'success': '#059669',
+            'error': '#DC2626',
+            'warning': '#D97706',
             'summary-text': '#FFFFFF',
-            income: '#059669',
-            expense: '#DC2626',
-            success: '#059669',
-            error: '#DC2626',
             'chip-bg': '#FFFFFF',
             'chip-text': '#111827',
             'nav-active-bg': '#FFEDD5',
             'nav-active-text': '#EA580C',
             'card-border': '#F1E7D8',
             'text-primary': '#111827',
-            'text-secondary': '#6B7280',
-            warning: '#d97706'
+            'text-secondary': '#6B7280'
           }
         },
         orangeDark: {
           dark: true,
           colors: {
-            background: '#17120D',
-            surface: '#241A12',
-            primary: '#FB923C',
-            secondary: '#FDBA74',
-            accent: '#431407',
-            summary: '#EA580C',
+            'background': '#17120D',
+            'surface': '#241A12',
+            'surface-variant': '#2B2118',
+            'primary': '#FB923C',
+            'secondary': '#FDBA74',
+            'accent': '#431407',
+            'outline': '#3A2A1E',
+            'on-background': '#F9FAFB',
+            'on-surface': '#F9FAFB',
+            'on-primary': '#431407',
+            'on-secondary': '#431407',
+            'summary': '#EA580C',
+            'income': '#34D399',
+            'expense': '#F87171',
+            'success': '#34D399',
+            'error': '#F87171',
+            'warning': '#FBBF24',
             'summary-text': '#FFF7ED',
-            income: '#34D399',
-            expense: '#F87171',
-            success: '#34D399',
-            error: '#F87171',
             'chip-bg': '#2B2118',
             'chip-text': '#F9FAFB',
             'nav-active-bg': '#431407',
             'nav-active-text': '#FDBA74',
             'card-border': '#3A2A1E',
             'text-primary': '#F9FAFB',
-            'text-secondary': '#D1D5DB',
-            warning: '#fbbf24'
+            'text-secondary': '#D1D5DB'
           }
         }
       }
@@ -249,6 +288,7 @@ export function createAppVuetify(config: RuntimeAppConfig) {
         account: mdiCreditCardOutline,
         tag: mdiTagOutline,
         recurring: mdiCalendarBlankOutline,
+        calendar: mdiCalendarBlankOutline,
         clock: mdiClockOutline,
         data: mdiDatabaseOutline,
         income: mdiArrowUp,

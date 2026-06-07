@@ -19,6 +19,11 @@
 
 ### In Scope
 
+- First implementation slice requested for review:
+  - Global Vuetify theme/defaults configuration.
+  - Global stylesheet consolidation.
+  - `src/modules/transactions/Transactions.vue`.
+  - `src/modules/transactions/TransactionEditor.vue`.
 - Consolidate the current global SCSS files into one global stylesheet:
   - `src/plugins/vuetify/style.scss`
   - `src/styles/main.scss`
@@ -121,4 +126,28 @@ Documentation files:
 
 ## Current Status
 
-Planning only. No runtime code changes should be made until this plan is accepted or implementation is explicitly requested.
+Implementation started for the first visual review slice after explicit user confirmation.
+
+## First Slice Notes
+
+- Keep old theme token aliases temporarily while untouched pages still reference them.
+- Replace old token usage in the two touched transaction files with new design-system tokens.
+- Do not change transaction behavior, data flow, routing, schemas, or user-visible copy.
+
+## First Slice Status
+
+- Completed global Vuetify theme token update for all four themes.
+- Completed Vuetify defaults update for common mobile controls.
+- Consolidated global style responsibility into `src/styles/main.scss`.
+- Removed the obsolete Vuetify Sass config file and Vite `styles.configFile` reference.
+- Updated `Transactions.vue` and `TransactionEditor.vue` to use the new global tokens and spacing variables.
+- Verification passed:
+  - `npm run typecheck`
+  - `npm run build`
+- Build still reports the existing `jeep-sqlite` browser `crypto` externalization warning.
+
+## CSS Cleanup Notes
+
+- Reduce redundant scoped CSS in `Transactions.vue` and `TransactionEditor.vue`.
+- Prefer Vuetify props and utility classes for spacing, typography, background, alignment, and simple flex layouts.
+- Keep local scoped CSS only for component-specific behavior that is not cleanly covered by Vuetify utilities, such as native date/time input styling and deep amount field input sizing.

@@ -39,11 +39,14 @@ const openDetail = (transaction: Transaction) => {
 };
 </script>
 <template>
-  <div v-if="item.kind === 'date'" class="date-row">
-    <div class="date-title">
+  <div
+    v-if="item.kind === 'date'"
+    class="d-flex align-center justify-space-between ga-8 px-3 pt-4 pb-2"
+  >
+    <div class="text-body-medium font-weight-bold">
       {{ formatShortDate(item.date, t) }}
     </div>
-    <div class="date-summary text-medium-emphasis">
+    <div class="text-label-medium text-medium-emphasis">
       <span v-if="item.income"
         >{{ t('transaction.income') }}
         {{ formatMinorUnits(item.income, item.currency) }}</span
@@ -56,14 +59,14 @@ const openDetail = (transaction: Transaction) => {
   </div>
   <v-card
     v-else
-    class="transaction-card soft-card"
+    class="soft-card mb-3 pa-4"
     role="button"
     tabindex="0"
     @click="openDetail(item.transaction)"
     @keydown.enter="openDetail(item.transaction)"
   >
-    <div class="transaction-content">
-      <div class="transaction-icon-col">
+    <div class="d-flex align-stretch ga-3">
+      <div class="d-flex align-center">
         <v-avatar
           :color="trans.getColor(item.transaction)"
           size="36"
@@ -72,16 +75,18 @@ const openDetail = (transaction: Transaction) => {
           <v-icon :icon="trans.getIcon(item.transaction)" size="20" />
         </v-avatar>
       </div>
-      <div class="transaction-main min-w-0">
-        <v-row class="transaction-row" no-gutters>
+      <div class="flex-grow-1 min-w-0">
+        <v-row class="align-center" no-gutters>
           <v-col class="min-w-0" cols="12">
-            <div class="transaction-title text-truncate">
+            <div class="text-title-small text-truncate">
               {{ trans.getTitle(item.transaction) }}
             </div>
           </v-col>
         </v-row>
-        <v-row class="transaction-row" no-gutters>
-          <v-col class="transaction-subtitle text-medium-emphasis min-w-0">
+        <v-row class="align-center" no-gutters>
+          <v-col
+            class="transaction-subtitle d-flex align-center ga-1 mt-1 text-label-medium text-medium-emphasis min-w-0"
+          >
             <span v-if="showBook" class="transaction-book text-truncate">
               {{ trans.getBookName(item.transaction.bookId) }}
             </span>
@@ -98,7 +103,7 @@ const openDetail = (transaction: Transaction) => {
           </v-col>
           <v-col class="transaction-amount-col" cols="auto">
             <AmountText
-              class="transaction-amount"
+              class="transaction-amount text-body-medium"
               :amount="item.transaction.amount"
               :currency="item.transaction.currency"
               :signed="item.transaction.type !== 'transfer'"
@@ -112,13 +117,13 @@ const openDetail = (transaction: Transaction) => {
             />
           </v-col>
         </v-row>
-        <v-row class="transaction-row" no-gutters>
-          <v-col class="transaction-third-line text-medium-emphasis min-w-0">
+        <v-row class="align-center" no-gutters>
+          <v-col class="mt-1 text-label-medium text-medium-emphasis min-w-0">
             {{ formatTime(item.transaction.occurredAt) }}
           </v-col>
           <v-col
             v-if="showAccount"
-            class="transaction-account text-medium-emphasis text-truncate"
+            class="text-label-medium text-medium-emphasis text-truncate"
             cols="auto"
           >
             {{ trans.getAccountName(item.transaction.accountId) }}
@@ -130,64 +135,8 @@ const openDetail = (transaction: Transaction) => {
 </template>
 
 <style scoped>
-.date-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  padding: 1rem 0.875rem 0.625rem;
-}
-
-.date-title {
-  font-size: 0.875rem;
-  font-weight: 700;
-  line-height: 1.45;
-}
-
-.date-summary {
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
-.transaction-card {
-  padding: 1rem 1rem 1.0625rem;
-  margin-bottom: 0.75rem;
-}
-
-.transaction-content {
-  display: flex;
-  align-items: stretch;
-  gap: 0.875rem;
-}
-
-.transaction-icon-col {
-  display: flex;
-  align-items: center;
-}
-
-.transaction-main {
-  flex: 1 1 auto;
-}
-
-.transaction-row {
-  align-items: center;
-}
-
-.transaction-title {
-  font-size: 0.875rem;
-  font-weight: 400;
-  line-height: 1.45;
-}
-
 .transaction-subtitle {
-  display: flex;
   min-height: 1.25rem;
-  min-width: 0;
-  align-items: center;
-  gap: 0.375rem;
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  line-height: 1.45;
 }
 
 .transaction-book {
@@ -205,28 +154,14 @@ const openDetail = (transaction: Transaction) => {
   white-space: nowrap;
 }
 
-.transaction-third-line {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
 .transaction-amount-col,
 .transaction-account {
   min-width: 0;
   text-align: right;
 }
 
-.transaction-account {
-  max-width: 9rem;
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
 .transaction-amount {
-  font-size: 0.875rem;
   font-weight: 600;
-  line-height: 1.35;
   white-space: nowrap;
 }
 </style>

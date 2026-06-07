@@ -1,7 +1,11 @@
-@use './settings' as settings;
-
 :root {
   color-scheme: light dark;
+  --app-page-padding: 1rem;
+  --app-section-gap: 1rem;
+  --app-card-shadow: 0 0.75rem 1.875rem rgba(15, 23, 42, 0.06);
+  --app-font-family:
+    system-ui, 'MiSans', 'HarmonyOS Sans SC', 'OPPOSans', 'Noto Sans SC',
+    'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 *,
@@ -20,8 +24,8 @@ body,
 
 body {
   background: rgb(var(--v-theme-background));
-  color: rgb(var(--v-theme-text-primary));
-  font-family: settings.$body-font-family;
+  color: rgb(var(--v-theme-on-background));
+  font-family: var(--app-font-family);
 }
 
 code {
@@ -29,12 +33,17 @@ code {
 }
 
 .soft-card {
-  border: 1px solid rgb(var(--v-theme-card-border));
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgb(var(--v-theme-outline));
+  background: rgb(var(--v-theme-surface));
+  box-shadow: var(--app-card-shadow);
 }
 
 .text-medium-emphasis {
-  color: rgb(var(--v-theme-text-secondary)) !important;
+  color: rgba(var(--v-theme-on-surface), 0.68) !important;
+}
+
+.text-disabled {
+  color: rgba(var(--v-theme-on-surface), 0.42) !important;
 }
 
 .amount-income {
@@ -48,6 +57,6 @@ code {
 }
 
 .amount-neutral {
-  color: rgb(var(--v-theme-text-primary));
+  color: rgb(var(--v-theme-on-surface));
   font-weight: 600;
 }
