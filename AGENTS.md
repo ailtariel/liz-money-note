@@ -32,7 +32,7 @@ Before the following task types, agents must search `docs/` for relevant documen
 - Feature changes or new feature implementation.
 - Debugging tasks where the error is not a simple syntax error.
 
-For feature additions, major updates, or refactors, agents must create or update an implementation document under `docs/implementation logs/` before changing code, then implement according to that document. The implementation document should record the goal, scope, impacted files/modules, main decisions, task checklist, verification plan, and final status.
+For feature additions, major updates, or refactors, agents must create or update an implementation document under `docs/implementation logs/` before changing code, then implement according to that document. The implementation document should record the goal, scope, impacted files/modules, main decisions, task checklist, verification plan, and final status. Log file name starts with "yyyy-mm-dd ".
 
 If multiple documents conflict with each other, if documentation conflicts with the current implementation, or if documentation conflicts with the user's explicit request in the current conversation, stop before code changes and confirm the intended direction with the user.
 
