@@ -84,22 +84,22 @@ onMounted(() => store.load());
   </AppBarVue>
 
   <v-main>
-    <v-container>
+    <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
         <v-card
           v-for="book in store.books"
           :key="book.id"
-          class="book-card soft-card"
+          class="soft-card pa-4"
         >
           <div class="d-flex align-center ga-3">
             <v-avatar color="primary" size="36" variant="tonal">
               <v-icon icon="$book" size="20" />
             </v-avatar>
             <div class="flex-grow-1 min-w-0" @click="editBook(book.id)">
-              <div class="book-title text-truncate">{{ book.name }}</div>
-              <div class="book-subtitle text-medium-emphasis text-truncate">
+              <div class="text-body-medium text-truncate">{{ book.name }}</div>
+              <div class="mt-1 text-label-medium text-medium-emphasis text-truncate">
                 {{ book.description || '-' }}
               </div>
               <v-chip
@@ -112,11 +112,10 @@ onMounted(() => store.load());
               </v-chip>
             </div>
             <div class="d-flex flex-column ga-1">
-              <v-btn class="book-action" size="small" variant="text" @click="editBook(book.id)">
+              <v-btn size="small" variant="text" @click="editBook(book.id)">
                 {{ t('common.edit') }}
               </v-btn>
               <v-btn
-                class="book-action"
                 :disabled="book.isArchived"
                 size="small"
                 variant="text"
@@ -130,8 +129,8 @@ onMounted(() => store.load());
       </div>
 
       <v-bottom-sheet v-model="editorOpen">
-        <v-card class="pa-4">
-          <div class="text-h6 font-weight-bold mb-4">
+        <v-card class="pa-4" color="surface">
+          <div class="text-title-large font-weight-bold mb-4">
             {{ editingId ? t('common.edit') : t('common.add') }}
           </div>
           <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
@@ -156,22 +155,6 @@ onMounted(() => store.load());
 </template>
 
 <style scoped>
-.book-card {
-  padding: 1rem;
-}
-
-.book-title {
-  font-size: 0.875rem;
-  font-weight: 400;
-  line-height: 1.45;
-}
-
-.book-subtitle {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
 .book-status {
   max-width: 6rem;
 }
@@ -180,9 +163,5 @@ onMounted(() => store.load());
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.book-action {
-  font-size: 0.75rem;
 }
 </style>

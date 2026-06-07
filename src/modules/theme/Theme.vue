@@ -42,15 +42,15 @@ onMounted(async () => {
   <AppBarVue />
 
   <v-main>
-    <v-container>
+    <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
         <v-card class="soft-card">
-          <div class="px-4 pt-4 text-subtitle-1 font-weight-bold">
+          <div class="px-4 pt-4 text-title-medium font-weight-bold">
             {{ t('theme.colorScheme.title') }}
           </div>
-          <v-list class="bg-transparent">
+          <v-list>
             <v-list-item
               v-for="scheme in themeColorSchemes"
               :key="scheme"
@@ -71,10 +71,10 @@ onMounted(async () => {
         </v-card>
 
         <v-card class="soft-card">
-          <div class="px-4 pt-4 text-subtitle-1 font-weight-bold">
+          <div class="px-4 pt-4 text-title-medium font-weight-bold">
             {{ t('theme.mode.title') }}
           </div>
-          <v-list class="bg-transparent">
+          <v-list>
             <v-list-item
               v-for="mode in themeModes"
               :key="mode"

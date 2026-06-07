@@ -103,9 +103,9 @@ onMounted(async () => {
     <RouterView />
 
     <v-bottom-sheet v-model="sheetOpen">
-      <v-card class="pa-4">
+      <v-card class="pa-4" color="surface">
         <div class="d-flex align-center mb-3">
-          <div class="text-h6 font-weight-bold">{{ t('recurring.dueTitle') }}</div>
+          <div class="text-title-large font-weight-bold">{{ t('recurring.dueTitle') }}</div>
           <v-spacer />
           <v-btn icon="$close" variant="text" @click="sheetOpen = false" />
         </div>
@@ -114,7 +114,7 @@ onMounted(async () => {
           {{ error }}
         </v-alert>
 
-        <v-list class="bg-transparent" lines="two">
+        <v-list lines="two">
           <v-list-item v-for="(event, index) in dueEvents" :key="event.id" class="px-0">
             <template #prepend>
               <v-avatar color="primary" variant="tonal">

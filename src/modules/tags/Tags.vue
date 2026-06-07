@@ -88,25 +88,25 @@ onMounted(() => store.load());
   </AppBarVue>
 
   <v-main>
-    <v-container>
+    <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
-        <v-card v-for="tag in store.tags" :key="tag.id" class="tag-card soft-card">
+        <v-card v-for="tag in store.tags" :key="tag.id" class="soft-card pa-4">
           <div class="d-flex align-center ga-3">
             <v-avatar :color="tag.color || 'primary'" size="36" variant="tonal">
               <v-icon icon="$tag" size="20" />
             </v-avatar>
             <div class="flex-grow-1 min-w-0" @click="editTag(tag.id)">
-              <div class="tag-title text-truncate">{{ tag.name }}</div>
-              <div class="tag-subtitle text-medium-emphasis text-truncate">
+              <div class="text-body-medium text-truncate">{{ tag.name }}</div>
+              <div class="mt-1 text-label-medium text-medium-emphasis text-truncate">
                 {{ tag.color || '-' }} &middot; {{ tag.sortOrder }}
               </div>
             </div>
-            <v-btn class="tag-action" size="small" variant="text" @click="editTag(tag.id)">
+            <v-btn size="small" variant="text" @click="editTag(tag.id)">
               {{ t('common.edit') }}
             </v-btn>
-            <v-btn class="tag-action" size="small" variant="text" @click="remove(tag.id)">
+            <v-btn size="small" variant="text" @click="remove(tag.id)">
               {{ t('common.delete') }}
             </v-btn>
           </div>
@@ -114,8 +114,8 @@ onMounted(() => store.load());
       </div>
 
       <v-bottom-sheet v-model="editorOpen">
-        <v-card class="pa-4">
-          <div class="text-h6 font-weight-bold mb-4">
+        <v-card class="pa-4" color="surface">
+          <div class="text-title-large font-weight-bold mb-4">
             {{ editingId ? t('common.edit') : t('common.add') }}
           </div>
           <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
@@ -144,25 +144,3 @@ onMounted(() => store.load());
     </v-container>
   </v-main>
 </template>
-
-<style scoped>
-.tag-card {
-  padding: 1rem;
-}
-
-.tag-title {
-  font-size: 0.875rem;
-  font-weight: 400;
-  line-height: 1.45;
-}
-
-.tag-subtitle {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
-.tag-action {
-  font-size: 0.75rem;
-}
-</style>

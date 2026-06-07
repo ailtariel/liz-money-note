@@ -58,11 +58,7 @@ function filterCurrency(_: string, query: string, item?: { raw?: { searchText?: 
       <v-list-item
         v-bind="itemProps"
         :disabled="item.disabled"
-        :style="
-          item.disabled
-            ? 'color: rgba(var(--v-theme-primary), 1); opacity: 1;'
-            : ''
-        "
+        :class="{ 'currency-item-selected': item.disabled }"
       >
         <template #prepend>
           <v-icon v-if="item.disabled" icon="$check" size="16" />
@@ -78,3 +74,10 @@ function filterCurrency(_: string, query: string, item?: { raw?: { searchText?: 
     </template>
   </v-autocomplete>
 </template>
+
+<style scoped>
+.currency-item-selected {
+  color: rgb(var(--v-theme-primary));
+  opacity: 1;
+}
+</style>

@@ -119,34 +119,33 @@ onMounted(async () => {
   </AppBarVue>
 
   <v-main>
-    <v-container>
+    <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
         <v-card
           v-for="account in store.accounts"
           :key="account.id"
-          class="account-card soft-card"
+          class="soft-card pa-4"
         >
           <div class="d-flex align-center ga-3">
             <v-avatar color="primary" size="36" variant="tonal">
               <v-icon :icon="accountTypeIcon(account.type)" size="20" />
             </v-avatar>
             <div class="flex-grow-1 min-w-0" @click="editAccount(account.id)">
-              <div class="account-title text-truncate">{{ account.name }}</div>
-              <div class="account-subtitle text-medium-emphasis text-truncate">
+              <div class="text-body-medium text-truncate">{{ account.name }}</div>
+              <div class="mt-1 text-label-medium text-medium-emphasis text-truncate">
                 {{ accountTypeLabel(account.type, t) }} &middot; {{ account.currency }}
               </div>
-              <div class="account-amount mt-1">
+              <div class="mt-1 text-body-medium font-weight-bold">
                 {{ formatMinorUnits(account.currentBalance, account.currency) }}
               </div>
             </div>
             <div class="d-flex flex-column ga-1">
-              <v-btn class="account-action" size="small" variant="text" @click="editAccount(account.id)">
+              <v-btn size="small" variant="text" @click="editAccount(account.id)">
                 {{ t('common.edit') }}
               </v-btn>
               <v-btn
-                class="account-action"
                 :disabled="account.isArchived"
                 size="small"
                 variant="text"
@@ -160,8 +159,8 @@ onMounted(async () => {
       </div>
 
       <v-bottom-sheet v-model="editorOpen">
-        <v-card class="pa-4">
-          <div class="text-h6 font-weight-bold mb-4">
+        <v-card class="pa-4" color="surface">
+          <div class="text-title-large font-weight-bold mb-4">
             {{ editingId ? t('common.edit') : t('common.add') }}
           </div>
           <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
@@ -211,31 +210,3 @@ onMounted(async () => {
     </v-container>
   </v-main>
 </template>
-
-<style scoped>
-.account-card {
-  padding: 1rem;
-}
-
-.account-title {
-  font-size: 0.875rem;
-  font-weight: 400;
-  line-height: 1.45;
-}
-
-.account-subtitle {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
-.account-amount {
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.35;
-}
-
-.account-action {
-  font-size: 0.75rem;
-}
-</style>

@@ -194,9 +194,9 @@ onMounted(async () => {
   </AppBarVue>
 
   <v-main>
-    <v-container>
+    <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
-        <div class="text-body-2 text-medium-emphasis">
+        <div class="text-body-medium text-medium-emphasis">
           {{ t('recurring.subtitle') }}
         </div>
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
@@ -210,11 +210,11 @@ onMounted(async () => {
             <v-avatar :color="event.isActive ? 'primary' : 'secondary'" variant="tonal">
               <v-icon icon="$recurring" />
             </v-avatar>
-            <div class="flex-grow-1" @click="editEvent(event.id)">
-              <div class="font-weight-bold">
+            <div class="flex-grow-1 min-w-0" @click="editEvent(event.id)">
+              <div class="text-body-medium font-weight-bold text-truncate">
                 {{ formatMinorUnits(event.amount, event.currency) }}
               </div>
-              <div class="text-body-2 text-medium-emphasis">
+              <div class="mt-1 text-label-medium text-medium-emphasis text-truncate">
                 {{ accountName(event.accountId) }} &middot; {{ event.nextTriggerDate }}
               </div>
               <v-chip class="mt-2" size="small" variant="tonal">
@@ -240,8 +240,8 @@ onMounted(async () => {
       </div>
 
       <v-bottom-sheet v-model="editorOpen">
-        <v-card class="pa-4">
-          <div class="text-h6 font-weight-bold mb-4">
+        <v-card class="pa-4" color="surface">
+          <div class="text-title-large font-weight-bold mb-4">
             {{ editingId ? t('common.edit') : t('common.add') }}
           </div>
           <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">

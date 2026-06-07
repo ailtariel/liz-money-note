@@ -31,16 +31,16 @@ async function clearCache() {
   <AppBarVue />
 
   <v-main>
-    <v-container>
+    <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
         <v-alert v-if="message" type="success" variant="tonal">{{ message }}</v-alert>
 
         <v-card class="soft-card">
-          <div class="px-4 pt-4 text-subtitle-1 font-weight-bold">
+          <div class="px-4 pt-4 text-title-medium font-weight-bold">
             {{ t('system.cache.title') }}
           </div>
-          <v-list class="bg-transparent">
+          <v-list>
             <v-list-item
               :disabled="loading"
               :subtitle="t('system.cache.subtitle')"

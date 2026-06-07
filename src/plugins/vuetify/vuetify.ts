@@ -161,15 +161,7 @@ export function createAppVuetify(config: RuntimeAppConfig) {
             'expense': '#DC2626',
             'success': '#059669',
             'error': '#DC2626',
-            'warning': '#D97706',
-            'summary-text': '#FFFFFF',
-            'chip-bg': '#FFFFFF',
-            'chip-text': '#111827',
-            'nav-active-bg': '#DFF5EF',
-            'nav-active-text': '#0F766E',
-            'card-border': '#DDEBE6',
-            'text-primary': '#111827',
-            'text-secondary': '#6B7280'
+            'warning': '#D97706'
           }
         },
         greenDark: {
@@ -191,15 +183,7 @@ export function createAppVuetify(config: RuntimeAppConfig) {
             'expense': '#F87171',
             'success': '#34D399',
             'error': '#F87171',
-            'warning': '#FBBF24',
-            'summary-text': '#ECFDF5',
-            'chip-bg': '#172A26',
-            'chip-text': '#F9FAFB',
-            'nav-active-bg': '#134E4A',
-            'nav-active-text': '#5EEAD4',
-            'card-border': '#21413B',
-            'text-primary': '#F9FAFB',
-            'text-secondary': '#CBD5E1'
+            'warning': '#FBBF24'
           }
         },
         orangeLight: {
@@ -221,15 +205,7 @@ export function createAppVuetify(config: RuntimeAppConfig) {
             'expense': '#DC2626',
             'success': '#059669',
             'error': '#DC2626',
-            'warning': '#D97706',
-            'summary-text': '#FFFFFF',
-            'chip-bg': '#FFFFFF',
-            'chip-text': '#111827',
-            'nav-active-bg': '#FFEDD5',
-            'nav-active-text': '#EA580C',
-            'card-border': '#F1E7D8',
-            'text-primary': '#111827',
-            'text-secondary': '#6B7280'
+            'warning': '#D97706'
           }
         },
         orangeDark: {
@@ -251,15 +227,7 @@ export function createAppVuetify(config: RuntimeAppConfig) {
             'expense': '#F87171',
             'success': '#34D399',
             'error': '#F87171',
-            'warning': '#FBBF24',
-            'summary-text': '#FFF7ED',
-            'chip-bg': '#2B2118',
-            'chip-text': '#F9FAFB',
-            'nav-active-bg': '#431407',
-            'nav-active-text': '#FDBA74',
-            'card-border': '#3A2A1E',
-            'text-primary': '#F9FAFB',
-            'text-secondary': '#D1D5DB'
+            'warning': '#FBBF24'
           }
         }
       }

@@ -16,12 +16,14 @@ const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0'];
 </script>
 
 <template>
-  <v-card class="pa-4">
-    <div v-if="title" class="text-body-2 text-medium-emphasis">
+  <v-card class="pa-4" color="surface">
+    <div v-if="title" class="text-body-medium text-medium-emphasis">
       {{ title }}
     </div>
-    <div class="numeric-keyboard-display mt-1">{{ displayValue }}</div>
-    <div class="numeric-keyboard-grid mt-4">
+    <div class="numeric-keyboard-display mt-1 text-primary font-weight-bold">
+      {{ displayValue }}
+    </div>
+    <div class="numeric-keyboard-grid mt-4 ga-2">
       <v-btn
         v-for="key in keys"
         :key="key"
@@ -52,15 +54,12 @@ const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0'];
 
 <style scoped>
 .numeric-keyboard-display {
-  color: rgb(var(--v-theme-primary));
   font-size: 4rem;
-  font-weight: 800;
   line-height: 1.1;
 }
 
 .numeric-keyboard-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
 }
 </style>

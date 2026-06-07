@@ -136,13 +136,13 @@ function applyDateRange() {
 </script>
 
 <template>
-  <v-card class="date-filter-sheet pa-4">
-    <div class="date-filter-title">
+  <v-card class="pa-4" color="surface">
+    <div class="mb-3 text-title-medium font-weight-bold">
       {{ title }}
     </div>
     <v-btn-toggle
       v-model="quickRange"
-      class="date-filter-toggle"
+      class="date-filter-toggle mb-3 w-100"
       color="primary"
       variant="outlined"
     >
@@ -150,7 +150,7 @@ function applyDateRange() {
         v-for="item in quickRangeItems"
         :key="item.value"
         :value="item.value"
-        style="border-radius: 0"
+        rounded="0"
       >
         {{ item.title }}
       </v-btn>
@@ -172,18 +172,6 @@ function applyDateRange() {
 </template>
 
 <style scoped>
-.date-filter-title {
-  margin-bottom: 0.75rem;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.date-filter-toggle {
-  width: 100%;
-  margin-bottom: 0.75rem;
-}
-
 .date-filter-toggle :deep(.v-btn) {
   flex: 1 1 0;
 }

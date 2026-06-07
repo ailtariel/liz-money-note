@@ -6,4 +6,3 @@ import BottomeNavVue from '@/components/shared/bottome-nav.vue';
   <RouterView />
   <BottomeNavVue />
 </template>
-<style scoped></style>

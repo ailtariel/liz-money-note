@@ -67,30 +67,30 @@ onMounted(async () => {
   <AppBarVue />
 
   <v-main>
-    <v-container>
+    <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
-        <v-card class="soft-card currency-card">
-          <div class="currency-section-title">
+        <v-card class="soft-card pa-6">
+          <div class="mb-4 text-title-large font-weight-bold">
             {{ t('settings.currency.defaultCurrency') }}
           </div>
-          <v-list class="bg-transparent">
+          <v-list>
             <v-list-item
               v-for="currency in store.currencies"
               :key="currency"
               :active="store.currency === currency"
-              class="currency-option"
+              class="currency-option px-4"
               :class="{ 'currency-option-active': store.currency === currency }"
               @click="chooseCurrency(currency)"
             >
               <template #prepend>
-                <v-avatar class="currency-icon" color="primary" variant="tonal">
+                <v-avatar class="me-4" color="primary" size="56" variant="tonal">
                   <v-icon icon="$cash" />
                 </v-avatar>
               </template>
-              <v-list-item-title class="currency-code">{{ currency }}</v-list-item-title>
-              <v-list-item-subtitle class="currency-meta">
+              <v-list-item-title class="text-title-large font-weight-bold">{{ currency }}</v-list-item-title>
+              <v-list-item-subtitle class="mt-1 text-body-medium text-medium-emphasis">
                 {{ currencyName(currency) }} · {{ currencyCountry(currency) }}
               </v-list-item-subtitle>
               <template #append>
@@ -108,8 +108,8 @@ onMounted(async () => {
           </v-list>
         </v-card>
 
-        <v-card class="soft-card currency-card">
-          <div class="currency-section-title">
+        <v-card class="soft-card pa-6">
+          <div class="mb-4 text-title-large font-weight-bold">
             {{ t('settings.currency.addCurrency') }}
           </div>
           <v-form class="d-flex flex-column ga-3" @submit.prevent="addCurrency">
@@ -138,56 +138,22 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.currency-card {
-  padding: 1.5rem;
-}
-
-.currency-section-title {
-  margin-bottom: 1rem;
-  color: rgb(var(--v-theme-text-primary));
-  font-size: 1.25rem;
-  font-weight: 800;
-  line-height: 1.3;
-}
-
 .currency-option {
   min-height: 5rem;
-  border-radius: 1rem;
-  padding-inline: 1rem;
 }
 
 .currency-option-active {
-  background: rgba(var(--v-theme-primary), 0.1);
-}
-
-.currency-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  margin-inline-end: 1rem;
-}
-
-.currency-code {
-  color: rgb(var(--v-theme-text-primary));
-  font-size: 1.25rem;
-  font-weight: 800;
-  line-height: 1.3;
-}
-
-.currency-meta {
-  margin-top: 0.25rem;
-  color: rgb(var(--v-theme-text-secondary));
-  font-size: 0.875rem;
-  line-height: 1.45;
+  background: rgb(var(--v-theme-accent));
 }
 
 .currency-check {
-  color: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-on-primary));
 }
 
 .currency-radio {
   width: 1.75rem;
   height: 1.75rem;
-  border: 3px solid rgba(var(--v-theme-text-secondary), 0.35);
+  border: 3px solid rgba(var(--v-theme-on-surface), 0.35);
   border-radius: 50%;
 }
 </style>

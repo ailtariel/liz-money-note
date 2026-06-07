@@ -82,6 +82,6 @@ const breadcrumbItems = computed(() => [
 }
 
 .breadcrumb-divider {
-  color: rgb(var(--v-theme-text-secondary));
+  color: rgba(var(--v-theme-on-surface), 0.68);
 }
 </style>

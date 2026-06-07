@@ -33,19 +33,19 @@ const removeTransaction = async () => {
 };
 </script>
 <template>
-  <v-card v-if="transaction" class="pa-4">
+  <v-card v-if="transaction" class="pa-4" color="surface">
     <div class="d-flex align-center mb-4">
-      <div class="text-h6 font-weight-bold">
+      <div class="text-title-large font-weight-bold">
         {{ t('transaction.detail') }}
       </div>
       <v-spacer />
       <v-btn icon="$close" variant="text" @click="$emit('close')" />
     </div>
     <div class="text-center mb-4">
-      <div class="text-caption text-medium-emphasis">
+      <div class="text-label-medium text-medium-emphasis">
         {{ t('transaction.amount') }}
       </div>
-      <div class="text-h4 font-weight-bold">
+      <div class="text-headline-large font-weight-bold">
         <AmountText
           :amount="transaction.amount"
           :currency="transaction.currency"
@@ -60,7 +60,7 @@ const removeTransaction = async () => {
         />
       </div>
     </div>
-    <v-list class="bg-transparent">
+    <v-list>
       <v-list-item
         :title="t('transaction.category')"
         :subtitle="trans.getTitle(transaction)"

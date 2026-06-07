@@ -25,13 +25,13 @@ const sections = computed(() =>
     </template>
   </AppBarVue>
   <v-main>
-    <v-container>
+    <v-container class="pa-4">
       <div class="d-flex flex-column ga-5">
         <v-card v-for="section in sections" :key="section.title" class="soft-card">
-          <div class="px-4 pt-4 text-subtitle-1 font-weight-bold">
+          <div class="px-4 pt-4 text-title-medium font-weight-bold">
             {{ section.title }}
           </div>
-          <v-list class="bg-transparent">
+          <v-list>
             <v-list-item
               v-for="item in section.items"
               :key="item.title"

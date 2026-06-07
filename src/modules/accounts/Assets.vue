@@ -27,17 +27,17 @@ onMounted(async () => {
 <template>
   <AppBarVue />
   <v-main>
-    <v-container>
+    <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
-        <v-card class="asset-hero pa-5 text-white">
-          <div class="asset-hero-label opacity-80">{{ t('assets.total') }}</div>
-          <div class="asset-hero-amount mt-2">
+        <v-card class="asset-hero pa-5" color="summary">
+          <div class="text-label-medium opacity-80">{{ t('assets.total') }}</div>
+          <div class="mt-2 text-headline-small font-weight-bold">
             {{ formatMinorUnits(totalAssets, baseCurrency) }}
           </div>
-          <div class="asset-hero-caption opacity-80 mt-1">{{ t('assets.included') }}</div>
+          <div class="mt-1 text-label-medium opacity-80">{{ t('assets.included') }}</div>
         </v-card>
 
-        <v-card v-for="account in accounts" :key="account.id" class="asset-card soft-card">
+        <v-card v-for="account in accounts" :key="account.id" class="soft-card pa-4">
           <div class="d-flex align-center ga-3">
             <v-avatar
               :color="account.isIncludedInAssets ? 'primary' : 'secondary'"
@@ -47,16 +47,16 @@ onMounted(async () => {
               <v-icon :icon="accountTypeIcon(account.type)" size="20" />
             </v-avatar>
             <div class="flex-grow-1 min-w-0">
-              <div class="asset-title text-truncate">{{ account.name }}</div>
-              <div class="asset-subtitle text-medium-emphasis text-truncate">
+              <div class="text-body-medium text-truncate">{{ account.name }}</div>
+              <div class="mt-1 text-label-medium text-medium-emphasis text-truncate">
                 {{ accountTypeLabel(account.type, t) }} &middot; {{ account.currency }}
               </div>
             </div>
             <div class="asset-value-col text-right">
-              <div class="asset-amount">
+              <div class="text-body-medium font-weight-bold text-no-wrap">
                 {{ formatMinorUnits(account.currentBalance, account.currency) }}
               </div>
-              <div class="asset-status text-medium-emphasis">
+              <div class="mt-1 text-label-medium text-medium-emphasis">
                 {{ account.isIncludedInAssets ? t('assets.included') : t('assets.excluded') }}
               </div>
             </div>
@@ -69,53 +69,11 @@ onMounted(async () => {
 
 <style scoped>
 .asset-hero {
-  color: rgb(var(--v-theme-summary-text));
-  background: rgb(var(--v-theme-summary));
-}
-
-.asset-hero-label,
-.asset-hero-caption {
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
-.asset-hero-amount {
-  font-size: 1.125rem;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.asset-card {
-  padding: 1rem;
-}
-
-.asset-title {
-  font-size: 0.875rem;
-  font-weight: 400;
-  line-height: 1.45;
-}
-
-.asset-subtitle {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  line-height: 1.45;
+  color: rgb(var(--v-theme-on-primary));
 }
 
 .asset-value-col {
   min-width: 0;
   max-width: 10rem;
-}
-
-.asset-amount {
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.35;
-  white-space: nowrap;
-}
-
-.asset-status {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  line-height: 1.45;
 }
 </style>

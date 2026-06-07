@@ -44,9 +44,9 @@ function applyTags() {
 </script>
 
 <template>
-  <v-card class="pa-4">
-    <div class="tag-filter-header">
-      <div class="tag-filter-title">
+  <v-card class="pa-4" color="surface">
+    <div class="d-flex align-center justify-space-between ga-4 mb-3">
+      <div class="text-title-medium font-weight-bold">
         {{ title }}
       </div>
       <v-btn variant="text" color="primary" @click="clearTags">
@@ -54,7 +54,7 @@ function applyTags() {
       </v-btn>
     </div>
 
-    <div class="tag-filter-chips">
+    <div class="d-flex flex-wrap ga-2">
       <v-chip
         v-for="tag in tags"
         :key="tag.id"
@@ -71,25 +71,3 @@ function applyTags() {
     </v-btn>
   </v-card>
 </template>
-
-<style scoped>
-.tag-filter-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.tag-filter-title {
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.tag-filter-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.625rem;
-}
-</style>

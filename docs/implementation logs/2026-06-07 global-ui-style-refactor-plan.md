@@ -151,3 +151,11 @@ Implementation started for the first visual review slice after explicit user con
 - Reduce redundant scoped CSS in `Transactions.vue` and `TransactionEditor.vue`.
 - Prefer Vuetify props and utility classes for spacing, typography, background, alignment, and simple flex layouts.
 - Keep local scoped CSS only for component-specific behavior that is not cleanly covered by Vuetify utilities, such as native date/time input styling and deep amount field input sizing.
+
+## Continued Global Application Notes
+
+- Continue remaining page migration using the current transaction module as the reference style:
+  - Prefer `color`, `variant`, Vuetify typography classes, and utility classes such as `d-flex`, `ga-*`, `pa-*`, `text-*`.
+  - Keep local scoped CSS only for truncation, fixed-format visual widgets, native input overrides, and small component-specific geometry.
+  - Replace touched legacy tokens (`text-primary`, `text-secondary`, `card-border`, `summary-text`, `nav-active-*`) with the new design-system tokens.
+  - Preserve behavior, data flow, routes, schemas, and user-visible copy.

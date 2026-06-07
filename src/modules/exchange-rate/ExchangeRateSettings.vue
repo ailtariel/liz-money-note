@@ -90,9 +90,9 @@ watch(
 </script>
 
 <template>
-  <v-card class="soft-card exchange-card">
-    <div class="exchange-header">
-      <div class="exchange-title">
+  <v-card class="soft-card pa-6">
+    <div class="d-flex align-center justify-space-between ga-4 mb-4">
+      <div class="text-title-large font-weight-bold">
         {{ t('exchangeRate.title') }}
       </div>
       <v-btn
@@ -106,7 +106,7 @@ watch(
       </v-btn>
     </div>
 
-    <div class="exchange-meta">
+    <div class="d-flex flex-wrap ga-1 mb-5 text-body-medium text-medium-emphasis">
       <span>{{ t('exchangeRate.base', { currency: targetCurrency }) }}</span>
       <span v-if="formattedUpdatedAt">
         · {{ t('exchangeRate.updatedAt', { time: formattedUpdatedAt }) }}
@@ -122,22 +122,22 @@ watch(
       {{ error || exchangeRateStore.error }}
     </v-alert>
 
-    <v-list v-if="exchangeRateStore.rates.length" class="bg-transparent exchange-list">
+    <v-list v-if="exchangeRateStore.rates.length" class="pa-0">
       <v-list-item
         v-for="rate in exchangeRateStore.rates"
         :key="`${rate.sourceCurrency}-${rate.targetCurrency}`"
         class="exchange-item"
       >
-        <div class="exchange-rate-info">
-          <div class="exchange-pair">
+        <div class="min-w-0">
+          <div class="text-body-large font-weight-bold">
             {{ rate.sourceCurrency }} -> {{ rate.targetCurrency }}
           </div>
-          <div class="exchange-source">
+          <div class="mt-1 text-label-medium text-medium-emphasis">
             {{ rate.isManual ? t('exchangeRate.manual') : t('exchangeRate.auto') }}
           </div>
         </div>
         <template #append>
-          <div class="exchange-actions">
+          <div class="d-flex align-center ga-3 exchange-actions">
             <v-text-field
               v-model="manualRates[rate.sourceCurrency]"
               class="exchange-input"
@@ -167,70 +167,13 @@ watch(
 </template>
 
 <style scoped>
-.exchange-card {
-  padding: 1.5rem;
-}
-
-.exchange-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.exchange-title {
-  color: rgb(var(--v-theme-text-primary));
-  font-size: 1.25rem;
-  font-weight: 800;
-  line-height: 1.3;
-}
-
-.exchange-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin-bottom: 1.25rem;
-  color: rgb(var(--v-theme-text-secondary));
-  font-size: 0.875rem;
-  line-height: 1.55;
-}
-
-.exchange-list {
-  padding-block: 0;
-}
-
 .exchange-item {
   min-height: 5rem;
   padding-inline: 0;
 }
 
 .exchange-item + .exchange-item {
-  border-top: 1px dashed rgba(var(--v-theme-card-border), 1);
-}
-
-.exchange-rate-info {
-  min-width: 0;
-}
-
-.exchange-pair {
-  color: rgb(var(--v-theme-text-primary));
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.35;
-}
-
-.exchange-source {
-  margin-top: 0.25rem;
-  color: rgb(var(--v-theme-text-secondary));
-  font-size: 0.8125rem;
-  line-height: 1.4;
-}
-
-.exchange-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  border-top: 1px dashed rgb(var(--v-theme-outline));
 }
 
 .exchange-input {

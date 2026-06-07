@@ -124,9 +124,9 @@ onMounted(async () => {
   <AppBarVue />
 
   <v-main>
-    <v-container>
+    <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
-        <div class="text-body-2 text-medium-emphasis">{{ t('data.subtitle') }}</div>
+        <div class="text-body-medium text-medium-emphasis">{{ t('data.subtitle') }}</div>
         <v-alert v-if="message" type="success" variant="tonal">{{ message }}</v-alert>
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
@@ -150,10 +150,10 @@ onMounted(async () => {
         </v-card>
 
         <v-card v-if="showImport" class="soft-card pa-4">
-          <div class="text-subtitle-1 font-weight-bold">
+          <div class="text-title-medium font-weight-bold">
             {{ t('data.importText') }}
           </div>
-          <div class="text-body-2 text-medium-emphasis mb-4">
+          <div class="text-body-medium text-medium-emphasis mb-4">
             {{ t('data.importHint') }}
           </div>
           <v-file-input
@@ -185,7 +185,7 @@ onMounted(async () => {
         </v-card>
 
         <v-card v-if="showImport && importResult" class="soft-card pa-4">
-          <v-list class="bg-transparent">
+          <v-list>
             <v-list-item v-for="file in importResult.files" :key="file.fileName">
               <v-list-item-title>{{ file.fileName }}</v-list-item-title>
               <v-list-item-subtitle>

@@ -66,14 +66,18 @@ onMounted(async () => {
 <template>
   <AppBarVue />
   <v-main>
-    <v-container>
+    <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
-        <v-card class="stats-card soft-card">
-          <div class="stats-card-title mb-4">{{ t('stats.monthlyFlow') }}</div>
-          <div class="stats-flow-row d-flex align-center justify-space-between mb-2">
+        <v-card class="soft-card pa-4">
+          <div class="mb-4 text-title-medium font-weight-bold">
+            {{ t('stats.monthlyFlow') }}
+          </div>
+          <div
+            class="d-flex align-center justify-space-between mb-2 text-label-medium"
+          >
             <span>{{ t('stats.received') }}</span>
             <AmountText
-              class="stats-amount"
+              class="text-body-medium font-weight-bold text-no-wrap"
               :amount="income"
               :currency="baseCurrency"
               type="income"
@@ -85,10 +89,12 @@ onMounted(async () => {
             height="10"
             rounded
           />
-          <div class="stats-flow-row d-flex align-center justify-space-between mt-5 mb-2">
+          <div
+            class="d-flex align-center justify-space-between mt-5 mb-2 text-label-medium"
+          >
             <span>{{ t('stats.spent') }}</span>
             <AmountText
-              class="stats-amount"
+              class="text-body-medium font-weight-bold text-no-wrap"
               :amount="expense"
               :currency="baseCurrency"
               type="expense"
@@ -102,15 +108,19 @@ onMounted(async () => {
           />
         </v-card>
 
-        <v-card class="stats-card soft-card">
-          <div class="stats-card-title mb-4">{{ t('stats.categoryShare') }}</div>
-          <div v-if="!categoryShare.length" class="stats-empty text-medium-emphasis">
+        <v-card class="soft-card pa-4">
+          <div class="mb-4 text-title-medium font-weight-bold">
+            {{ t('stats.categoryShare') }}
+          </div>
+          <div v-if="!categoryShare.length" class="text-label-medium text-medium-emphasis">
             {{ t('common.empty') }}
           </div>
           <div v-for="item in categoryShare" :key="item.tag?.id ?? 0" class="mb-4">
-            <div class="stats-category-row d-flex align-center justify-space-between mb-1">
+            <div
+              class="d-flex align-center justify-space-between ga-3 mb-1 text-label-medium"
+            >
               <span class="text-truncate">{{ item.tag?.name ?? t('category.more') }}</span>
-              <span class="stats-amount">{{ formatMinorUnits(item.amount, baseCurrency) }}</span>
+              <span class="text-body-medium font-weight-bold text-no-wrap">{{ formatMinorUnits(item.amount, baseCurrency) }}</span>
             </div>
             <v-progress-linear
               :model-value="(item.amount / Math.max(expense, 1)) * 100"
@@ -121,15 +131,17 @@ onMounted(async () => {
           </div>
         </v-card>
 
-        <v-card class="stats-card soft-card">
-          <div class="stats-card-title mb-4">{{ t('stats.monthTrend') }}</div>
+        <v-card class="soft-card pa-4">
+          <div class="mb-4 text-title-medium font-weight-bold">
+            {{ t('stats.monthTrend') }}
+          </div>
           <div class="trend-chart">
             <div v-for="item in trend" :key="item.label" class="trend-item">
               <div
                 class="trend-bar"
                 :style="{ height: `${Math.max((item.value / Math.max(expense, 1)) * 110, 8)}px` }"
               />
-              <div class="trend-label text-medium-emphasis">{{ item.label }}</div>
+              <div class="text-label-medium text-medium-emphasis">{{ item.label }}</div>
             </div>
           </div>
         </v-card>
@@ -139,36 +151,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.stats-card {
-  padding: 1rem;
-}
-
-.stats-card-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.45;
-}
-
-.stats-flow-row,
-.stats-category-row,
-.stats-empty,
-.trend-label {
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
-.stats-category-row {
-  gap: 0.75rem;
-}
-
-.stats-amount {
-  flex: 0 0 auto;
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.35;
-  white-space: nowrap;
-}
-
 .trend-chart {
   display: grid;
   grid-template-columns: repeat(5, 1fr);

@@ -30,6 +30,7 @@ const activeNav = computed(() =>
   <v-bottom-navigation
     v-if="showBottomNav"
     :model-value="activeNav"
+    bg-color="surface"
     grow
     :height="bottomNavHeight"
     mandatory
@@ -47,16 +48,8 @@ const activeNav = computed(() =>
 </template>
 
 <style scoped>
-.v-bottom-navigation {
-  background: rgb(var(--v-theme-surface));
-}
-
 .v-bottom-navigation :deep(.v-btn--selected) {
-  background: rgb(var(--v-theme-nav-active-bg));
-  color: rgb(var(--v-theme-nav-active-text));
-}
-
-.v-bottom-navigation :deep(.v-btn__content) {
-  font-size: 0.75rem;
+  background: rgb(var(--v-theme-accent));
+  color: rgb(var(--v-theme-primary));
 }
 </style>

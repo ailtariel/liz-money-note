@@ -24,8 +24,8 @@ function selectItem(value: number | string | null) {
 </script>
 
 <template>
-  <v-card class="pa-4">
-    <div class="filter-sheet-title">
+  <v-card class="pa-4" color="surface">
+    <div class="mb-3 text-title-medium font-weight-bold">
       {{ title }}
     </div>
     <v-list>
@@ -44,12 +44,3 @@ function selectItem(value: number | string | null) {
     </v-list>
   </v-card>
 </template>
-
-<style scoped>
-.filter-sheet-title {
-  margin-bottom: 0.75rem;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.4;
-}
-</style>
