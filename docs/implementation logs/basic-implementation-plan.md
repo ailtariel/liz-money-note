@@ -106,8 +106,10 @@ src/modules/database/
   DataSettings.vue          数据导入、导出、备份、恢复页
 
 docs/
-  basic-data-design.md      基础数据设计方案
-  basic-implementation-plan.md 基础功能实施计划
+  design/
+    basic-data-design.md      基础数据设计方案
+  implementation logs/
+    basic-implementation-plan.md 基础功能实施计划
 ```
 
 文件边界规则：
@@ -340,7 +342,7 @@ Expected: 导出后可恢复同一份账本、账户、Tag、流水和周期事�
 - Create: `src/modules/import/text-import.parser.ts`
 - Create: `src/modules/import/import.service.ts`
 - Modify: `src/modules/database/DataSettings.vue`
-- Modify: `docs/basic-data-design.md`
+- Modify: `docs/design/basic-data-design.md`
 
 - [x] 支持选择多个 `.csv` / `.txt` 文件。
 - [x] 每个文件作为一个账本导入，账本名为文件名去扩展名。

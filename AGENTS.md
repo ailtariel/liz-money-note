@@ -12,11 +12,14 @@ This does not override explicit user instructions in the current conversation, s
 
 ## Required Reading Order
 
+Use the explicit file list below as the current mandatory rule index. Do not assume legacy specification paths exist unless they are listed here.
+
 Before any implementation, code edit, or command execution related to delivery:
 
 1. Read `README.md` at the repository root only when the conversation/task is related to this repository.
 2. Read `AI-coding-specification/coding-specification.md` when the task involves code changes.
-3. Read `AI-coding-specification/front-end.md` when the task involves frontend layout, pages, components, styles, or UI behavior.
+3. Read `AI-coding-specification/app-rules.md` when the task involves product behavior, app-specific UI requirements, navigation, i18n, mobile app constraints, cache/data boundaries, or feature placement.
+4. Read `AI-coding-specification/front-end.md` when the task involves frontend layout, pages, components, styles, UI behavior, feature module boundaries, or frontend state/message flow.
 
 If additional rule files are added under `AI-coding-specification/`, list them explicitly in this section and describe when each file applies. Do not rely on wildcard reading for mandatory rules.
 
@@ -28,6 +31,8 @@ Before the following task types, agents must search `docs/` for relevant documen
 
 - Feature changes or new feature implementation.
 - Debugging tasks where the error is not a simple syntax error.
+
+For feature additions, major updates, or refactors, agents must create or update an implementation document under `docs/implementation logs/` before changing code, then implement according to that document. The implementation document should record the goal, scope, impacted files/modules, main decisions, task checklist, verification plan, and final status.
 
 If multiple documents conflict with each other, if documentation conflicts with the current implementation, or if documentation conflicts with the user's explicit request in the current conversation, stop before code changes and confirm the intended direction with the user.
 
