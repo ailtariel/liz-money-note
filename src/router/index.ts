@@ -133,6 +133,14 @@ const router = createRouter({
           meta: {
             titleKey: 'more.defaultCurrency'
           }
+        },
+        {
+          path: 'system',
+          name: 'system',
+          component: () => import('@/modules/system/System.vue'),
+          meta: {
+            titleKey: 'more.system'
+          }
         }
       ]
     },

@@ -164,6 +164,7 @@ export default {
     restore: 'Restore',
     theme: 'Theme',
     defaultCurrency: 'Currency',
+    system: 'System',
     about: 'About'
   },
   theme: {
@@ -195,6 +196,16 @@ export default {
       currencyCode: 'Currency code',
       currencyCodeHint: 'Use a 3-letter ISO 4217 code, such as EUR or JPY.',
       addFailed: 'Failed to add currency.'
+    }
+  },
+  system: {
+    cache: {
+      title: 'Cache',
+      clear: 'Clear cache',
+      subtitle: 'Clear browser cache and Android WebView cache. Local account data is kept.',
+      clearDoneBrowser: 'Cache cleared. {count} browser cache buckets removed.',
+      clearDoneAndroid: 'Cache cleared. Android WebView cache was also cleaned.',
+      clearFailed: 'Failed to clear cache.'
     }
   },
   exchangeRate: {

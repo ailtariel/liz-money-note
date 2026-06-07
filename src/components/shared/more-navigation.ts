@@ -86,6 +86,12 @@ export const moreNavigationSections: MoreNavigationSection[] = [
         to: { name: 'currency' },
         routeNames: ['currency']
       },
+      {
+        titleKey: 'more.system',
+        icon: '$system',
+        to: { name: 'system' },
+        routeNames: ['system']
+      },
       { titleKey: 'more.about', icon: '$info' }
     ]
   }

@@ -164,6 +164,7 @@ export default {
     restore: '恢复',
     theme: '主题',
     defaultCurrency: '货币',
+    system: '系统',
     about: '关于'
   },
   theme: {
@@ -195,6 +196,16 @@ export default {
       currencyCode: '货币代码',
       currencyCodeHint: '使用 3 位 ISO 4217 货币代码，例如 EUR 或 JPY。',
       addFailed: '添加货币失败。'
+    }
+  },
+  system: {
+    cache: {
+      title: '缓存',
+      clear: '清理缓存',
+      subtitle: '清理浏览器缓存和 Android WebView 缓存，不会删除本地账本数据。',
+      clearDoneBrowser: '缓存已清理，已移除 {count} 个浏览器缓存桶。',
+      clearDoneAndroid: '缓存已清理，已同时清理 Android WebView 缓存。',
+      clearFailed: '清理缓存失败。'
     }
   },
   exchangeRate: {
