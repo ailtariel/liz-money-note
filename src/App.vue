@@ -3,15 +3,21 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import { useAppLocale } from '@/modules/shared/useAppLocale';
 import { useAccountStore } from '@/modules/accounts/account.store';
+import { useCurrencyStore } from '@/modules/currency/currency.store';
+import { useExchangeRateStore } from '@/modules/exchange-rate/exchange-rate.store';
 import { useRecurringStore } from '@/modules/recurring/recurring.store';
 import { useApplyTheme } from '@/modules/theme/useApplyTheme';
+import { useCronJobManager } from '@/shared/lib/cron-job-manager';
 import AmountText from '@/components/shared/AmountText.vue';
 
 const { t } = useI18n();
 const appLocale = useAppLocale();
 useApplyTheme();
+const cronJobManager = useCronJobManager();
 const recurringStore = useRecurringStore();
 const accountStore = useAccountStore();
+const currencyStore = useCurrencyStore();
+const exchangeRateStore = useExchangeRateStore();
 const sheetOpen = ref(false);
 const error = ref('');
 
@@ -28,6 +34,15 @@ function accountName(id: number | null) {
 async function refreshDueSheet() {
   await recurringStore.loadDue();
   sheetOpen.value = dueEvents.value.length > 0;
+}
+
+async function refreshExchangeRates(force = false) {
+  await currencyStore.load();
+  await exchangeRateStore.refreshOnline(
+    currencyStore.currencies,
+    currencyStore.currency,
+    force
+  );
 }
 
 async function approve(index: number) {
@@ -63,7 +78,22 @@ async function disable(index: number) {
 
 onMounted(async () => {
   appLocale.init();
-  await accountStore.load();
+  await Promise.all([accountStore.load(), currencyStore.load()]);
+
+  try {
+    await exchangeRateStore.load(currencyStore.currencies, currencyStore.currency);
+    await refreshExchangeRates();
+  } catch (err) {
+    console.error('Failed to update exchange rates.', err);
+  }
+
+  cronJobManager.addJob({
+    id: 'exchange-rate-refresh',
+    name: 'Exchange rate refresh',
+    interval: 24 * 60 * 60 * 1000,
+    execute: () => refreshExchangeRates()
+  });
+
   await refreshDueSheet();
 });
 </script>

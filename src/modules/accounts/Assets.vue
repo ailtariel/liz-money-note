@@ -2,17 +2,17 @@
 import { computed, onMounted } from 'vue';
 import { useI18n } from '@/i18n';
 import { useAccountStore } from '@/modules/accounts/account.store';
-import { useDefaultCurrencyStore } from '@/modules/settings/default-currency.store';
+import { useCurrencyStore } from '@/modules/currency/currency.store';
 import { formatMinorUnits } from '@/modules/shared/money';
 import { accountTypeIcon, accountTypeLabel } from '@/components/shared/financeDisplay';
 import AppBarVue from '@/components/shared/app-bar.vue';
 
 const { t } = useI18n();
 const accountStore = useAccountStore();
-const defaultCurrencyStore = useDefaultCurrencyStore();
+const currencyStore = useCurrencyStore();
 
 const accounts = computed(() => accountStore.accounts);
-const baseCurrency = computed(() => accounts.value[0]?.currency ?? defaultCurrencyStore.currency);
+const baseCurrency = computed(() => accounts.value[0]?.currency ?? currencyStore.currency);
 const totalAssets = computed(() =>
   accounts.value
     .filter((account) => account.isIncludedInAssets && !account.isArchived)
@@ -20,7 +20,7 @@ const totalAssets = computed(() =>
 );
 
 onMounted(async () => {
-  await Promise.all([accountStore.load(), defaultCurrencyStore.load()]);
+  await Promise.all([accountStore.load(), currencyStore.load()]);
 });
 </script>
 

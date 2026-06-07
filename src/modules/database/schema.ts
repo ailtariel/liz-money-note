@@ -116,6 +116,35 @@ CREATE TABLE IF NOT EXISTS settings (
   value TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS currencies (
+  code TEXT PRIMARY KEY,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+
+  CHECK (code GLOB '[A-Z][A-Z][A-Z]')
+);
+
+CREATE TABLE IF NOT EXISTS currency_rates (
+  source_currency TEXT NOT NULL,
+  target_currency TEXT NOT NULL,
+  rate REAL NOT NULL,
+  is_manual INTEGER NOT NULL DEFAULT 0,
+  provider TEXT,
+  fetched_at TEXT,
+  updated_at TEXT NOT NULL,
+
+  PRIMARY KEY (source_currency, target_currency),
+
+  FOREIGN KEY (source_currency) REFERENCES currencies(code),
+  FOREIGN KEY (target_currency) REFERENCES currencies(code),
+
+  CHECK (source_currency != target_currency),
+  CHECK (source_currency GLOB '[A-Z][A-Z][A-Z]'),
+  CHECK (target_currency GLOB '[A-Z][A-Z][A-Z]'),
+  CHECK (rate > 0),
+  CHECK (is_manual IN (0, 1))
+);
 `;
 
 export const createIndexStatements = `
@@ -139,4 +168,7 @@ ON recurring_events(is_active, next_trigger_date);
 
 CREATE INDEX IF NOT EXISTS idx_recurring_event_tags_tag
 ON recurring_event_tags(tag_id);
+
+CREATE INDEX IF NOT EXISTS idx_currency_rates_target
+ON currency_rates(target_currency);
 `;

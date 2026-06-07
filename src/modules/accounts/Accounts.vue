@@ -4,7 +4,7 @@ import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
 import CurrencyAutocomplete from '@/components/shared/CurrencyAutocomplete.vue';
 import { useAccountStore } from '@/modules/accounts/account.store';
-import { useDefaultCurrencyStore } from '@/modules/settings/default-currency.store';
+import { useCurrencyStore } from '@/modules/currency/currency.store';
 import type { AccountType } from '@/modules/accounts/account.types';
 import {
   formatMinorUnits,
@@ -18,7 +18,7 @@ import {
 
 const { t } = useI18n();
 const store = useAccountStore();
-const defaultCurrencyStore = useDefaultCurrencyStore();
+const currencyStore = useCurrencyStore();
 const error = ref('');
 const editingId = ref<number | null>(null);
 const editorOpen = ref(false);
@@ -42,7 +42,7 @@ function resetForm() {
   editingId.value = null;
   form.name = '';
   form.type = 'cash';
-  form.currency = defaultCurrencyStore.currency;
+  form.currency = currencyStore.currency;
   form.initialBalance = '0';
   form.isIncludedInAssets = true;
 }
@@ -101,7 +101,7 @@ async function archive(accountId: number) {
 }
 
 onMounted(async () => {
-  await Promise.all([store.load(), defaultCurrencyStore.load()]);
+  await Promise.all([store.load(), currencyStore.load()]);
 });
 </script>
 
@@ -185,7 +185,7 @@ onMounted(async () => {
             </v-slide-group>
             <CurrencyAutocomplete
               v-model="form.currency"
-              :currencies="defaultCurrencyStore.currencies"
+              :currencies="currencyStore.currencies"
               :label="t('data.currency')"
             />
             <v-text-field

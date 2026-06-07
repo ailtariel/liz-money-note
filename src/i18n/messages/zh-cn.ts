@@ -197,6 +197,17 @@ export default {
       addFailed: '添加货币失败。'
     }
   },
+  exchangeRate: {
+    title: '汇率',
+    updateNow: '更新',
+    base: '基准货币：{currency}',
+    updatedAt: '更新时间 {time}',
+    manual: '手动',
+    auto: '自动',
+    empty: '只有一种货币时不需要汇率。',
+    updateFailed: '更新汇率失败。',
+    saveFailed: '保存汇率失败。'
+  },
   country: {
     china: { name: '中国', currency: '人民币' },
     unitedStates: { name: '美国', currency: '美元' },

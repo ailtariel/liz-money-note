@@ -129,7 +129,7 @@ const router = createRouter({
         {
           path: 'currency',
           name: 'currency',
-          component: () => import('@/modules/settings/DefaultCurrency.vue'),
+          component: () => import('@/modules/currency/Currency.vue'),
           meta: {
             titleKey: 'more.defaultCurrency'
           }

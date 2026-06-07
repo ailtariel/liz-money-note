@@ -197,6 +197,17 @@ export default {
       addFailed: 'Failed to add currency.'
     }
   },
+  exchangeRate: {
+    title: 'Exchange rates',
+    updateNow: 'Update',
+    base: 'Base currency: {currency}',
+    updatedAt: 'Updated at {time}',
+    manual: 'Manual',
+    auto: 'Auto',
+    empty: 'No exchange rates needed for one currency.',
+    updateFailed: 'Failed to update exchange rates.',
+    saveFailed: 'Failed to save exchange rate.'
+  },
   country: {
     china: { name: 'China', currency: 'Chinese yuan' },
     unitedStates: { name: 'United States', currency: 'US dollar' },

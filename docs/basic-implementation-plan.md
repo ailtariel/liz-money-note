@@ -406,3 +406,13 @@ Expected: Web 构建成功，Android 项目同步成功，并可在 Android Stud
 - 周期事件只有在用户批准后才生成流水。
 - 数据保存在 SQLite 中，刷新或重启后仍然存在。
 - 项目可以完成 Web 构建，并能同步到 Android 工程。
+
+## Currency and Exchange Rate Module Update
+
+- `src/modules/currency/` owns configured currencies and the default currency page.
+- `src/modules/exchange-rate/` owns exchange-rate persistence, online refresh, manual override, store state, and feature UI.
+- `src/shared/lib/cron-job-manager/` owns reusable scheduler logic and has no UI.
+- `settings.default_currency` stores only the selected default currency; initial value is `CNY`.
+- `currencies` stores the configured currency list.
+- `currency_rates` stores exchange rates from configured non-default currencies to the current default currency.
+- App startup loads configured currencies, refreshes exchange rates if older than 24 hours, and registers a 24-hour refresh job.

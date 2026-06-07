@@ -343,3 +343,13 @@ recurring_event_tags
 4. 生成 `public/assets/databases/databases.json`，供 `@capacitor-community/sqlite` 的 `copyFromAssets` 使用。
 
 应用启动时会初始化 SQLite 连接，并在本地业务库为空时从 `public/assets/databases/liz_money_note.db` 复制预置库。若本地库已经存在账户、Tag、非默认账本或流水，启动流程不会覆盖用户数据。
+
+## Currency and Exchange Rates
+
+- The default currency is a user setting stored in `settings` with key `default_currency`.
+- The first default currency value is `CNY`.
+- Configured currencies are stored in `currencies`; default rows are `CNY`, `USD`, and `AED`.
+- User-added currencies are retained and are not deleted by the application.
+- Exchange rates are stored in `currency_rates` as source-to-default-currency pairs, for example `USD -> CNY`.
+- Manual exchange rates are marked with `is_manual = 1` and are not overwritten by automatic online refresh.
+- Automatic refresh only queries currently configured non-default currencies against the current default currency.

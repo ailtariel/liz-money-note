@@ -28,9 +28,11 @@ This document defines repository-level rules for frontend layout, page structure
 
 ## Feature Module Boundaries
 
+- `src/modules/` contains feature modules. A module is a product or business feature that may include pages, route-level UI, domain data, stores, repositories, services, feature composables, and private components.
 - Feature pages with domain data, stores, repositories, services, feature composables, and private components belong under `src/modules/<feature>/`.
-- `src/components/` is for lightweight UI, shared app shell pieces, and cross-feature display components that do not own domain business flow.
+- `src/components/` contains UI components. A component may include page structure or small local interaction logic, but should not own substantial domain data flow, persistence, repositories, services, or business workflows.
 - `src/components/shared/` is only for components reused by multiple features and not bound to one business domain.
+- `src/shared/lib/` contains shared logic-only libraries. A lib must not include pages or UI components. Use it for cross-feature logic such as schedulers, formatters, parsers, protocol helpers, or infrastructure utilities.
 - Types used by only one Vue file may stay in that Vue file. Types shared across multiple files should move to the nearest feature-level `*.types.ts` or UI-specific types file.
 
 ## State, Data Sync, and Messages

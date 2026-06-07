@@ -7,11 +7,11 @@ import { exportDatabaseJson, importDatabaseJson } from '@/modules/database/backu
 import { importTextFiles } from '@/modules/import/import.service';
 import type { ImportBatchResult } from '@/modules/import/import.types';
 import type { CurrencyCode } from '@/modules/shared/money';
-import { useDefaultCurrencyStore } from '@/modules/settings/default-currency.store';
+import { useCurrencyStore } from '@/modules/currency/currency.store';
 
 const { t } = useI18n();
 const route = useRoute();
-const defaultCurrencyStore = useDefaultCurrencyStore();
+const currencyStore = useCurrencyStore();
 const message = ref('');
 const error = ref('');
 const importText = ref('');
@@ -113,7 +113,7 @@ async function importSelectedFiles() {
 
 onMounted(async () => {
   try {
-    await defaultCurrencyStore.load();
+    await currencyStore.load();
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('settings.defaultCurrency.loadFailed');
   }
@@ -166,7 +166,7 @@ onMounted(async () => {
             v-model="importCurrency"
             :items="[
               { title: t('data.autoCurrency'), value: 'auto' },
-              ...defaultCurrencyStore.currencies.map((currency) => ({
+              ...currencyStore.currencies.map((currency) => ({
                 title: currency,
                 value: currency
               }))

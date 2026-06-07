@@ -5,7 +5,7 @@ import { useI18n } from '@/i18n';
 import { useBookStore } from '@/modules/books/book.store';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useTagStore } from '@/modules/tags/tag.store';
-import { useDefaultCurrencyStore } from '@/modules/settings/default-currency.store';
+import { useCurrencyStore } from '@/modules/currency/currency.store';
 import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import type { TransactionType } from '@/modules/transactions/transaction.types';
 import {
@@ -27,7 +27,7 @@ const emit = defineEmits<{
 const bookStore = useBookStore();
 const accountStore = useAccountStore();
 const tagStore = useTagStore();
-const defaultCurrencyStore = useDefaultCurrencyStore();
+const currencyStore = useCurrencyStore();
 const transactionStore = useTransactionStore();
 const error = ref('');
 const accountSheetOpen = ref(false);
@@ -176,7 +176,7 @@ onMounted(async () => {
     bookStore.load(),
     accountStore.load(),
     tagStore.load(),
-    defaultCurrencyStore.load()
+    currencyStore.load()
   ]);
   form.bookId = bookStore.activeBooks[0]?.id ?? null;
   form.accountId = accountStore.activeAccounts[0]?.id ?? null;
@@ -447,7 +447,7 @@ onMounted(async () => {
       <NumericKeyboard
         :confirm-label="t('common.confirm')"
         :display-value="displayAmount"
-        :title="`${t('transaction.amount')} (${selectedAccount?.currency ?? defaultCurrencyStore.currency})`"
+        :title="`${t('transaction.amount')} (${selectedAccount?.currency ?? currencyStore.currency})`"
         @backspace="backspaceAmount"
         @confirm="amountKeyboardOpen = false"
         @input="appendAmount"
