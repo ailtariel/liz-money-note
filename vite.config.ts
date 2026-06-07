@@ -56,6 +56,9 @@ export default defineConfig(({ mode, command }) => {
       },
       server: {
         port: Number(env.VITE_PORT || 8000),
+        watch: {
+          ignored: ["**/dist/**", "**/android/**", "**/.gradle/**", "**/docs/**"],
+        },
         proxy: {
           "/api": {
             target: env.VITE_API_PROXY_TARGET,
