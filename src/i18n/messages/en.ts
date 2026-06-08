@@ -271,6 +271,7 @@ export default {
     subtitle: 'Import or export local SQLite data',
     exported: 'Data exported.',
     exportFailed: 'Export failed.',
+    restoreTitle: 'Restore data',
     restoreConfirm: 'Restore will replace current data. Continue?',
     restored: 'Data restored. Refresh the current page data.',
     restoreFailed: 'Restore failed.',
@@ -278,6 +279,14 @@ export default {
     chooseFile: 'Please choose CSV or TXT files.',
     duplicateImportConfirm:
       'Importing the same file again creates duplicate transactions. Continue?',
+    duplicateFoundTitle: 'Duplicate transactions found',
+    duplicateFoundMessage:
+      '{count} imported rows already exist. Choose how to continue.',
+    keepDuplicates: 'Keep',
+    ignoreDuplicates: 'Ignore',
+    abortImport: 'Abort',
+    duplicateRows: '{count} duplicate rows',
+    duplicateIgnored: 'Ignored duplicates',
     importDone: 'Import complete: {count} transactions.',
     importFailed: 'Import failed.',
     pasteJson: 'Paste exported JSON',

@@ -2,9 +2,18 @@
 import { onMounted, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
+import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue';
 import { exportDatabaseJson, importDatabaseJson } from '@/modules/database/backup';
-import { importTextFiles } from '@/modules/import/import.service';
-import type { ImportBatchResult } from '@/modules/import/import.types';
+import {
+  getImportDuplicateSummary,
+  importTextFiles
+} from '@/modules/import/import.service';
+import type {
+  ImportBatchResult,
+  ImportDuplicateStrategy,
+  ImportDuplicateSummary,
+  ImportTextFile
+} from '@/modules/import/import.types';
 import type { CurrencyCode } from '@/modules/shared/money';
 import { useCurrencyStore } from '@/modules/currency/currency.store';
 import { useSnackQueueStore } from '@/modules/snack-queue/snack-queue.store';
@@ -17,6 +26,10 @@ const importText = ref('');
 const selectedFiles = ref<File[]>([]);
 const importCurrency = ref<CurrencyCode | 'auto'>('auto');
 const importResult = ref<ImportBatchResult | null>(null);
+const restoreConfirmDialog = ref(false);
+const duplicateConfirmDialog = ref(false);
+const pendingImportFiles = ref<ImportTextFile[]>([]);
+const duplicateSummary = ref<ImportDuplicateSummary | null>(null);
 
 async function exportData() {
   validationError.value = '';
@@ -39,11 +52,10 @@ async function exportData() {
 
 async function restoreData() {
   validationError.value = '';
+  restoreConfirmDialog.value = true;
+}
 
-  if (!window.confirm(t('data.restoreConfirm'))) {
-    return;
-  }
-
+async function confirmRestoreData() {
   try {
     await importDatabaseJson(importText.value);
     importText.value = '';
@@ -62,16 +74,29 @@ function readFileAsText(file: File) {
   });
 }
 
+async function runTextImport(
+  files: ImportTextFile[],
+  duplicateStrategy: ImportDuplicateStrategy
+) {
+  importResult.value = await importTextFiles(files, {
+    duplicateStrategy
+  });
+  snackQueueStore.success(
+    t('data.importDone', {
+      count: importResult.value.importedRows
+    })
+  );
+  selectedFiles.value = [];
+  pendingImportFiles.value = [];
+  duplicateSummary.value = null;
+}
+
 async function importSelectedFiles() {
   validationError.value = '';
   importResult.value = null;
 
   if (selectedFiles.value.length === 0) {
     validationError.value = t('data.chooseFile');
-    return;
-  }
-
-  if (!window.confirm(t('data.duplicateImportConfirm'))) {
     return;
   }
 
@@ -83,17 +108,35 @@ async function importSelectedFiles() {
         currency: importCurrency.value === 'auto' ? undefined : importCurrency.value
       }))
     );
+    const summary = await getImportDuplicateSummary(files);
 
-    importResult.value = await importTextFiles(files);
-    snackQueueStore.success(
-      t('data.importDone', {
-        count: importResult.value.importedRows
-      })
-    );
-    selectedFiles.value = [];
+    if (summary.duplicateRows > 0) {
+      pendingImportFiles.value = files;
+      duplicateSummary.value = summary;
+      duplicateConfirmDialog.value = true;
+      return;
+    }
+
+    await runTextImport(files, 'keep');
   } catch (err) {
     snackQueueStore.error(err instanceof Error ? err.message : t('data.importFailed'));
   }
+}
+
+async function confirmDuplicateImport(strategy: ImportDuplicateStrategy) {
+  duplicateConfirmDialog.value = false;
+
+  try {
+    await runTextImport(pendingImportFiles.value, strategy);
+  } catch (err) {
+    snackQueueStore.error(err instanceof Error ? err.message : t('data.importFailed'));
+  }
+}
+
+function abortDuplicateImport() {
+  duplicateConfirmDialog.value = false;
+  pendingImportFiles.value = [];
+  duplicateSummary.value = null;
 }
 
 onMounted(async () => {
@@ -109,6 +152,52 @@ onMounted(async () => {
 
 <template>
   <AppBarVue />
+
+  <ConfirmationDialog
+    v-model="restoreConfirmDialog"
+    :title="t('data.restoreTitle')"
+    :message="t('data.restoreConfirm')"
+    :confirm-text="t('common.confirm')"
+    :cancel-text="t('common.cancel')"
+    confirm-color="error"
+    @confirm="confirmRestoreData"
+  />
+
+  <ConfirmationDialog
+    v-model="duplicateConfirmDialog"
+    :title="t('data.duplicateFoundTitle')"
+    persistent
+  >
+    <div class="d-flex flex-column ga-3">
+      <div>
+        {{
+          t('data.duplicateFoundMessage', {
+            count: duplicateSummary?.duplicateRows ?? 0
+          })
+        }}
+      </div>
+      <v-list v-if="duplicateSummary?.files.length" density="compact">
+        <v-list-item v-for="file in duplicateSummary.files" :key="file.fileName">
+          <v-list-item-title>{{ file.fileName }}</v-list-item-title>
+          <v-list-item-subtitle>
+            {{ t('data.duplicateRows', { count: file.duplicateRows }) }}
+          </v-list-item-subtitle>
+        </v-list-item>
+      </v-list>
+    </div>
+
+    <template #actions>
+      <v-btn variant="text" @click="abortDuplicateImport">
+        {{ t('data.abortImport') }}
+      </v-btn>
+      <v-btn color="secondary" variant="tonal" @click="confirmDuplicateImport('ignore')">
+        {{ t('data.ignoreDuplicates') }}
+      </v-btn>
+      <v-btn color="primary" variant="flat" @click="confirmDuplicateImport('keep')">
+        {{ t('data.keepDuplicates') }}
+      </v-btn>
+    </template>
+  </ConfirmationDialog>
 
   <v-main>
     <v-container class="pa-4">
@@ -191,6 +280,9 @@ onMounted(async () => {
               <v-list-item-subtitle>
                 {{ file.bookName }} &middot; {{ file.currency }} &middot;
                 {{ t('data.imported') }} {{ file.importedRows }}
+                <template v-if="file.duplicateRows">
+                  &middot; {{ t('data.duplicateIgnored') }} {{ file.duplicateRows }}
+                </template>
               </v-list-item-subtitle>
             </v-list-item>
           </v-list>

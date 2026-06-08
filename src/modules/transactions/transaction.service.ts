@@ -75,7 +75,11 @@ export async function createTransaction(input: TransactionInput) {
     await persistDatabase();
     return transactionId;
   } catch (error) {
-    await db.rollbackTransaction();
+    try {
+      await db.rollbackTransaction();
+    } catch {
+      // Preserve the original database error.
+    }
     throw error;
   }
 }
@@ -108,7 +112,11 @@ export async function deleteTransaction(id: number) {
     await db.commitTransaction();
     await persistDatabase();
   } catch (error) {
-    await db.rollbackTransaction();
+    try {
+      await db.rollbackTransaction();
+    } catch {
+      // Preserve the original database error.
+    }
     throw error;
   }
 }

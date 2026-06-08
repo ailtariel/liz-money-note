@@ -71,7 +71,8 @@ export async function insertTransaction(
       input.recurringEventId ?? null,
       now,
       now
-    ]
+    ],
+    false
   );
   const id = result.changes?.lastId ?? 0;
 
@@ -81,7 +82,8 @@ export async function insertTransaction(
         statement:
           'INSERT OR IGNORE INTO transaction_tags (transaction_id, tag_id) VALUES (?, ?)',
         values: [id, tagId]
-      }))
+      })),
+      false
     );
   }
 
@@ -205,6 +207,7 @@ export async function getTransactionById(id: number, db?: SQLiteDBConnection) {
 export async function markTransactionDeleted(id: number, db: SQLiteDBConnection) {
   await db.run(
     `UPDATE transactions SET deleted_at = ?, updated_at = ? WHERE id = ?`,
-    [nowIso(), nowIso(), id]
+    [nowIso(), nowIso(), id],
+    false
   );
 }

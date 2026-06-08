@@ -57,9 +57,11 @@ async function replaceRecurringTags(
   tagIds: number[],
   db: SQLiteDBConnection
 ) {
-  await db.run('DELETE FROM recurring_event_tags WHERE recurring_event_id = ?', [
-    recurringEventId
-  ]);
+  await db.run(
+    'DELETE FROM recurring_event_tags WHERE recurring_event_id = ?',
+    [recurringEventId],
+    false
+  );
 
   if (tagIds.length === 0) {
     return;
@@ -70,7 +72,8 @@ async function replaceRecurringTags(
       statement:
         'INSERT OR IGNORE INTO recurring_event_tags (recurring_event_id, tag_id) VALUES (?, ?)',
       values: [recurringEventId, tagId]
-    }))
+    })),
+    false
   );
 }
 
@@ -157,14 +160,19 @@ export async function createRecurringEvent(input: RecurringEventInput) {
         input.nextTriggerDate,
         now,
         now
-      ]
+      ],
+      false
     );
     const id = result.changes?.lastId ?? 0;
     await replaceRecurringTags(id, input.tagIds ?? [], db);
     await db.commitTransaction();
     await persistDatabase();
   } catch (error) {
-    await db.rollbackTransaction();
+    try {
+      await db.rollbackTransaction();
+    } catch {
+      // Preserve the original database error.
+    }
     throw error;
   }
 }
@@ -196,13 +204,18 @@ export async function updateRecurringEvent(id: number, input: RecurringEventInpu
         input.nextTriggerDate,
         nowIso(),
         id
-      ]
+      ],
+      false
     );
     await replaceRecurringTags(id, input.tagIds ?? [], db);
     await db.commitTransaction();
     await persistDatabase();
   } catch (error) {
-    await db.rollbackTransaction();
+    try {
+      await db.rollbackTransaction();
+    } catch {
+      // Preserve the original database error.
+    }
     throw error;
   }
 }
@@ -211,7 +224,8 @@ export async function updateRecurringSchedule(
   id: number,
   nextTriggerDate: string | null,
   isActive: boolean,
-  db: SQLiteDBConnection
+  db: SQLiteDBConnection,
+  useTransaction = true
 ) {
   await db.run(
     `UPDATE recurring_events
@@ -219,7 +233,8 @@ export async function updateRecurringSchedule(
          is_active = ?,
          updated_at = ?
      WHERE id = ?`,
-    [nextTriggerDate, isActive ? 1 : 0, nowIso(), id]
+    [nextTriggerDate, isActive ? 1 : 0, nowIso(), id],
+    useTransaction
   );
 }
 

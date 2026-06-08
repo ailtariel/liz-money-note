@@ -110,11 +110,21 @@ export async function approveRecurringEvent(event: RecurringEvent) {
       await applyAccountBalanceDelta(event.targetAccountId!, event.amount, db);
     }
 
-    await updateRecurringSchedule(event.id, schedule.nextDate, schedule.isActive, db);
+    await updateRecurringSchedule(
+      event.id,
+      schedule.nextDate,
+      schedule.isActive,
+      db,
+      false
+    );
     await db.commitTransaction();
     await persistDatabase();
   } catch (error) {
-    await db.rollbackTransaction();
+    try {
+      await db.rollbackTransaction();
+    } catch {
+      // Preserve the original database error.
+    }
     throw error;
   }
 }

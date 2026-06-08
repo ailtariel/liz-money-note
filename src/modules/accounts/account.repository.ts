@@ -114,6 +114,7 @@ export async function applyAccountBalanceDelta(
     `UPDATE accounts
      SET current_balance = current_balance + ?, updated_at = ?
      WHERE id = ?`,
-    [delta, nowIso(), id]
+    [delta, nowIso(), id],
+    false
   );
 }

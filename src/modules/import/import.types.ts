@@ -7,6 +7,12 @@ export interface ImportTextFile {
   currency?: CurrencyCode;
 }
 
+export type ImportDuplicateStrategy = 'keep' | 'ignore';
+
+export interface ImportTextOptions {
+  duplicateStrategy?: ImportDuplicateStrategy;
+}
+
 export interface ParsedImportTransaction {
   rowNumber: number;
   occurredAt: string;
@@ -39,6 +45,7 @@ export interface ImportFileResult {
   currency: CurrencyCode;
   importedRows: number;
   skippedRows: number;
+  duplicateRows: number;
   issueCount: number;
   issues: ImportParseIssue[];
 }
@@ -47,5 +54,16 @@ export interface ImportBatchResult {
   files: ImportFileResult[];
   importedRows: number;
   skippedRows: number;
+  duplicateRows: number;
   issueCount: number;
+}
+
+export interface ImportDuplicateFileSummary {
+  fileName: string;
+  duplicateRows: number;
+}
+
+export interface ImportDuplicateSummary {
+  duplicateRows: number;
+  files: ImportDuplicateFileSummary[];
 }
