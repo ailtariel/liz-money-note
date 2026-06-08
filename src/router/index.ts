@@ -89,34 +89,22 @@ const router = createRouter({
         {
           path: 'data/import',
           name: 'data-import',
-          component: () => import('@/modules/database/Data.vue'),
-          meta: {
-            titleKey: 'more.import'
-          }
+          redirect: { name: 'data' }
         },
         {
           path: 'data/export',
           name: 'data-export',
-          component: () => import('@/modules/database/Data.vue'),
-          meta: {
-            titleKey: 'more.export'
-          }
+          redirect: { name: 'data' }
         },
         {
           path: 'data/backup',
           name: 'data-backup',
-          component: () => import('@/modules/database/Data.vue'),
-          meta: {
-            titleKey: 'more.backup'
-          }
+          redirect: { name: 'data' }
         },
         {
           path: 'data/restore',
           name: 'data-restore',
-          component: () => import('@/modules/database/Data.vue'),
-          meta: {
-            titleKey: 'more.restore'
-          }
+          redirect: { name: 'data' }
         },
         {
           path: 'theme',

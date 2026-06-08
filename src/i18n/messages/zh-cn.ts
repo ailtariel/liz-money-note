@@ -164,14 +164,14 @@ export default {
     excluded: '未计入资产'
   },
   more: {
-    basicData: '基础资料',
+    features: '功能',
     data: '数据',
     settings: '设置',
     import: '导入',
     export: '导出',
     backup: '备份',
     restore: '恢复',
-    theme: '主题',
+    theme: '外观',
     defaultCurrency: '货币',
     system: '系统',
     about: '关于'
@@ -180,7 +180,7 @@ export default {
     loadFailed: '加载主题设置失败。',
     saveFailed: '保存主题设置失败。',
     colorScheme: {
-      title: '色系',
+      title: '主题',
       green: '绿色',
       orange: '橙色'
     },
@@ -262,7 +262,7 @@ export default {
   },
   data: {
     title: '数据',
-    subtitle: '导入、导出或恢复本地 SQLite 数据',
+    subtitle: '导入或导出本地 SQLite 数据',
     exported: '数据已导出。',
     exportFailed: '导出失败。',
     restoreConfirm: '恢复会替换当前数据，是否继续？',
@@ -274,8 +274,10 @@ export default {
     importDone: '导入完成：{count} 条流水。',
     importFailed: '导入失败。',
     pasteJson: '粘贴导出的 JSON',
+    importJson: '导入 JSON',
     importText: '导入 CSV / TXT',
     importHint: '每个文件会作为一个账本导入，分类会转换为 Tag。',
+    exportHint: '导出本地数据库的 JSON 备份。',
     chooseFiles: '选择文件',
     currency: '币种',
     autoCurrency: '自动推断',

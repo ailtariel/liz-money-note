@@ -14,7 +14,7 @@ export type MoreNavigationSection = {
 
 export const moreNavigationSections: MoreNavigationSection[] = [
   {
-    titleKey: 'more.basicData',
+    titleKey: 'more.features',
     items: [
       {
         titleKey: 'nav.books',
@@ -29,6 +29,12 @@ export const moreNavigationSections: MoreNavigationSection[] = [
         routeNames: ['accounts']
       },
       {
+        titleKey: 'more.defaultCurrency',
+        icon: '$cash',
+        to: { name: 'currency' },
+        routeNames: ['currency']
+      },
+      {
         titleKey: 'nav.tags',
         icon: '$tag',
         to: { name: 'tags' },
@@ -39,35 +45,18 @@ export const moreNavigationSections: MoreNavigationSection[] = [
         icon: '$recurring',
         to: { name: 'recurring' },
         routeNames: ['recurring']
-      }
-    ]
-  },
-  {
-    titleKey: 'more.data',
-    items: [
-      {
-        titleKey: 'more.import',
-        icon: '$upload',
-        to: { name: 'data-import' },
-        routeNames: ['data-import']
       },
       {
-        titleKey: 'more.export',
-        icon: '$download',
-        to: { name: 'data-export' },
-        routeNames: ['data-export']
-      },
-      {
-        titleKey: 'more.backup',
+        titleKey: 'nav.data',
         icon: '$data',
-        to: { name: 'data-backup' },
-        routeNames: ['data-backup']
-      },
-      {
-        titleKey: 'more.restore',
-        icon: '$restore',
-        to: { name: 'data-restore' },
-        routeNames: ['data-restore']
+        to: { name: 'data' },
+        routeNames: [
+          'data',
+          'data-import',
+          'data-export',
+          'data-backup',
+          'data-restore'
+        ]
       }
     ]
   },
@@ -79,12 +68,6 @@ export const moreNavigationSections: MoreNavigationSection[] = [
         icon: '$themeDark',
         to: { name: 'theme' },
         routeNames: ['theme']
-      },
-      {
-        titleKey: 'more.defaultCurrency',
-        icon: '$cash',
-        to: { name: 'currency' },
-        routeNames: ['currency']
       },
       {
         titleKey: 'more.system',

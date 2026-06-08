@@ -19,11 +19,7 @@ const sections = computed(() =>
 </script>
 
 <template>
-  <AppBarVue>
-    <template #actions>
-      <LanguageSwitcher />
-    </template>
-  </AppBarVue>
+  <AppBarVue />
   <v-main>
     <v-container class="pa-4">
       <div class="d-flex flex-column ga-5">

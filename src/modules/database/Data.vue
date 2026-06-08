@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { onMounted, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
 import { exportDatabaseJson, importDatabaseJson } from '@/modules/database/backup';
@@ -11,7 +10,6 @@ import { useCurrencyStore } from '@/modules/currency/currency.store';
 import { useSnackQueueStore } from '@/modules/snack-queue/snack-queue.store';
 
 const { t } = useI18n();
-const route = useRoute();
 const currencyStore = useCurrencyStore();
 const snackQueueStore = useSnackQueueStore();
 const validationError = ref('');
@@ -19,19 +17,6 @@ const importText = ref('');
 const selectedFiles = ref<File[]>([]);
 const importCurrency = ref<CurrencyCode | 'auto'>('auto');
 const importResult = ref<ImportBatchResult | null>(null);
-const dataRouteName = computed(() => route.name);
-const showExport = computed(() =>
-  ['data', 'data-export', 'data-backup'].includes(String(dataRouteName.value ?? ''))
-);
-const showRestore = computed(() =>
-  ['data', 'data-restore'].includes(String(dataRouteName.value ?? ''))
-);
-const showImport = computed(() =>
-  ['data', 'data-import'].includes(String(dataRouteName.value ?? ''))
-);
-const exportButtonLabel = computed(() =>
-  dataRouteName.value === 'data-backup' ? t('more.backup') : t('more.export')
-);
 
 async function exportData() {
   validationError.value = '';
@@ -133,61 +118,73 @@ onMounted(async () => {
           {{ validationError }}
         </v-alert>
 
-        <v-card v-if="showExport" class="soft-card pa-4">
-          <v-btn block color="primary" prepend-icon="$download" @click="exportData">
-            {{ exportButtonLabel }}
-          </v-btn>
-        </v-card>
+        <v-row>
+          <v-col cols="12" sm="6">
+            <v-card class="soft-card pa-4 h-100">
+              <div class="text-title-medium font-weight-bold">
+                {{ t('more.import') }}
+              </div>
+              <div class="text-body-medium text-medium-emphasis mb-4">
+                {{ t('data.importHint') }}
+              </div>
+              <v-file-input
+                v-model="selectedFiles"
+                accept=".csv,.txt,text/csv,text/plain"
+                :label="t('data.chooseFiles')"
+                multiple
+              />
+              <v-select
+                v-model="importCurrency"
+                :items="[
+                  { title: t('data.autoCurrency'), value: 'auto' },
+                  ...currencyStore.currencies.map((currency) => ({
+                    title: currency,
+                    value: currency
+                  }))
+                ]"
+                :label="t('data.currency')"
+              />
+              <v-btn
+                :disabled="selectedFiles.length === 0"
+                block
+                color="primary"
+                prepend-icon="$upload"
+                @click="importSelectedFiles"
+              >
+                {{ t('more.import') }}
+              </v-btn>
 
-        <v-card v-if="showRestore" class="soft-card pa-4">
-          <v-textarea v-model="importText" :label="t('data.pasteJson')" rows="8" />
-          <v-btn
-            :disabled="!importText"
-            block
-            color="error"
-            variant="tonal"
-            @click="restoreData"
-          >
-            {{ t('more.restore') }}
-          </v-btn>
-        </v-card>
+              <v-divider class="my-4" />
 
-        <v-card v-if="showImport" class="soft-card pa-4">
-          <div class="text-title-medium font-weight-bold">
-            {{ t('data.importText') }}
-          </div>
-          <div class="text-body-medium text-medium-emphasis mb-4">
-            {{ t('data.importHint') }}
-          </div>
-          <v-file-input
-            v-model="selectedFiles"
-            accept=".csv,.txt,text/csv,text/plain"
-            :label="t('data.chooseFiles')"
-            multiple
-          />
-          <v-select
-            v-model="importCurrency"
-            :items="[
-              { title: t('data.autoCurrency'), value: 'auto' },
-              ...currencyStore.currencies.map((currency) => ({
-                title: currency,
-                value: currency
-              }))
-            ]"
-            :label="t('data.currency')"
-          />
-          <v-btn
-            :disabled="selectedFiles.length === 0"
-            block
-            color="primary"
-            prepend-icon="$upload"
-            @click="importSelectedFiles"
-          >
-            {{ t('more.import') }}
-          </v-btn>
-        </v-card>
+              <v-textarea v-model="importText" :label="t('data.pasteJson')" rows="8" />
+              <v-btn
+                :disabled="!importText"
+                block
+                color="error"
+                variant="tonal"
+                @click="restoreData"
+              >
+                {{ t('data.importJson') }}
+              </v-btn>
+            </v-card>
+          </v-col>
 
-        <v-card v-if="showImport && importResult" class="soft-card pa-4">
+          <v-col cols="12" sm="6">
+            <v-card class="soft-card pa-4 h-100">
+              <div class="text-title-medium font-weight-bold">
+                {{ t('more.export') }}
+              </div>
+              <div class="text-body-medium text-medium-emphasis mb-4">
+                {{ t('data.exportHint') }}
+              </div>
+              <v-btn block color="primary" prepend-icon="$download" @click="exportData">
+                {{ t('more.export') }}
+              </v-btn>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <v-card v-if="importResult" class="soft-card pa-4">
           <v-list>
             <v-list-item v-for="file in importResult.files" :key="file.fileName">
               <v-list-item-title>{{ file.fileName }}</v-list-item-title>
@@ -199,7 +196,7 @@ onMounted(async () => {
           </v-list>
         </v-card>
 
-        <v-alert v-if="showImport && importResult?.issueCount" type="warning" variant="tonal">
+        <v-alert v-if="importResult?.issueCount" type="warning" variant="tonal">
           {{ t('data.issueWarning', { count: importResult.issueCount }) }}
         </v-alert>
       </div>

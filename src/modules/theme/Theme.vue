@@ -1,14 +1,20 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { useI18n } from '@/i18n';
+import { computed, onMounted, ref } from 'vue';
+import { Locale, useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
+import { useAppLocale } from '@/modules/shared/useAppLocale';
 import { themeColorSchemes, themeModes } from './theme.types';
 import type { ThemeColorScheme, ThemeMode } from './theme.types';
 import { useThemeStore } from './theme.store';
 
 const { t } = useI18n();
 const store = useThemeStore();
+const appLocale = useAppLocale();
 const error = ref('');
+const languages = computed(() => [
+  { value: Locale.zhCn, title: t('language.zhCn') },
+  { value: Locale.en, title: t('language.en') }
+]);
 
 async function chooseColorScheme(value: ThemeColorScheme) {
   error.value = '';
@@ -28,6 +34,10 @@ async function chooseMode(value: ThemeMode) {
   }
 }
 
+function chooseLanguage(value: Locale) {
+  appLocale.apply(value);
+}
+
 onMounted(async () => {
   error.value = '';
   try {
@@ -45,6 +55,32 @@ onMounted(async () => {
     <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+
+        <v-card class="soft-card">
+          <div class="px-4 pt-4 text-title-medium font-weight-bold">
+            {{ t('app.language') }}
+          </div>
+          <v-list>
+            <v-list-item
+              v-for="language in languages"
+              :key="language.value"
+              :active="appLocale.current === language.value"
+              @click="chooseLanguage(language.value)"
+            >
+              <template #prepend>
+                <v-avatar color="primary" variant="tonal">
+                  <v-icon icon="$language" />
+                </v-avatar>
+              </template>
+              <v-list-item-title>
+                {{ language.title }}
+              </v-list-item-title>
+              <template #append>
+                <v-icon v-if="appLocale.current === language.value" icon="$check" />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-card>
 
         <v-card class="soft-card">
           <div class="px-4 pt-4 text-title-medium font-weight-bold">

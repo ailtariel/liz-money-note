@@ -154,7 +154,8 @@ export default {
     totalSpent: 'Total spent',
     totalIncome: 'Total income',
     untagged: 'Untagged',
-    exchangeRateHint: 'Statistics are automatically converted to the selected currency using exchange rates.',
+    exchangeRateHint:
+      'Statistics are automatically converted to the selected currency using exchange rates.',
     missingExchangeRates:
       'Unable to fetch exchange rates from {currencies} to {currency}. Related transactions are not included in statistics.'
   },
@@ -164,14 +165,14 @@ export default {
     excluded: 'Excluded'
   },
   more: {
-    basicData: 'Basic data',
+    features: 'Features',
     data: 'Data',
     settings: 'Settings',
     import: 'Import',
     export: 'Export',
     backup: 'Backup',
     restore: 'Restore',
-    theme: 'Theme',
+    theme: 'Appearance',
     defaultCurrency: 'Currency',
     system: 'System',
     about: 'About'
@@ -180,7 +181,7 @@ export default {
     loadFailed: 'Failed to load theme settings.',
     saveFailed: 'Failed to save theme settings.',
     colorScheme: {
-      title: 'Color scheme',
+      title: 'Theme',
       green: 'Green',
       orange: 'Orange'
     },
@@ -211,9 +212,11 @@ export default {
     cache: {
       title: 'Cache',
       clear: 'Clear cache',
-      subtitle: 'Clear browser cache and Android WebView cache. Local account data is kept.',
+      subtitle:
+        'Clear browser cache and Android WebView cache. Local account data is kept.',
       clearDoneBrowser: 'Cache cleared. {count} browser cache buckets removed.',
-      clearDoneAndroid: 'Cache cleared. Android WebView cache was also cleaned.',
+      clearDoneAndroid:
+        'Cache cleared. Android WebView cache was also cleaned.',
       clearFailed: 'Failed to clear cache.'
     }
   },
@@ -231,7 +234,10 @@ export default {
   country: {
     china: { name: 'China', currency: 'Chinese yuan' },
     unitedStates: { name: 'United States', currency: 'US dollar' },
-    unitedArabEmirates: { name: 'United Arab Emirates', currency: 'UAE dirham' },
+    unitedArabEmirates: {
+      name: 'United Arab Emirates',
+      currency: 'UAE dirham'
+    },
     eurozone: { name: 'Eurozone', currency: 'Euro' },
     unitedKingdom: { name: 'United Kingdom', currency: 'Pound sterling' },
     japan: { name: 'Japan', currency: 'Japanese yen' },
@@ -262,7 +268,7 @@ export default {
   },
   data: {
     title: 'Data',
-    subtitle: 'Import, export, or restore local SQLite data',
+    subtitle: 'Import or export local SQLite data',
     exported: 'Data exported.',
     exportFailed: 'Export failed.',
     restoreConfirm: 'Restore will replace current data. Continue?',
@@ -270,12 +276,15 @@ export default {
     restoreFailed: 'Restore failed.',
     readFileFailed: 'Failed to read file.',
     chooseFile: 'Please choose CSV or TXT files.',
-    duplicateImportConfirm: 'Importing the same file again creates duplicate transactions. Continue?',
+    duplicateImportConfirm:
+      'Importing the same file again creates duplicate transactions. Continue?',
     importDone: 'Import complete: {count} transactions.',
     importFailed: 'Import failed.',
     pasteJson: 'Paste exported JSON',
+    importJson: 'Import JSON',
     importText: 'Import CSV / TXT',
     importHint: 'Each file imports as one book. Categories become tags.',
+    exportHint: 'Export a JSON backup of the local database.',
     chooseFiles: 'Choose files',
     currency: 'Currency',
     autoCurrency: 'Auto detect',
@@ -283,6 +292,7 @@ export default {
     imported: 'Imported',
     skipped: 'Skipped',
     issues: 'Issues',
-    issueWarning: '{count} rows were not imported. Check file format, amounts, or dates.'
+    issueWarning:
+      '{count} rows were not imported. Check file format, amounts, or dates.'
   }
 };
