@@ -124,7 +124,12 @@ const listRows = computed<TransactionListRow[]>(() => {
 
   for (const transaction of transactions.value) {
     const date = transaction.occurredAt.slice(0, 10);
-    grouped.set(date, [...(grouped.get(date) ?? []), transaction]);
+    const items = grouped.get(date);
+    if (items) {
+      items.push(transaction);
+    } else {
+      grouped.set(date, [transaction]);
+    }
   }
 
   for (const [date, items] of grouped) {
@@ -450,7 +455,14 @@ function handleEditorSaved() {
         </div>
       </v-card>
 
-      <v-virtual-scroll v-else v-memo="[listRows]" :items="listRows">
+      <v-virtual-scroll
+        v-else
+        v-memo="[listRows]"
+        :items="listRows"
+        item-height="98"
+        item-key="key"
+        height="520"
+      >
         <template #default="{ item }">
           <TransactionItemVue
             :item="item"

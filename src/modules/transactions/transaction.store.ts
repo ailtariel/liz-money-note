@@ -1,10 +1,7 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, shallowRef } from 'vue';
 import { useAccountStore } from '@/modules/accounts/account.store';
-import {
-  createTransaction,
-  deleteTransaction
-} from './transaction.service';
+import { createTransaction, deleteTransaction } from './transaction.service';
 import { listTransactions } from './transaction.repository';
 import type {
   Transaction,
@@ -13,7 +10,7 @@ import type {
 } from './transaction.types';
 
 export const useTransactionStore = defineStore('transactions', () => {
-  const transactions = ref<Transaction[]>([]);
+  const transactions = shallowRef<Transaction[]>([]);
   const filters = ref<TransactionFilters>({});
   const loading = ref(false);
   const accountStore = useAccountStore();
