@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import { useTagStore } from '@/modules/tags/tag.store';
@@ -191,11 +191,6 @@ onMounted(async () => {
   await refreshMissingExchangeRates();
 });
 
-watch(selectedCurrency, async () => {
-  await loadExchangeRates();
-  await refreshMissingExchangeRates();
-});
-
 function convertAmount(amount: number, currency: CurrencyCode) {
   if (currency === selectedCurrency.value) {
     return amount;
@@ -266,6 +261,12 @@ async function loadStatisticsData() {
   await refreshMissingExchangeRates();
 }
 
+async function changeSelectedCurrency(currency: CurrencyCode) {
+  selectedCurrency.value = currency;
+  await loadExchangeRates();
+  await refreshMissingExchangeRates();
+}
+
 async function refreshMissingExchangeRates() {
   const missingCurrencies = missingExchangeCurrencies.value;
   if (!missingCurrencies.length) {
@@ -303,14 +304,25 @@ async function selectBook(value: number | string | null) {
 
 async function selectCurrency(value: number | string | null) {
   if (typeof value === 'string') {
-    selectedCurrency.value = value;
+    await changeSelectedCurrency(value);
   }
   currencyFilterOpen.value = false;
 }
 
 async function selectAccount(value: number | string | null) {
-  filters.value.accountId = typeof value === 'number' ? value : null;
+  const accountId = typeof value === 'number' ? value : null;
+  filters.value.accountId = accountId;
   accountFilterOpen.value = false;
+
+  if (accountId !== null) {
+    const account = accountStore.accounts.find((item) => item.id === accountId);
+
+    if (account && account.currency !== selectedCurrency.value) {
+      selectedCurrency.value = account.currency;
+      await loadExchangeRates();
+    }
+  }
+
   await loadStatisticsData();
 }
 
@@ -389,6 +401,10 @@ function buildTrendPoints() {
           {{ selectedCurrency }}
           <v-icon class="ms-1 text-medium-emphasis" icon="$dropdown" size="18" />
         </v-btn>
+      </div>
+
+      <div class="px-1 text-body-small text-medium-emphasis">
+        {{ t('stats.exchangeRateHint') }}
       </div>
 
       <v-card class="summary-amount-card pa-5" color="summary">

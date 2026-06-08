@@ -154,6 +154,7 @@ export default {
     totalSpent: 'Total spent',
     totalIncome: 'Total income',
     untagged: 'Untagged',
+    exchangeRateHint: 'Statistics are automatically converted to the selected currency using exchange rates.',
     missingExchangeRates:
       'Unable to fetch exchange rates from {currencies} to {currency}. Related transactions are not included in statistics.'
   },

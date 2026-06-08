@@ -154,6 +154,7 @@ export default {
     totalSpent: '总支出',
     totalIncome: '总收入',
     untagged: '未标记',
+    exchangeRateHint: '统计金额会根据汇率自动换算为所选货币。',
     missingExchangeRates:
       '无法获取 {currencies} 到 {currency} 的汇率，相关流水未计入统计。'
   },
