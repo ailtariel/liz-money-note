@@ -10,7 +10,9 @@ export function useApplyTheme() {
 
   const activeThemeName = computed(() => {
     const dark =
-      themeStore.mode === 'system' ? prefersDark.value : themeStore.mode === 'dark';
+      themeStore.mode === 'system'
+        ? prefersDark.value
+        : themeStore.mode === 'dark';
     const tone = dark ? 'Dark' : 'Light';
     return `${themeStore.colorScheme}${tone}`;
   });
@@ -22,7 +24,7 @@ export function useApplyTheme() {
   watch(
     activeThemeName,
     (name) => {
-      vuetifyTheme.global.name.value = name;
+      vuetifyTheme.change(name);
     },
     { immediate: true }
   );
