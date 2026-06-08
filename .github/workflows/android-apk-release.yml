@@ -1,0 +1,132 @@
+name: Android APK Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release-apk:
+    name: Build and release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y sqlite3
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build web assets
+        run: npm run build
+
+      - name: Sync Capacitor Android project
+        run: npm run cap:sync:android
+
+      - name: Read release version
+        id: version
+        shell: bash
+        run: |
+          tag_name="${GITHUB_REF_NAME}"
+          version_name="${tag_name#v}"
+          version_code="${GITHUB_RUN_NUMBER}"
+
+          if [[ -z "${version_name}" || "${version_name}" == "${tag_name}" ]]; then
+            echo "Tag must use the v<version> format, for example v1.2.3." >&2
+            exit 1
+          fi
+
+          echo "tag_name=${tag_name}" >> "${GITHUB_OUTPUT}"
+          echo "version_name=${version_name}" >> "${GITHUB_OUTPUT}"
+          echo "version_code=${version_code}" >> "${GITHUB_OUTPUT}"
+
+      - name: Check Android signing secrets
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          missing=0
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [[ -z "${!name}" ]]; then
+              echo "Missing required GitHub Actions secret: ${name}" >&2
+              missing=1
+            fi
+          done
+
+          if [[ "${missing}" -ne 0 ]]; then
+            exit 1
+          fi
+
+      - name: Build unsigned release APK
+        working-directory: android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleRelease \
+            -PVERSION_NAME="${{ steps.version.outputs.version_name }}" \
+            -PVERSION_CODE="${{ steps.version.outputs.version_code }}"
+
+      - name: Sign release APK
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          TAG_NAME: ${{ steps.version.outputs.tag_name }}
+        run: |
+          mkdir -p dist-release
+          keystore_path="${RUNNER_TEMP}/release.keystore"
+          unsigned_apk="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          aligned_apk="${RUNNER_TEMP}/app-release-aligned.apk"
+          signed_apk="dist-release/Liz-Money-Note-${TAG_NAME}.apk"
+
+          echo "${ANDROID_KEYSTORE_BASE64}" | base64 --decode > "${keystore_path}"
+
+          build_tools_dir="$(find "${ANDROID_HOME}/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)"
+          "${build_tools_dir}/zipalign" -f -p 4 "${unsigned_apk}" "${aligned_apk}"
+          "${build_tools_dir}/apksigner" sign \
+            --ks "${keystore_path}" \
+            --ks-key-alias "${ANDROID_KEY_ALIAS}" \
+            --ks-pass "pass:${ANDROID_KEYSTORE_PASSWORD}" \
+            --key-pass "pass:${ANDROID_KEY_PASSWORD}" \
+            --out "${signed_apk}" \
+            "${aligned_apk}"
+          "${build_tools_dir}/apksigner" verify --verbose "${signed_apk}"
+
+          sha256sum "${signed_apk}" > "${signed_apk}.sha256"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ steps.version.outputs.tag_name }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+        run: |
+          gh release create "${TAG_NAME}" \
+            dist-release/* \
+            --title "Liz Money Note ${VERSION_NAME}" \
+            --notes "Android APK release for ${TAG_NAME}."

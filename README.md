@@ -27,6 +27,34 @@ npm run dev
 npm run build
 ```
 
+## GitHub Android APK Release
+
+This repository includes a GitHub Actions workflow that builds and publishes a signed Android APK when a version tag is pushed.
+
+Required tag format:
+
+```bash
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+The workflow publishes the APK and its SHA-256 checksum to GitHub Releases.
+
+Required GitHub Actions secrets:
+
+- `ANDROID_KEYSTORE_BASE64`: Base64-encoded Android signing keystore.
+- `ANDROID_KEYSTORE_PASSWORD`: Keystore password.
+- `ANDROID_KEY_ALIAS`: Signing key alias.
+- `ANDROID_KEY_PASSWORD`: Signing key password.
+
+Example command to encode the keystore:
+
+```bash
+base64 -w 0 release.keystore
+```
+
+The APK `versionName` is derived from the tag without the leading `v`, and `versionCode` is derived from the GitHub Actions run number.
+
 ## Docker
 
 ```bash
