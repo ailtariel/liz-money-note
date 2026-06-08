@@ -45,6 +45,13 @@ When relevant documents exist, agents should update those documents by default a
 - Follow the coding specification constraints for planning, changes, and verification when the task involves code changes.
 - Before final response for code-related tasks, self-check compliance against the coding specification.
 
+## Encoding and Terminal Output
+
+- Do not conclude that a source file is garbled only because PowerShell command output shows mojibake.
+- On Windows, even when `chcp`, `[Console]::OutputEncoding`, and `$OutputEncoding` are UTF-8, the agent tool host may still decode captured stdout incorrectly.
+- When Chinese or other non-ASCII text looks garbled in shell output, verify the actual file content through a UTF-8-aware method before making claims or edits. Prefer checking diffs, build/typecheck results, or reading the file with a runtime that explicitly decodes UTF-8.
+- Treat PowerShell output mojibake as a display/capture issue unless there is direct evidence that the file bytes or application runtime text are actually corrupted.
+
 ## Conflict Resolution
 
 - Highest priority: explicit user request in current conversation.
