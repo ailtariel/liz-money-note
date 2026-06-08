@@ -24,6 +24,8 @@ export const useExchangeRateStore = defineStore('exchangeRate', () => {
   const rates = ref<CurrencyRate[]>([]);
   const loading = ref(false);
   const error = ref('');
+  let loadedTargetCurrency: CurrencyCode | null = null;
+  let loadedCurrenciesKey = '';
 
   const updatedAt = computed(() =>
     rates.value
@@ -58,9 +60,30 @@ export const useExchangeRateStore = defineStore('exchangeRate', () => {
       });
   }
 
+  function getCurrenciesKey(currencies: CurrencyCode[]) {
+    return [...currencies].sort().join('|');
+  }
+
+  function markLoaded(currencies: CurrencyCode[], targetCurrency: CurrencyCode) {
+    loadedTargetCurrency = targetCurrency;
+    loadedCurrenciesKey = getCurrenciesKey(currencies);
+  }
+
+  function hasFreshLoadedRates(
+    currencies: CurrencyCode[],
+    targetCurrency: CurrencyCode
+  ) {
+    return (
+      loadedTargetCurrency === targetCurrency &&
+      loadedCurrenciesKey === getCurrenciesKey(currencies) &&
+      !isStale(updatedAt.value)
+    );
+  }
+
   async function load(currencies: CurrencyCode[], targetCurrency: CurrencyCode) {
     const storedRates = await listCurrencyRates(targetCurrency);
     rates.value = mergeConfiguredCurrencies(currencies, targetCurrency, storedRates);
+    markLoaded(currencies, targetCurrency);
   }
 
   async function refreshOnline(
@@ -69,6 +92,14 @@ export const useExchangeRateStore = defineStore('exchangeRate', () => {
     force = false,
     sourceCurrencyFilter: CurrencyCode[] | null = null
   ) {
+    if (
+      !force &&
+      !sourceCurrencyFilter &&
+      hasFreshLoadedRates(currencies, targetCurrency)
+    ) {
+      return;
+    }
+
     const sourceCurrencies = [
       ...new Set(
         (sourceCurrencyFilter ?? currencies)
@@ -77,6 +108,7 @@ export const useExchangeRateStore = defineStore('exchangeRate', () => {
     ];
     if (sourceCurrencies.length === 0) {
       rates.value = [];
+      markLoaded(currencies, targetCurrency);
       return;
     }
 

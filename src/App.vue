@@ -3,11 +3,14 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import { useAppLocale } from '@/modules/shared/useAppLocale';
 import { useAccountStore } from '@/modules/accounts/account.store';
-import { useCurrencyStore } from '@/modules/currency/currency.store';
-import { useExchangeRateStore } from '@/modules/exchange-rate/exchange-rate.store';
 import { useRecurringStore } from '@/modules/recurring/recurring.store';
 import { useSnackQueueStore } from '@/modules/snack-queue/snack-queue.store';
 import { useApplyTheme } from '@/modules/theme/useApplyTheme';
+import {
+  loadSystemDatabaseState,
+  loadSystemDueRecurringEvents,
+  refreshSystemExchangeRates
+} from '@/shared/lib/core/db';
 import { useCronJobManager } from '@/shared/lib/cron-job-manager';
 import AmountText from '@/components/shared/AmountText.vue';
 
@@ -17,8 +20,6 @@ useApplyTheme();
 const cronJobManager = useCronJobManager();
 const recurringStore = useRecurringStore();
 const accountStore = useAccountStore();
-const currencyStore = useCurrencyStore();
-const exchangeRateStore = useExchangeRateStore();
 const snackQueueStore = useSnackQueueStore();
 const sheetOpen = ref(false);
 const error = ref('');
@@ -34,17 +35,11 @@ function accountName(id: number | null) {
 }
 
 async function refreshDueSheet() {
-  await recurringStore.loadDue();
-  sheetOpen.value = dueEvents.value.length > 0;
+  sheetOpen.value = (await loadSystemDueRecurringEvents()) > 0;
 }
 
 async function refreshExchangeRates(force = false) {
-  await currencyStore.load();
-  await exchangeRateStore.refreshOnline(
-    currencyStore.currencies,
-    currencyStore.currency,
-    force
-  );
+  await refreshSystemExchangeRates(force);
 }
 
 async function approve(index: number) {
@@ -80,10 +75,9 @@ async function disable(index: number) {
 
 onMounted(async () => {
   appLocale.init();
-  await Promise.all([accountStore.load(), currencyStore.load()]);
+  await loadSystemDatabaseState();
 
   try {
-    await exchangeRateStore.load(currencyStore.currencies, currencyStore.currency);
     await refreshExchangeRates();
   } catch (err) {
     console.error('Failed to update exchange rates.', err);

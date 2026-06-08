@@ -20,7 +20,11 @@ export const useCurrencyStore = defineStore('currency', () => {
   const loaded = ref(false);
   let loadPromise: Promise<void> | null = null;
 
-  async function load() {
+  async function load(force = false) {
+    if (loaded.value && !force) {
+      return;
+    }
+
     if (loadPromise) {
       return loadPromise;
     }

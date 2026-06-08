@@ -11,11 +11,49 @@ interface CurrencyRow {
   code: string;
 }
 
+let defaultCurrenciesPromise: Promise<void> | null = null;
+let defaultCurrenciesEnsured = false;
+
 export async function ensureDefaultCurrencies() {
+  if (defaultCurrenciesEnsured) {
+    return;
+  }
+
+  if (defaultCurrenciesPromise) {
+    return defaultCurrenciesPromise;
+  }
+
+  defaultCurrenciesPromise = ensureDefaultCurrenciesOnce()
+    .then(() => {
+      defaultCurrenciesEnsured = true;
+    })
+    .finally(() => {
+      defaultCurrenciesPromise = null;
+    });
+  return defaultCurrenciesPromise;
+}
+
+async function ensureDefaultCurrenciesOnce() {
   const db = await getDatabase();
+  const existingResult = await db.query(
+    `SELECT code FROM currencies
+     WHERE code IN (${defaultCurrencies.map(() => '?').join(', ')})`,
+    [...defaultCurrencies]
+  );
+  const existingCurrencies = new Set(
+    ((existingResult.values ?? []) as CurrencyRow[]).map((row) => row.code)
+  );
+  const missingCurrencies = defaultCurrencies.filter(
+    (currency) => !existingCurrencies.has(currency)
+  );
+
+  if (missingCurrencies.length === 0) {
+    return;
+  }
+
   const now = nowIso();
 
-  for (const currency of defaultCurrencies) {
+  for (const currency of missingCurrencies) {
     await db.run(
       `INSERT OR IGNORE INTO currencies (code, created_at, updated_at)
        VALUES (?, ?, ?)`,

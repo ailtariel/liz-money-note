@@ -450,7 +450,7 @@ function handleEditorSaved() {
         </div>
       </v-card>
 
-      <v-virtual-scroll v-else :items="listRows">
+      <v-virtual-scroll v-else v-memo="[listRows]" :items="listRows">
         <template #default="{ item }">
           <TransactionItemVue
             :item="item"
