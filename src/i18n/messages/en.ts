@@ -210,14 +210,25 @@ export default {
   },
   system: {
     cache: {
-      title: 'Cache',
+      title: 'System',
       clear: 'Clear cache',
       subtitle:
-        'Clear browser cache and Android WebView cache. Local account data is kept.',
+        'Clear browser CacheStorage, Android WebView cache, and temporary runtime config. User data are kept.',
+      confirmTitle: 'Clear cache',
+      confirmMessage: 'Clear cache now? ',
       clearDoneBrowser: 'Cache cleared. {count} browser cache buckets removed.',
       clearDoneAndroid:
         'Cache cleared. Android WebView cache was also cleaned.',
       clearFailed: 'Failed to clear cache.'
+    },
+    database: {
+      reset: 'Reset database',
+      subtitle:
+        'Delete the database and initialize a new empty database. Use only when data is corrupted. Back up your data first.',
+      confirmTitle: 'Reset database',
+      confirmMessage: 'Reset the database?',
+      resetDone: 'Database reset.',
+      resetFailed: 'Failed to reset database.'
     }
   },
   exchangeRate: {

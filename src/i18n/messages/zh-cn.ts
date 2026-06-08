@@ -209,12 +209,24 @@ export default {
   },
   system: {
     cache: {
-      title: '缓存',
+      title: '系统',
       clear: '清理缓存',
-      subtitle: '清理浏览器缓存和 Android WebView 缓存，不会删除本地账本数据。',
+      subtitle:
+        '清理浏览器 CacheStorage、Android WebView 缓存和临时运行配置，不会删除用户数据。',
+      confirmTitle: '清理',
+      confirmMessage: '确认清理缓存？',
       clearDoneBrowser: '缓存已清理，已移除 {count} 个浏览器缓存桶。',
       clearDoneAndroid: '缓存已清理，已同时清理 Android WebView 缓存。',
       clearFailed: '清理缓存失败。'
+    },
+    database: {
+      reset: '重置数据库',
+      subtitle:
+        '删除并重新初始化为空数据库。仅应在数据损坏时使用，建议提前备份数据。',
+      confirmTitle: '重置',
+      confirmMessage: '确认重置数据库？',
+      resetDone: '数据库已重置。',
+      resetFailed: '重置数据库失败。'
     }
   },
   exchangeRate: {

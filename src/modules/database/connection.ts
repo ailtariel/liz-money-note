@@ -83,6 +83,10 @@ function setDatabaseAssetMarker() {
   globalThis.localStorage?.setItem(databaseAssetMarkerKey, '1');
 }
 
+function clearDatabaseAssetMarker() {
+  globalThis.localStorage?.removeItem(databaseAssetMarkerKey);
+}
+
 async function initializeFromAssetsIfNeeded(
   connection: SQLiteDBConnection
 ): Promise<SQLiteDBConnection> {
@@ -134,6 +138,21 @@ export async function resetDatabaseConnection() {
   await db.close();
   db = null;
   initPromise = null;
+}
+
+export async function resetDatabaseToAssets() {
+  const connection = await getDatabase();
+
+  await connection.close();
+  await connection.delete();
+  db = null;
+  initPromise = null;
+  clearDatabaseAssetMarker();
+
+  await sqlite.copyFromAssets(true);
+  setDatabaseAssetMarker();
+  db = await openAndMigrateConnection();
+  return db;
 }
 
 export { databaseName, sqlite };
