@@ -129,6 +129,14 @@ const router = createRouter({
           meta: {
             titleKey: 'more.system'
           }
+        },
+        {
+          path: 'about',
+          name: 'about',
+          component: () => import('@/components/About.vue'),
+          meta: {
+            titleKey: 'more.about'
+          }
         }
       ]
     },

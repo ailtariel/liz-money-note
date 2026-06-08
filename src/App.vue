@@ -5,6 +5,7 @@ import { useAppLocale } from '@/modules/shared/useAppLocale';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useRecurringStore } from '@/modules/recurring/recurring.store';
 import { useSnackQueueStore } from '@/modules/snack-queue/snack-queue.store';
+import { useAppUpdateStore } from '@/modules/app-update/app-update.store';
 import { useApplyTheme } from '@/modules/theme/useApplyTheme';
 import {
   loadSystemDatabaseState,
@@ -21,6 +22,7 @@ const cronJobManager = useCronJobManager();
 const recurringStore = useRecurringStore();
 const accountStore = useAccountStore();
 const snackQueueStore = useSnackQueueStore();
+const appUpdateStore = useAppUpdateStore();
 const sheetOpen = ref(false);
 const error = ref('');
 
@@ -40,6 +42,14 @@ async function refreshDueSheet() {
 
 async function refreshExchangeRates(force = false) {
   await refreshSystemExchangeRates(force);
+}
+
+async function checkAppUpdate() {
+  try {
+    await appUpdateStore.check();
+  } catch (err) {
+    console.error('Failed to check app update.', err);
+  }
 }
 
 async function approve(index: number) {
@@ -88,6 +98,15 @@ onMounted(async () => {
     name: 'Exchange rate refresh',
     interval: 24 * 60 * 60 * 1000,
     execute: () => refreshExchangeRates()
+  });
+
+  cronJobManager.addJob({
+    id: 'app-update-check',
+    name: 'App update check',
+    interval: 60 * 60 * 1000,
+    immediate: true,
+    maxRetries: 1,
+    execute: () => checkAppUpdate()
   });
 
   await refreshDueSheet();

@@ -75,7 +75,12 @@ export const moreNavigationSections: MoreNavigationSection[] = [
         to: { name: 'system' },
         routeNames: ['system']
       },
-      { titleKey: 'more.about', icon: '$info' }
+      {
+        titleKey: 'more.about',
+        icon: '$info',
+        to: { name: 'about' },
+        routeNames: ['about']
+      }
     ]
   }
 ];

@@ -6,6 +6,8 @@ const RUNTIME_ENV_STORAGE_KEY = '__APP_RUNTIME_ENV__';
 const defaultConfig: RuntimeAppConfig = {
   app_title: 'Vue Skeleton',
   api_base_url: '/api',
+  update_manifest_url:
+    'https://api.github.com/repos/ailtariel/liz-money-note/releases/latest',
   default_route: '/',
   enable_route_guard: true,
   feature_flags: {

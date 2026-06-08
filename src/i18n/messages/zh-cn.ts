@@ -176,6 +176,16 @@ export default {
     system: '系统',
     about: '关于'
   },
+  about: {
+    title: '关于',
+    currentVersion: '当前版本',
+    updateAvailable: '发现新版本 {version}',
+    checkUpdate: '检查更新',
+    updateVersion: '更新 {version}',
+    noUpdate: '已是最新版本。',
+    checkFailed: '检查更新失败。',
+    installFailed: '启动更新安装失败。'
+  },
   theme: {
     loadFailed: '加载主题设置失败。',
     saveFailed: '保存主题设置失败。',

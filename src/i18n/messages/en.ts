@@ -177,6 +177,16 @@ export default {
     system: 'System',
     about: 'About'
   },
+  about: {
+    title: 'About',
+    currentVersion: 'Current version',
+    updateAvailable: 'Version {version} is available.',
+    checkUpdate: 'Check for updates',
+    updateVersion: 'Update {version}',
+    noUpdate: 'Already up to date.',
+    checkFailed: 'Failed to check for updates.',
+    installFailed: 'Failed to start update installation.'
+  },
   theme: {
     loadFailed: 'Failed to load theme settings.',
     saveFailed: 'Failed to save theme settings.',

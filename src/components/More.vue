@@ -3,8 +3,10 @@ import { computed } from 'vue';
 import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
 import { moreNavigationSections } from '@/components/shared/more-navigation';
+import { useAppUpdateStore } from '@/modules/app-update/app-update.store';
 
 const { t } = useI18n();
+const appUpdateStore = useAppUpdateStore();
 
 const sections = computed(() =>
   moreNavigationSections.map((section) => ({
@@ -12,7 +14,8 @@ const sections = computed(() =>
     items: section.items.map((item) => ({
       title: t(item.titleKey),
       icon: item.icon,
-      to: item.to
+      to: item.to,
+      showBadge: item.routeNames?.includes('about') && appUpdateStore.hasUpdate
     }))
   }))
 );
@@ -35,9 +38,16 @@ const sections = computed(() =>
               :title="item.title"
             >
               <template #prepend>
-                <v-avatar color="primary" variant="tonal">
-                  <v-icon :icon="item.icon" />
-                </v-avatar>
+                <v-badge
+                  :model-value="item.showBadge"
+                  color="error"
+                  dot
+                  location="top end"
+                >
+                  <v-avatar color="primary" variant="tonal">
+                    <v-icon :icon="item.icon" />
+                  </v-avatar>
+                </v-badge>
               </template>
               <template #append>
                 <v-icon icon="$next" />

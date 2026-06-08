@@ -4,6 +4,7 @@ import { defineConfig, loadEnv, mergeConfig, type PluginOption, type UserConfig 
 import vue from "@vitejs/plugin-vue";
 import vuetify from "vite-plugin-vuetify";
 import generateEnvTemplate from "./scripts/generate-env-template";
+import packageJson from "./package.json";
 
 function runDatabaseInitializer(mode: string, profile: "build" | "dev") {
   const result = spawnSync(
@@ -79,11 +80,13 @@ export default defineConfig(({ mode, command }) => {
   const databaseName = env.DB_NAME || "liz_money_note";
   const databaseEncryptionMode = env.DB_ENCRYPTION_MODE || "no-encryption";
   const databaseVersion = Number(env.DB_VERSION || 1);
+  const appVersion = env.BUILD_APP_VERSION || packageJson.version;
 
   const config: Record<string, UserConfig> = {
     default: {
       plugins: createPlugins(mode, command),
       define: {
+        __APP_VERSION__: JSON.stringify(appVersion),
         __APP_BUILD_TIMESTAMP__: JSON.stringify(new Date().toISOString()),
         __DB_NAME__: JSON.stringify(databaseName),
         __DB_ENCRYPTION_MODE__: JSON.stringify(databaseEncryptionMode),

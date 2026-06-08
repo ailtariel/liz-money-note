@@ -36,15 +36,6 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Type check
-        run: npm run typecheck
-
-      - name: Build web assets
-        run: npm run build
-
-      - name: Sync Capacitor Android project
-        run: npm run cap:sync:android
-
       - name: Read release version
         id: version
         shell: bash
@@ -61,6 +52,17 @@ jobs:
           echo "tag_name=${tag_name}" >> "${GITHUB_OUTPUT}"
           echo "version_name=${version_name}" >> "${GITHUB_OUTPUT}"
           echo "version_code=${version_code}" >> "${GITHUB_OUTPUT}"
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build web assets
+        env:
+          BUILD_APP_VERSION: ${{ steps.version.outputs.version_name }}
+        run: npm run build
+
+      - name: Sync Capacitor Android project
+        run: npm run cap:sync:android
 
       - name: Check Android signing secrets
         shell: bash
