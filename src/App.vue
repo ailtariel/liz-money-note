@@ -6,6 +6,7 @@ import { useAccountStore } from '@/modules/accounts/account.store';
 import { useCurrencyStore } from '@/modules/currency/currency.store';
 import { useExchangeRateStore } from '@/modules/exchange-rate/exchange-rate.store';
 import { useRecurringStore } from '@/modules/recurring/recurring.store';
+import { useSnackQueueStore } from '@/modules/snack-queue/snack-queue.store';
 import { useApplyTheme } from '@/modules/theme/useApplyTheme';
 import { useCronJobManager } from '@/shared/lib/cron-job-manager';
 import AmountText from '@/components/shared/AmountText.vue';
@@ -18,6 +19,7 @@ const recurringStore = useRecurringStore();
 const accountStore = useAccountStore();
 const currencyStore = useCurrencyStore();
 const exchangeRateStore = useExchangeRateStore();
+const snackQueueStore = useSnackQueueStore();
 const sheetOpen = ref(false);
 const error = ref('');
 
@@ -145,5 +147,13 @@ onMounted(async () => {
         </v-list>
       </v-card>
     </v-bottom-sheet>
+
+    <v-snackbar-queue
+      v-model="snackQueueStore.queue"
+      closable
+      location="bottom"
+      timer="bottom"
+      :total-visible="2"
+    />
   </v-app>
 </template>

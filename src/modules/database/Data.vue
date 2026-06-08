@@ -8,12 +8,13 @@ import { importTextFiles } from '@/modules/import/import.service';
 import type { ImportBatchResult } from '@/modules/import/import.types';
 import type { CurrencyCode } from '@/modules/shared/money';
 import { useCurrencyStore } from '@/modules/currency/currency.store';
+import { useSnackQueueStore } from '@/modules/snack-queue/snack-queue.store';
 
 const { t } = useI18n();
 const route = useRoute();
 const currencyStore = useCurrencyStore();
-const message = ref('');
-const error = ref('');
+const snackQueueStore = useSnackQueueStore();
+const validationError = ref('');
 const importText = ref('');
 const selectedFiles = ref<File[]>([]);
 const importCurrency = ref<CurrencyCode | 'auto'>('auto');
@@ -33,8 +34,7 @@ const exportButtonLabel = computed(() =>
 );
 
 async function exportData() {
-  error.value = '';
-  message.value = '';
+  validationError.value = '';
   try {
     const data = await exportDatabaseJson();
     const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -46,15 +46,14 @@ async function exportData() {
     link.download = `liz-money-note-${new Date().toISOString().slice(0, 10)}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    message.value = t('data.exported');
+    snackQueueStore.success(t('data.exported'));
   } catch (err) {
-    error.value = err instanceof Error ? err.message : t('data.exportFailed');
+    snackQueueStore.error(err instanceof Error ? err.message : t('data.exportFailed'));
   }
 }
 
 async function restoreData() {
-  error.value = '';
-  message.value = '';
+  validationError.value = '';
 
   if (!window.confirm(t('data.restoreConfirm'))) {
     return;
@@ -63,9 +62,9 @@ async function restoreData() {
   try {
     await importDatabaseJson(importText.value);
     importText.value = '';
-    message.value = t('data.restored');
+    snackQueueStore.success(t('data.restored'));
   } catch (err) {
-    error.value = err instanceof Error ? err.message : t('data.restoreFailed');
+    snackQueueStore.error(err instanceof Error ? err.message : t('data.restoreFailed'));
   }
 }
 
@@ -79,12 +78,11 @@ function readFileAsText(file: File) {
 }
 
 async function importSelectedFiles() {
-  error.value = '';
-  message.value = '';
+  validationError.value = '';
   importResult.value = null;
 
   if (selectedFiles.value.length === 0) {
-    error.value = t('data.chooseFile');
+    validationError.value = t('data.chooseFile');
     return;
   }
 
@@ -102,12 +100,14 @@ async function importSelectedFiles() {
     );
 
     importResult.value = await importTextFiles(files);
-    message.value = t('data.importDone', {
-      count: importResult.value.importedRows
-    });
+    snackQueueStore.success(
+      t('data.importDone', {
+        count: importResult.value.importedRows
+      })
+    );
     selectedFiles.value = [];
   } catch (err) {
-    error.value = err instanceof Error ? err.message : t('data.importFailed');
+    snackQueueStore.error(err instanceof Error ? err.message : t('data.importFailed'));
   }
 }
 
@@ -115,7 +115,9 @@ onMounted(async () => {
   try {
     await currencyStore.load();
   } catch (err) {
-    error.value = err instanceof Error ? err.message : t('settings.defaultCurrency.loadFailed');
+    snackQueueStore.error(
+      err instanceof Error ? err.message : t('settings.defaultCurrency.loadFailed')
+    );
   }
 });
 </script>
@@ -127,8 +129,9 @@ onMounted(async () => {
     <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
         <div class="text-body-medium text-medium-emphasis">{{ t('data.subtitle') }}</div>
-        <v-alert v-if="message" type="success" variant="tonal">{{ message }}</v-alert>
-        <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+        <v-alert v-if="validationError" type="error" variant="tonal">
+          {{ validationError }}
+        </v-alert>
 
         <v-card v-if="showExport" class="soft-card pa-4">
           <v-btn block color="primary" prepend-icon="$download" @click="exportData">

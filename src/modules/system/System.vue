@@ -2,25 +2,27 @@
 import { ref } from 'vue';
 import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
+import { useSnackQueueStore } from '@/modules/snack-queue/snack-queue.store';
 import { clearSystemCache } from './cache.service';
 
 const { t } = useI18n();
+const snackQueueStore = useSnackQueueStore();
 const loading = ref(false);
-const error = ref('');
-const message = ref('');
 
 async function clearCache() {
   loading.value = true;
-  error.value = '';
-  message.value = '';
 
   try {
     const result = await clearSystemCache();
-    message.value = result.androidCacheCleared
-      ? t('system.cache.clearDoneAndroid')
-      : t('system.cache.clearDoneBrowser', { count: result.cacheStorageCount });
+    snackQueueStore.success(
+      result.androidCacheCleared
+        ? t('system.cache.clearDoneAndroid')
+        : t('system.cache.clearDoneBrowser', { count: result.cacheStorageCount })
+    );
   } catch (err) {
-    error.value = err instanceof Error ? err.message : t('system.cache.clearFailed');
+    snackQueueStore.error(
+      err instanceof Error ? err.message : t('system.cache.clearFailed')
+    );
   } finally {
     loading.value = false;
   }
@@ -33,9 +35,6 @@ async function clearCache() {
   <v-main>
     <v-container class="pa-4">
       <div class="d-flex flex-column ga-4">
-        <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
-        <v-alert v-if="message" type="success" variant="tonal">{{ message }}</v-alert>
-
         <v-card class="soft-card">
           <div class="px-4 pt-4 text-title-medium font-weight-bold">
             {{ t('system.cache.title') }}
