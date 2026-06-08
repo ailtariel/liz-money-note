@@ -47,7 +47,7 @@ At container startup, the flow is:
 
 ## Runtime Env
 
-This repository uses three kinds of environment variables. They have different scopes and should not be mixed.
+This repository uses four kinds of environment variables. They have different scopes and should not be mixed.
 
 ### 1. `VITE_*`
 
@@ -142,6 +142,37 @@ Notes:
 - These variables are mainly consumed by `nginx/templates/default.conf.template`
 - Local `npm run dev` does not depend on them
 - In production they can be overridden directly in Docker, Helm, or Kubernetes YAML
+
+### 4. `DB_*`
+
+Purpose:
+
+- SQLite database build and initialization configuration
+- Consumed by Node/Vite build scripts
+- Not exposed as client runtime config
+
+Example:
+
+```env
+DB_SQLITE_PATH=C:\Software\SQLite\sqlite3.exe
+DB_NAME=liz_money_note
+DB_FILE_NAME=liz_money_note.db
+DB_ASSET_DIR=public/assets/databases
+DB_ENCRYPTION_MODE=no-encryption
+DB_VERSION=1
+```
+
+Local development override:
+
+```env
+DB_LOCAL_PATH=.local/databases/liz_money_note.db
+```
+
+Notes:
+
+- `npm run dev` prepares the local SQLite file from `DB_LOCAL_PATH` if it does not exist, then syncs it into `DB_ASSET_DIR`
+- `npm run build` always generates a fresh empty initialized SQLite database under `DB_ASSET_DIR`
+- `DB_LOCAL_PATH` belongs in `.env.local` and should not be committed
 
 ## React Migration
 

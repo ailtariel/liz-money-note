@@ -11,7 +11,7 @@ export default {
     newTransaction: '新增流水',
     books: '账本',
     accounts: '账户',
-    tags: 'Tag',
+    tags: '标签',
     recurring: '周期',
     data: '数据'
   },

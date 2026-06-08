@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "cap:sync:android": "cap sync android",
+    "db:generate-empty": "node --experimental-strip-types scripts/generate-empty-database.mjs --profile=build",
+    "db:generate-empty:dev": "node --experimental-strip-types scripts/generate-empty-database.mjs --profile=dev",
     "db:generate-preload": "node --experimental-strip-types scripts/generate-preloaded-database.mjs",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit"

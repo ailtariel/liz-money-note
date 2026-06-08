@@ -331,18 +331,22 @@ recurring_event_tags
 - 当前 mock 数据不包含转账记录，第一版文本导入只处理收入和支出。
 - 导入账户的初始余额为 `0`，当前余额由导入流水累计得到。
 
-## 预置 SQLite 数据库
+## SQLite 数据库初始化
 
-`.mockdata` 只作为开发期一次性数据源，不由应用运行时读取。应用运行时连接的数据库名为 `liz_money_note`。
+`.mockdata` 只作为开发期数据源，用于脚本验证导入解析和转换规则，不作为默认应用数据进入 Web / Android 应用包。
 
-预置数据库生成流程：
+数据库配置使用 `.env` 中的 `DB_*` 变量管理：
 
-1. 使用 `scripts/generate-preloaded-database.mjs` 读取 `.mockdata`。
-2. 按 CSV / TXT 导入映射规则转换为 SQLite 数据。
-3. 生成 `public/assets/databases/liz_money_note.db`。
-4. 生成 `public/assets/databases/databases.json`，供 `@capacitor-community/sqlite` 的 `copyFromAssets` 使用。
+- `DB_NAME`：应用运行时连接的 SQLite 数据库名。
+- `DB_FILE_NAME`：写入 Web / Android assets 的数据库文件名。
+- `DB_ASSET_DIR`：构建期数据库 asset 输出目录。
+- `DB_SQLITE_PATH`：构建期调用的 SQLite CLI 路径。
+- `DB_ENCRYPTION_MODE`：传给 Capacitor SQLite 的加密模式。
+- `DB_VERSION`：传给 Capacitor SQLite 的数据库版本。
 
-应用启动时会初始化 SQLite 连接，并在本地业务库为空时从 `public/assets/databases/liz_money_note.db` 复制预置库。若本地库已经存在账户、Tag、非默认账本或流水，启动流程不会覆盖用户数据。
+本地开发数据库路径由 `.env.local` 的 `DB_LOCAL_PATH` 覆盖。`npm run dev` 会在本地数据库不存在时创建空 SQLite 数据库，并同步到 `DB_ASSET_DIR` 供 `copyFromAssets` 初始化运行时数据库。
+
+`vite build` 默认根据 `src/modules/database/schema.ts` 生成全新的空 SQLite 数据库和 `databases.json`，再由 Capacitor 同步进 Android assets。构建产物只包含空结构库，不包含 `.mockdata` 业务样例数据。
 
 ## Currency and Exchange Rates
 

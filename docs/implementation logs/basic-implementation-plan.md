@@ -21,14 +21,14 @@
 - 已实现周期事件批准时复制 Tag，并在同一事务中生成流水、更新余额、推进下一次触发日。
 - 已添加 Capacitor Android 平台和基础配置。
 - 已实现 CSV / TXT 文本导入，支持按文件创建账本、自动创建导入账户、分类转 Tag、金额和汇总行修复。
-- 已将 `.mockdata` 一次性生成到预置 SQLite 数据库 `public/assets/databases/liz_money_note.db`，应用启动时连接 `liz_money_note` 并在空库时复制预置库。
+- 已废弃将 `.mockdata` 生成到 `public/assets/databases/liz_money_note.db` 并随应用包复制业务样例数据的方案；正式构建会生成空结构 SQLite 数据库并随 Web / Android assets 初始化。
 
 当前差异和待验证项：
 
 - 数据导出/恢复当前使用 `@capacitor-community/sqlite` 的 JSON import/export 能力，未实现原始 SQLite 数据库文件导出。若必须导出 `.db` 文件，需要补充文件系统访问方案并确认 Web 与 Android 的交互要求。
 - 已执行 `npm run build` 和 `npx cap sync android`；尚未在 Android Studio 中手动构建 Debug APK。
 - CSV / TXT 导入没有自动去重能力，重复导入同一文件会产生重复流水。
-- 预置数据库只在本地业务库为空时复制，不会在每次启动时覆盖已有用户数据。
+- `.mockdata` 仅用于开发期脚本验证，不作为默认业务数据进入 Web / Android 应用包。
 
 ## 范围
 

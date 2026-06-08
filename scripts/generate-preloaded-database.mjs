@@ -1,13 +1,53 @@
+import { existsSync } from 'node:fs';
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const sqlitePath =
-  process.env.SQLITE3_PATH ?? 'C:\\Software\\SQLite\\sqlite3.exe';
-const outputDir = path.join(rootDir, 'public/assets/databases');
-const outputDatabaseName = 'liz_money_note.db';
+
+function parseEnvFile(content) {
+  return content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('#'))
+    .reduce((acc, line) => {
+      const separatorIndex = line.indexOf('=');
+
+      if (separatorIndex === -1) {
+        return acc;
+      }
+
+      const key = line.slice(0, separatorIndex).trim();
+      const value = line.slice(separatorIndex + 1).trim();
+      acc[key] = value;
+      return acc;
+    }, {});
+}
+
+async function loadEnv() {
+  const env = {};
+
+  for (const file of ['.env', '.env.local']) {
+    const filePath = path.join(rootDir, file);
+
+    if (!existsSync(filePath)) {
+      continue;
+    }
+
+    Object.assign(env, parseEnvFile(await readFile(filePath, 'utf8')));
+  }
+
+  return {
+    ...env,
+    ...process.env
+  };
+}
+
+const env = await loadEnv();
+const sqlitePath = env.DB_SQLITE_PATH ?? env.SQLITE3_PATH ?? 'sqlite3';
+const outputDir = path.join(rootDir, '.mockdata/generated-databases');
+const outputDatabaseName = env.DB_FILE_NAME ?? 'liz_money_note.db';
 const outputDatabasePath = path.join(outputDir, outputDatabaseName);
 
 const parserModuleUrl = pathToFileURL(
