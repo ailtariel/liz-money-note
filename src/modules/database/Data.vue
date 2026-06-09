@@ -4,6 +4,7 @@ import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
 import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue';
 import { exportDatabaseJson, importDatabaseJson } from '@/modules/database/backup';
+import { saveDatabaseJsonFile } from '@/modules/database/export-file';
 import {
   getImportDuplicateSummary,
   importTextFiles
@@ -35,15 +36,8 @@ async function exportData() {
   validationError.value = '';
   try {
     const data = await exportDatabaseJson();
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: 'application/json'
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `liz-money-note-${new Date().toISOString().slice(0, 10)}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+    const fileName = `liz-money-note-${new Date().toISOString().slice(0, 10)}.json`;
+    await saveDatabaseJsonFile(fileName, JSON.stringify(data, null, 2));
     snackQueueStore.success(t('data.exported'));
   } catch (err) {
     snackQueueStore.error(err instanceof Error ? err.message : t('data.exportFailed'));
