@@ -13,3 +13,16 @@ export interface BookInput {
   description?: string | null;
   sortOrder?: number;
 }
+
+export interface BookAccountLink {
+  bookId: number;
+  accountId: number;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BookAccountConfigInput {
+  accountIds: number[];
+  defaultAccountId: number;
+}

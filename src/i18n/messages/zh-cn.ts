@@ -120,6 +120,10 @@ export default {
     archiveFailed: '归档账户失败。'
   },
   book: {
+    linkedAccounts: '关联账户',
+    defaultAccount: '默认',
+    accountRequired: '请至少关联一个账户。',
+    defaultAccountRequired: '请选择一个已关联的默认账户。',
     saveFailed: '保存账本失败。',
     archiveFailed: '归档账本失败。',
     restoreFailed: '恢复账本失败。',

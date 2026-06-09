@@ -1,6 +1,7 @@
 import type { SQLiteDBConnection } from '@capacitor-community/sqlite';
 import { getDatabase, persistDatabase } from '@/modules/database/connection';
 import { applyAccountBalanceDelta } from '@/modules/accounts/account.repository';
+import { linkDefaultAccountToBook } from '@/modules/books/book.repository';
 import { insertTransaction } from '@/modules/transactions/transaction.repository';
 import { nowIso } from '@/modules/shared/date';
 import type { CurrencyCode } from '@/modules/shared/money';
@@ -233,6 +234,7 @@ async function importParsedFile(
       parsedFile.currency,
       db
     );
+    await linkDefaultAccountToBook(bookId, accountId, db);
     const tagIds = new Map<string, number>();
 
     for (const transaction of parsedFile.transactions) {

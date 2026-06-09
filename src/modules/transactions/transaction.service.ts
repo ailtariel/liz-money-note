@@ -4,6 +4,7 @@ import {
   applyAccountBalanceDelta,
   getAccountById
 } from '@/modules/accounts/account.repository';
+import { isAccountLinkedToBook } from '@/modules/books/book.repository';
 import { insertTransaction } from './transaction.repository';
 import {
   getTransactionById,
@@ -24,6 +25,10 @@ async function validateTransactionInput(
     throw new Error('账户不存在。');
   }
 
+  if (!(await isAccountLinkedToBook(input.bookId, input.accountId, db))) {
+    throw new Error('账户未关联到所选账本。');
+  }
+
   if (sourceAccount.currency !== input.currency) {
     throw new Error('流水币种必须与账户币种一致。');
   }
@@ -42,6 +47,10 @@ async function validateTransactionInput(
   const targetAccount = await getAccountById(input.targetAccountId, db);
   if (!targetAccount) {
     throw new Error('转入账户不存在。');
+  }
+
+  if (!(await isAccountLinkedToBook(input.bookId, input.targetAccountId, db))) {
+    throw new Error('转入账户未关联到所选账本。');
   }
 
   if (targetAccount.currency !== sourceAccount.currency) {

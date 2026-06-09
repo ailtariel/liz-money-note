@@ -62,8 +62,23 @@ const selectedBook = computed(() =>
   bookStore.activeBooks.find((book) => book.id === form.bookId)
 );
 
+const selectedBookAccountLinks = computed(() =>
+  form.bookId ? (bookStore.bookAccountLinks[form.bookId] ?? []) : []
+);
+
+const linkedAccounts = computed(() => {
+  const linkedIds = new Set(
+    selectedBookAccountLinks.value.map((link) => link.accountId)
+  );
+  return accountStore.activeAccounts.filter((account) => linkedIds.has(account.id));
+});
+
+const selectedBookDefaultAccountId = computed(
+  () => selectedBookAccountLinks.value.find((link) => link.isDefault)?.accountId ?? null
+);
+
 const targetAccounts = computed(() =>
-  accountStore.activeAccounts.filter(
+  linkedAccounts.value.filter(
     (account) =>
       account.id !== form.accountId &&
       account.currency === selectedAccount.value?.currency
@@ -76,6 +91,26 @@ watch(
   () => form.accountId,
   () => {
     form.targetAccountId = null;
+  }
+);
+
+watch(
+  () => form.bookId,
+  async (bookId) => {
+    if (!bookId) {
+      form.accountId = null;
+      return;
+    }
+
+    await bookStore.loadAccountLinks(bookId);
+    const defaultAccountId = selectedBookDefaultAccountId.value;
+    const currentAccountIsLinked = linkedAccounts.value.some(
+      (account) => account.id === form.accountId
+    );
+
+    if (!currentAccountIsLinked) {
+      form.accountId = defaultAccountId ?? linkedAccounts.value[0]?.id ?? null;
+    }
   }
 );
 
@@ -179,7 +214,11 @@ onMounted(async () => {
     currencyStore.load()
   ]);
   form.bookId = bookStore.activeBooks[0]?.id ?? null;
-  form.accountId = accountStore.activeAccounts[0]?.id ?? null;
+  if (form.bookId) {
+    await bookStore.loadAccountLinks(form.bookId);
+  }
+  form.accountId =
+    selectedBookDefaultAccountId.value ?? linkedAccounts.value[0]?.id ?? null;
 });
 </script>
 
@@ -358,7 +397,7 @@ onMounted(async () => {
         </div>
         <v-list>
           <v-list-item
-            v-for="account in accountStore.activeAccounts"
+            v-for="account in linkedAccounts"
             :key="account.id"
             :active="form.accountId === account.id"
             @click="

@@ -120,6 +120,10 @@ export default {
     archiveFailed: 'Failed to archive account.'
   },
   book: {
+    linkedAccounts: 'Linked accounts',
+    defaultAccount: 'Default',
+    accountRequired: 'Please link at least one account.',
+    defaultAccountRequired: 'Please choose a linked default account.',
     saveFailed: 'Failed to save book.',
     archiveFailed: 'Failed to archive book.',
     restoreFailed: 'Failed to restore book.',

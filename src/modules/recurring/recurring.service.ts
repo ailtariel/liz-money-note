@@ -2,6 +2,7 @@ import { getDatabase, persistDatabase } from '@/modules/database/connection';
 import { todayIsoDate } from '@/modules/shared/date';
 import { getAccountById } from '@/modules/accounts/account.repository';
 import { applyAccountBalanceDelta } from '@/modules/accounts/account.repository';
+import { isAccountLinkedToBook } from '@/modules/books/book.repository';
 import { insertTransaction } from '@/modules/transactions/transaction.repository';
 import {
   listDueRecurringEvents,
@@ -70,6 +71,10 @@ export async function approveRecurringEvent(event: RecurringEvent) {
     throw new Error('周期事件账户不存在。');
   }
 
+  if (!(await isAccountLinkedToBook(event.bookId, event.accountId, db))) {
+    throw new Error('周期事件账户未关联到所选账本。');
+  }
+
   if (event.type === 'transfer') {
     if (!event.targetAccountId) {
       throw new Error('转账周期事件缺少转入账户。');
@@ -78,6 +83,10 @@ export async function approveRecurringEvent(event: RecurringEvent) {
     const targetAccount = await getAccountById(event.targetAccountId, db);
     if (!targetAccount || targetAccount.currency !== sourceAccount.currency) {
       throw new Error('转账周期事件必须使用同币种账户。');
+    }
+
+    if (!(await isAccountLinkedToBook(event.bookId, event.targetAccountId, db))) {
+      throw new Error('周期事件转入账户未关联到所选账本。');
     }
   }
 

@@ -45,8 +45,20 @@ const form = reactive({
 const selectedAccount = computed(() =>
   accountStore.activeAccounts.find((account) => account.id === form.accountId)
 );
+const selectedBookAccountLinks = computed(() =>
+  form.bookId ? (bookStore.bookAccountLinks[form.bookId] ?? []) : []
+);
+const linkedAccounts = computed(() => {
+  const linkedIds = new Set(
+    selectedBookAccountLinks.value.map((link) => link.accountId)
+  );
+  return accountStore.activeAccounts.filter((account) => linkedIds.has(account.id));
+});
+const selectedBookDefaultAccountId = computed(
+  () => selectedBookAccountLinks.value.find((link) => link.isDefault)?.accountId ?? null
+);
 const targetAccounts = computed(() =>
-  accountStore.activeAccounts.filter(
+  linkedAccounts.value.filter(
     (account) =>
       account.id !== form.accountId &&
       account.currency === selectedAccount.value?.currency
@@ -60,7 +72,8 @@ function resetForm() {
   form.bookId = bookStore.activeBooks[0]?.id ?? null;
   form.type = 'expense';
   form.amount = '';
-  form.accountId = accountStore.activeAccounts[0]?.id ?? null;
+  form.accountId =
+    selectedBookDefaultAccountId.value ?? linkedAccounts.value[0]?.id ?? null;
   form.targetAccountId = null;
   form.repeatType = 'monthly';
   form.repeatInterval = 1;
@@ -76,12 +89,13 @@ function startCreate() {
   editorOpen.value = true;
 }
 
-function editEvent(eventId: number) {
+async function editEvent(eventId: number) {
   const event = recurringStore.events.find((item) => item.id === eventId);
   if (!event) {
     return;
   }
 
+  await bookStore.loadAccountLinks(event.bookId);
   editingId.value = event.id;
   form.bookId = event.bookId;
   form.type = event.type;
@@ -102,6 +116,26 @@ watch(
   () => form.accountId,
   () => {
     form.targetAccountId = null;
+  }
+);
+
+watch(
+  () => form.bookId,
+  async (bookId) => {
+    if (!bookId) {
+      form.accountId = null;
+      return;
+    }
+
+    await bookStore.loadAccountLinks(bookId);
+    const currentAccountIsLinked = linkedAccounts.value.some(
+      (account) => account.id === form.accountId
+    );
+
+    if (!currentAccountIsLinked) {
+      form.accountId =
+        selectedBookDefaultAccountId.value ?? linkedAccounts.value[0]?.id ?? null;
+    }
   }
 );
 
@@ -176,6 +210,9 @@ onMounted(async () => {
     tagStore.load(),
     recurringStore.load()
   ]);
+  if (bookStore.activeBooks[0]?.id) {
+    await bookStore.loadAccountLinks(bookStore.activeBooks[0].id);
+  }
   resetForm();
 });
 </script>
@@ -260,7 +297,7 @@ onMounted(async () => {
             />
             <v-select
               v-model="form.accountId"
-              :items="accountStore.activeAccounts"
+              :items="linkedAccounts"
               item-title="name"
               item-value="id"
               :label="t('transaction.account')"

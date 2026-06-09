@@ -345,6 +345,37 @@ recurring_event_tags
 
 ## SQLite 数据库初始化
 
+## 账本账户关联模型补充
+
+账户是全局资产，不直接归属于单个账本。账本通过 `book_accounts` 关联可用账户：
+
+- 每个账本必须至少关联一个账户。
+- 每个账本只能有一个默认账户。
+- 新增流水和周期事件只能使用所选账本已关联的账户。
+- 新增流水默认使用所选账本的默认账户。
+- 不同账本可以关联同一个账户。
+
+```sql
+CREATE TABLE book_accounts (
+  book_id INTEGER NOT NULL,
+  account_id INTEGER NOT NULL,
+  is_default INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+
+  PRIMARY KEY (book_id, account_id),
+
+  FOREIGN KEY (book_id) REFERENCES books(id),
+  FOREIGN KEY (account_id) REFERENCES accounts(id),
+
+  CHECK (is_default IN (0, 1))
+);
+```
+
+数据库通过 `book_accounts(book_id) WHERE is_default = 1` 的唯一索引保证每个账本最多一个默认账户；业务层和迁移回填保证每个账本至少一个关联账户。
+
+CSV / TXT 导入时，每个导入文件创建或复用账本与导入账户，并将该导入账户关联到对应账本且设置为默认账户。
+
 `.mockdata` 只作为开发期数据源，用于脚本验证导入解析和转换规则，不作为默认应用数据进入 Web / Android 应用包。
 
 数据库配置使用 `.env` 中的 `DB_*` 变量管理：

@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue';
 import AppBarVue from '@/components/shared/app-bar.vue';
+import { useAccountStore } from '@/modules/accounts/account.store';
 import { useBookStore } from '@/modules/books/book.store';
 
 const { t } = useI18n();
 const store = useBookStore();
+const accountStore = useAccountStore();
 const error = ref('');
 const editingId = ref<number | null>(null);
 const editorOpen = ref(false);
@@ -14,13 +16,19 @@ const deleteConfirmOpen = ref(false);
 const deletingBookId = ref<number | null>(null);
 const form = reactive({
   name: '',
-  description: ''
+  description: '',
+  accountIds: [] as number[],
+  defaultAccountId: null as number | null
 });
+const activeAccounts = computed(() => accountStore.activeAccounts);
 
 function resetForm() {
   editingId.value = null;
   form.name = '';
   form.description = '';
+  const defaultAccountId = activeAccounts.value[0]?.id ?? null;
+  form.accountIds = defaultAccountId ? [defaultAccountId] : [];
+  form.defaultAccountId = defaultAccountId;
 }
 
 function startCreate() {
@@ -28,30 +36,70 @@ function startCreate() {
   editorOpen.value = true;
 }
 
-function editBook(bookId: number) {
+async function editBook(bookId: number) {
   const book = store.books.find((item) => item.id === bookId);
   if (!book) {
     return;
   }
 
+  await store.loadAccountLinks(bookId);
+  const links = store.bookAccountLinks[bookId] ?? [];
+  const defaultLink = links.find((link) => link.isDefault);
+
   editingId.value = book.id;
   form.name = book.name;
   form.description = book.description ?? '';
+  form.accountIds = links.map((link) => link.accountId);
+  form.defaultAccountId =
+    defaultLink?.accountId ?? form.accountIds[0] ?? activeAccounts.value[0]?.id ?? null;
+
+  if (form.defaultAccountId && !form.accountIds.includes(form.defaultAccountId)) {
+    form.accountIds = [form.defaultAccountId, ...form.accountIds];
+  }
+
   editorOpen.value = true;
+}
+
+function toggleAccount(accountId: number) {
+  if (form.accountIds.includes(accountId)) {
+    form.accountIds = form.accountIds.filter((id) => id !== accountId);
+
+    if (form.defaultAccountId === accountId) {
+      form.defaultAccountId = form.accountIds[0] ?? null;
+    }
+    return;
+  }
+
+  form.accountIds = [...form.accountIds, accountId];
+  form.defaultAccountId ??= accountId;
 }
 
 async function submit() {
   error.value = '';
+  if (!form.accountIds.length || !form.defaultAccountId) {
+    error.value = t('book.accountRequired');
+    return;
+  }
+
+  if (!form.accountIds.includes(form.defaultAccountId)) {
+    error.value = t('book.defaultAccountRequired');
+    return;
+  }
+
   try {
     const input = {
       name: form.name,
       description: form.description || null
     };
+    const accountConfig = {
+      accountIds: form.accountIds,
+      defaultAccountId: form.defaultAccountId
+    };
 
     if (editingId.value) {
-      await store.update(editingId.value, input);
+      await store.update(editingId.value, input, accountConfig);
     } else {
-      await store.create(input);
+      await store.create(input, accountConfig);
     }
 
     resetForm();
@@ -98,7 +146,9 @@ async function confirmDelete() {
   }
 }
 
-onMounted(() => store.load());
+onMounted(async () => {
+  await Promise.all([store.load(), accountStore.load()]);
+});
 </script>
 
 <template>
@@ -188,6 +238,42 @@ onMounted(() => store.load());
               v-model="form.description"
               :label="t('common.description')"
             />
+            <div>
+              <div class="text-body-medium font-weight-bold mb-2">
+                {{ t('book.linkedAccounts') }}
+              </div>
+              <div class="d-flex flex-column ga-2">
+                <v-card
+                  v-for="account in activeAccounts"
+                  :key="account.id"
+                  class="book-account-option pa-3"
+                  color="surface-variant"
+                >
+                  <div class="d-flex align-center ga-2">
+                    <v-checkbox
+                      :model-value="form.accountIds.includes(account.id)"
+                      density="compact"
+                      hide-details
+                      @update:model-value="toggleAccount(account.id)"
+                    />
+                    <div class="flex-grow-1 min-w-0">
+                      <div class="text-body-medium text-truncate">
+                        {{ account.name }}
+                      </div>
+                      <div class="text-label-medium text-medium-emphasis">
+                        {{ account.currency }}
+                      </div>
+                    </div>
+                    <v-radio
+                      v-model="form.defaultAccountId"
+                      :disabled="!form.accountIds.includes(account.id)"
+                      :label="t('book.defaultAccount')"
+                      :value="account.id"
+                    />
+                  </div>
+                </v-card>
+              </div>
+            </div>
             <div class="d-flex ga-2">
               <v-btn color="primary" type="submit">
                 {{ editingId ? t('common.save') : t('common.add') }}
@@ -212,5 +298,9 @@ onMounted(() => store.load());
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.book-account-option {
+  border: 1px solid rgb(var(--v-theme-outline));
 }
 </style>

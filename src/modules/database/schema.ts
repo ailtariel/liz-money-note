@@ -28,6 +28,21 @@ CREATE TABLE IF NOT EXISTS accounts (
   CHECK (currency GLOB '[A-Z][A-Z][A-Z]')
 );
 
+CREATE TABLE IF NOT EXISTS book_accounts (
+  book_id INTEGER NOT NULL,
+  account_id INTEGER NOT NULL,
+  is_default INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+
+  PRIMARY KEY (book_id, account_id),
+
+  FOREIGN KEY (book_id) REFERENCES books(id),
+  FOREIGN KEY (account_id) REFERENCES accounts(id),
+
+  CHECK (is_default IN (0, 1))
+);
+
 CREATE TABLE IF NOT EXISTS tags (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL UNIQUE,
@@ -150,6 +165,13 @@ CREATE TABLE IF NOT EXISTS currency_rates (
 export const createIndexStatements = `
 CREATE INDEX IF NOT EXISTS idx_transactions_book_time
 ON transactions(book_id, occurred_at DESC);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_book_accounts_default
+ON book_accounts(book_id)
+WHERE is_default = 1;
+
+CREATE INDEX IF NOT EXISTS idx_book_accounts_account
+ON book_accounts(account_id);
 
 CREATE INDEX IF NOT EXISTS idx_transactions_type
 ON transactions(type);
