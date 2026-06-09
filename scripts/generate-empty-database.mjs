@@ -72,7 +72,12 @@ function runSqlite(sqlitePath, dbPath, input) {
   });
 
   if (result.status !== 0) {
-    throw new Error(result.stderr || result.stdout || 'sqlite3 failed.');
+    const detail =
+      result.error?.message ||
+      result.stderr ||
+      result.stdout ||
+      `sqlite3 exited with status ${result.status ?? 'unknown'}.`;
+    throw new Error(`sqlite3 failed at ${sqlitePath}: ${detail}`);
   }
 
   return result.stdout.trim();
