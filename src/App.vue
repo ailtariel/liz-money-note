@@ -7,6 +7,7 @@ import { useRecurringStore } from '@/modules/recurring/recurring.store';
 import { useSnackQueueStore } from '@/modules/snack-queue/snack-queue.store';
 import { useAppUpdateStore } from '@/modules/app-update/app-update.store';
 import { useApplyTheme } from '@/modules/theme/useApplyTheme';
+import { useSystemStore } from '@/app/system.store';
 import {
   loadSystemDatabaseState,
   loadSystemDueRecurringEvents,
@@ -23,6 +24,7 @@ const recurringStore = useRecurringStore();
 const accountStore = useAccountStore();
 const snackQueueStore = useSnackQueueStore();
 const appUpdateStore = useAppUpdateStore();
+const systemStore = useSystemStore();
 const sheetOpen = ref(false);
 const error = ref('');
 
@@ -84,6 +86,7 @@ async function disable(index: number) {
 }
 
 onMounted(async () => {
+  systemStore.refreshPlatform();
   appLocale.init();
   await loadSystemDatabaseState();
 

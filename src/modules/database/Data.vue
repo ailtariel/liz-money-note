@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
 import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue';
 import { exportDatabaseJson, importDatabaseJson } from '@/modules/database/backup';
 import { saveDatabaseJsonFile } from '@/modules/database/export-file';
+import { pickNativeTextImportFiles } from '@/modules/database/import-file';
 import {
   getImportDuplicateSummary,
   importTextFiles
@@ -18,19 +19,25 @@ import type {
 import type { CurrencyCode } from '@/modules/shared/money';
 import { useCurrencyStore } from '@/modules/currency/currency.store';
 import { useSnackQueueStore } from '@/modules/snack-queue/snack-queue.store';
+import { useSystemStore } from '@/app/system.store';
 
 const { t } = useI18n();
 const currencyStore = useCurrencyStore();
 const snackQueueStore = useSnackQueueStore();
+const systemStore = useSystemStore();
 const validationError = ref('');
 const importText = ref('');
 const selectedFiles = ref<File[]>([]);
+const nativeSelectedFiles = ref<ImportTextFile[]>([]);
 const importCurrency = ref<CurrencyCode | 'auto'>('auto');
 const importResult = ref<ImportBatchResult | null>(null);
 const restoreConfirmDialog = ref(false);
 const duplicateConfirmDialog = ref(false);
 const pendingImportFiles = ref<ImportTextFile[]>([]);
 const duplicateSummary = ref<ImportDuplicateSummary | null>(null);
+const selectedImportFileCount = computed(() =>
+  systemStore.isAndroid ? nativeSelectedFiles.value.length : selectedFiles.value.length
+);
 
 async function exportData() {
   validationError.value = '';
@@ -81,27 +88,47 @@ async function runTextImport(
     })
   );
   selectedFiles.value = [];
+  nativeSelectedFiles.value = [];
   pendingImportFiles.value = [];
   duplicateSummary.value = null;
+}
+
+function withSelectedCurrency(file: ImportTextFile): ImportTextFile {
+  return {
+    ...file,
+    currency: importCurrency.value === 'auto' ? undefined : importCurrency.value
+  };
+}
+
+async function chooseNativeImportFiles() {
+  validationError.value = '';
+  importResult.value = null;
+
+  try {
+    nativeSelectedFiles.value = await pickNativeTextImportFiles();
+  } catch (err) {
+    snackQueueStore.error(err instanceof Error ? err.message : t('data.readFileFailed'));
+  }
 }
 
 async function importSelectedFiles() {
   validationError.value = '';
   importResult.value = null;
 
-  if (selectedFiles.value.length === 0) {
+  if (selectedImportFileCount.value === 0) {
     validationError.value = t('data.chooseFile');
     return;
   }
 
   try {
-    const files = await Promise.all(
-      selectedFiles.value.map(async (file) => ({
-        fileName: file.name,
-        content: await readFileAsText(file),
-        currency: importCurrency.value === 'auto' ? undefined : importCurrency.value
-      }))
-    );
+    const files = systemStore.isAndroid
+      ? nativeSelectedFiles.value.map(withSelectedCurrency)
+      : await Promise.all(
+        selectedFiles.value.map(async (file) => withSelectedCurrency({
+          fileName: file.name,
+          content: await readFileAsText(file)
+        }))
+      );
     const summary = await getImportDuplicateSummary(files);
 
     if (summary.duplicateRows > 0) {
@@ -211,10 +238,30 @@ onMounted(async () => {
                 {{ t('data.importHint') }}
               </div>
               <v-file-input
+                v-if="!systemStore.isAndroid"
                 v-model="selectedFiles"
+                accept=".csv,.txt,text/csv,text/plain"
                 :label="t('data.chooseFiles')"
                 multiple
               />
+              <div v-else class="d-flex flex-column ga-2 mb-4">
+                <v-btn
+                  block
+                  color="primary"
+                  prepend-icon="$upload"
+                  variant="tonal"
+                  @click="chooseNativeImportFiles"
+                >
+                  {{ t('data.chooseFiles') }}
+                </v-btn>
+                <v-list v-if="nativeSelectedFiles.length" density="compact">
+                  <v-list-item
+                    v-for="file in nativeSelectedFiles"
+                    :key="file.fileName"
+                    :title="file.fileName"
+                  />
+                </v-list>
+              </div>
               <v-select
                 v-model="importCurrency"
                 :items="[
@@ -227,7 +274,7 @@ onMounted(async () => {
                 :label="t('data.currency')"
               />
               <v-btn
-                :disabled="selectedFiles.length === 0"
+                :disabled="selectedImportFileCount === 0"
                 block
                 color="primary"
                 prepend-icon="$upload"
