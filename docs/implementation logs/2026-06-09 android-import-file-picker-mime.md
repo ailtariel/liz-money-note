@@ -18,10 +18,12 @@ Make Android file selection for text data import show CSV/TXT files on stricter 
 - Use a broader accept list because Android file providers can report CSV files as `text/csv`, `application/csv`, `application/vnd.ms-excel`, `text/plain`, or `application/octet-stream`.
 - Include `*/*` as the final compatibility fallback so OEM file pickers do not hide valid import files only because their MIME detection differs.
 - Continue validating content through the existing parser after the user selects files.
+- Follow-up: vivo/OriginOS still hides CSV files when any `accept` filter is present, even with `*/*` included. Remove the `accept` attribute entirely so Android does not receive file type restrictions from WebView.
 
 ## Checklist
 
 - [x] Update file input accept list.
+- [x] Remove the file input accept filter after vivo verification showed CSV files are still hidden.
 - [x] Run targeted type checking.
 
 ## Verification Plan
@@ -30,7 +32,8 @@ Make Android file selection for text data import show CSV/TXT files on stricter 
 
 ## Verification Results
 
-- `npm run typecheck`: passed.
+- `npm run typecheck`: passed before the follow-up change.
+- `npm run typecheck`: passed after removing the `accept` attribute.
 
 ## Final Status
 
