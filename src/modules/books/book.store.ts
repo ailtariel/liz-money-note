@@ -5,8 +5,10 @@ import {
   createBook,
   ensureDefaultBook,
   listBooks,
+  restoreBook,
   updateBook
 } from './book.repository';
+import { deleteBook } from './book.service';
 import type { Book, BookInput } from './book.types';
 
 export const useBookStore = defineStore('books', () => {
@@ -44,6 +46,16 @@ export const useBookStore = defineStore('books', () => {
     await load();
   }
 
+  async function restore(id: number) {
+    await restoreBook(id);
+    await load();
+  }
+
+  async function remove(id: number) {
+    await deleteBook(id);
+    await load();
+  }
+
   return {
     books,
     activeBooks,
@@ -52,6 +64,8 @@ export const useBookStore = defineStore('books', () => {
     ensureDefault,
     create,
     update,
-    archive
+    archive,
+    restore,
+    remove
   };
 });

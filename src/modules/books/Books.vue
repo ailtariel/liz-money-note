@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
 import { useI18n } from '@/i18n';
+import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue';
 import AppBarVue from '@/components/shared/app-bar.vue';
 import { useBookStore } from '@/modules/books/book.store';
 
@@ -9,6 +10,8 @@ const store = useBookStore();
 const error = ref('');
 const editingId = ref<number | null>(null);
 const editorOpen = ref(false);
+const deleteConfirmOpen = ref(false);
+const deletingBookId = ref<number | null>(null);
 const form = reactive({
   name: '',
   description: ''
@@ -67,10 +70,49 @@ async function archive(bookId: number) {
   }
 }
 
+async function restore(bookId: number) {
+  error.value = '';
+  try {
+    await store.restore(bookId);
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : t('book.restoreFailed');
+  }
+}
+
+function requestDelete(bookId: number) {
+  deletingBookId.value = bookId;
+  deleteConfirmOpen.value = true;
+}
+
+async function confirmDelete() {
+  if (!deletingBookId.value) {
+    return;
+  }
+
+  error.value = '';
+  try {
+    await store.remove(deletingBookId.value);
+    deletingBookId.value = null;
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : t('book.deleteFailed');
+  }
+}
+
 onMounted(() => store.load());
 </script>
 
 <template>
+  <ConfirmationDialog
+    v-model="deleteConfirmOpen"
+    :title="t('book.deleteConfirmTitle')"
+    :message="t('book.deleteConfirmMessage')"
+    :confirm-text="t('common.delete')"
+    :cancel-text="t('common.cancel')"
+    confirm-color="error"
+    @cancel="deletingBookId = null"
+    @confirm="confirmDelete"
+  />
+
   <AppBarVue>
     <template #actions>
       <v-btn
@@ -116,12 +158,19 @@ onMounted(() => store.load());
                 {{ t('common.edit') }}
               </v-btn>
               <v-btn
-                :disabled="book.isArchived"
                 size="small"
                 variant="text"
-                @click="archive(book.id)"
+                @click="book.isArchived ? restore(book.id) : archive(book.id)"
               >
-                {{ t('common.archive') }}
+                {{ book.isArchived ? t('common.restore') : t('common.archive') }}
+              </v-btn>
+              <v-btn
+                color="error"
+                size="small"
+                variant="text"
+                @click="requestDelete(book.id)"
+              >
+                {{ t('common.delete') }}
               </v-btn>
             </div>
           </div>

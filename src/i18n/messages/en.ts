@@ -34,6 +34,7 @@ export default {
     delete: 'Delete',
     clear: 'Clear',
     archive: 'Archive',
+    restore: 'Restore',
     active: 'Active',
     archived: 'Archived',
     disabled: 'Disabled',
@@ -120,7 +121,12 @@ export default {
   },
   book: {
     saveFailed: 'Failed to save book.',
-    archiveFailed: 'Failed to archive book.'
+    archiveFailed: 'Failed to archive book.',
+    restoreFailed: 'Failed to restore book.',
+    deleteFailed: 'Failed to delete book.',
+    deleteConfirmTitle: 'Delete book',
+    deleteConfirmMessage:
+      'Deleted books cannot be recovered. Back up your data first.'
   },
   tag: {
     saveFailed: 'Failed to save tag.',

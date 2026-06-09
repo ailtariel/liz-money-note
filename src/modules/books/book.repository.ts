@@ -1,6 +1,7 @@
 import type { SQLiteDBConnection } from '@capacitor-community/sqlite';
 import { getDatabase, persistDatabase } from '@/modules/database/connection';
 import { nowIso } from '@/modules/shared/date';
+import type { TransactionType } from '@/modules/transactions/transaction.types';
 import type { Book, BookInput } from './book.types';
 
 interface BookRow {
@@ -11,6 +12,24 @@ interface BookRow {
   is_archived: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface BookTransactionDeleteRow {
+  id: number;
+  type: TransactionType;
+  amount: number;
+  accountId: number;
+  targetAccountId: number | null;
+  deletedAt: string | null;
+}
+
+interface BookTransactionDeleteDbRow {
+  id: number;
+  type: TransactionType;
+  amount: number;
+  account_id: number;
+  target_account_id: number | null;
+  deleted_at: string | null;
 }
 
 function mapBook(row: BookRow): Book {
@@ -72,6 +91,58 @@ export async function archiveBook(id: number) {
     [nowIso(), id]
   );
   await persistDatabase();
+}
+
+export async function restoreBook(id: number) {
+  const db = await getDatabase();
+  await db.run(
+    `UPDATE books SET is_archived = 0, updated_at = ? WHERE id = ?`,
+    [nowIso(), id]
+  );
+  await persistDatabase();
+}
+
+export async function listBookTransactionsForDelete(
+  bookId: number,
+  db: SQLiteDBConnection
+) {
+  const result = await db.query(
+    `SELECT id, type, amount, account_id, target_account_id, deleted_at
+     FROM transactions
+     WHERE book_id = ?`,
+    [bookId]
+  );
+
+  return ((result.values ?? []) as BookTransactionDeleteDbRow[]).map((row) => ({
+    id: row.id,
+    type: row.type,
+    amount: row.amount,
+    accountId: row.account_id,
+    targetAccountId: row.target_account_id,
+    deletedAt: row.deleted_at
+  }));
+}
+
+export async function deleteBookRows(bookId: number, db: SQLiteDBConnection) {
+  await db.run(
+    `DELETE FROM transaction_tags
+     WHERE transaction_id IN (
+       SELECT id FROM transactions WHERE book_id = ?
+     )`,
+    [bookId],
+    false
+  );
+  await db.run('DELETE FROM transactions WHERE book_id = ?', [bookId], false);
+  await db.run(
+    `DELETE FROM recurring_event_tags
+     WHERE recurring_event_id IN (
+       SELECT id FROM recurring_events WHERE book_id = ?
+     )`,
+    [bookId],
+    false
+  );
+  await db.run('DELETE FROM recurring_events WHERE book_id = ?', [bookId], false);
+  await db.run('DELETE FROM books WHERE id = ?', [bookId], false);
 }
 
 export async function ensureDefaultBook() {

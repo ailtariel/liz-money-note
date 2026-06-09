@@ -34,6 +34,7 @@ export default {
     delete: '删除',
     clear: '清空',
     archive: '归档',
+    restore: '恢复',
     active: '启用',
     archived: '已归档',
     disabled: '停用',
@@ -120,7 +121,11 @@ export default {
   },
   book: {
     saveFailed: '保存账本失败。',
-    archiveFailed: '归档账本失败。'
+    archiveFailed: '归档账本失败。',
+    restoreFailed: '恢复账本失败。',
+    deleteFailed: '删除账本失败。',
+    deleteConfirmTitle: '删除账本',
+    deleteConfirmMessage: '账本删除后无法恢复，建议提前备份'
   },
   tag: {
     saveFailed: '保存 Tag 失败。',
