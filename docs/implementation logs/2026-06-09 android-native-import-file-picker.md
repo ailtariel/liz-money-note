@@ -23,7 +23,8 @@ Use a native Android document picker for CSV/TXT import while keeping the browse
 
 - Platform detection is centralized in the app-level `useSystemStore`.
 - `useSystemStore` lives under `src/app` because it describes app runtime state, not the System feature module.
-- Android uses `Intent.ACTION_OPEN_DOCUMENT` with `CATEGORY_OPENABLE`, `*/*`, and multiple selection support.
+- Android uses `Intent.ACTION_OPEN_DOCUMENT` with `*/*` and multiple selection support.
+- `CATEGORY_OPENABLE` was removed for vivo X300 verification because the device may hide document entries when the picker is constrained to openable document-provider items.
 - The native plugin reads selected `content://` URIs through `ContentResolver`, then returns UTF-8 text content to the existing import flow.
 - Browser/Web keeps the existing `v-file-input` and `FileReader` path.
 - The Web file input keeps the CSV/TXT `accept` filter because Android no longer renders that input.
