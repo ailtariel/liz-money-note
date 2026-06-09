@@ -208,14 +208,14 @@ onMounted(async () => {
     </div>
 
     <template #actions>
-      <v-btn variant="text" @click="abortDuplicateImport">
-        {{ t('data.abortImport') }}
-      </v-btn>
       <v-btn color="secondary" variant="tonal" @click="confirmDuplicateImport('ignore')">
         {{ t('data.ignoreDuplicates') }}
       </v-btn>
       <v-btn color="primary" variant="flat" @click="confirmDuplicateImport('keep')">
         {{ t('data.keepDuplicates') }}
+      </v-btn>
+      <v-btn variant="text" @click="abortDuplicateImport">
+        {{ t('data.abortImport') }}
       </v-btn>
     </template>
   </ConfirmationDialog>

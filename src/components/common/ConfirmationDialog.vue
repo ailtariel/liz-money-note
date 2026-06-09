@@ -56,11 +56,11 @@ function cancel() {
           :cancel="cancel"
           :close="close"
         >
-          <v-btn variant="text" @click="cancel">
-            {{ cancelText }}
-          </v-btn>
           <v-btn :color="confirmColor ?? 'primary'" variant="flat" @click="confirm">
             {{ confirmText }}
+          </v-btn>
+          <v-btn variant="text" @click="cancel">
+            {{ cancelText }}
           </v-btn>
         </slot>
       </v-card-actions>
