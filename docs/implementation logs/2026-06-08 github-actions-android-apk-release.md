@@ -28,6 +28,7 @@ Create a GitHub CI/CD workflow that builds a signed Android APK and publishes it
 
 - [x] Add release workflow triggered by tag pushes.
 - [x] Install SQLite in CI because the Vite build generates database assets.
+- [x] Override `DB_SQLITE_PATH` to `sqlite3` in CI so Linux runners do not use the Windows path from `.env`.
 - [x] Run `npm ci`, `npm run typecheck`, `npm run build`, and `npm run cap:sync:android`.
 - [x] Build unsigned release APK with Gradle.
 - [x] Sign and verify the APK with Android SDK build tools.

@@ -59,6 +59,7 @@ jobs:
       - name: Build web assets
         env:
           BUILD_APP_VERSION: ${{ steps.version.outputs.version_name }}
+          DB_SQLITE_PATH: sqlite3
         run: npm run build
 
       - name: Sync Capacitor Android project
