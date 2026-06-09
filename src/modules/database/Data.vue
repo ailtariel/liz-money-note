@@ -212,7 +212,7 @@ onMounted(async () => {
               </div>
               <v-file-input
                 v-model="selectedFiles"
-                accept=".csv,.txt,text/csv,text/plain"
+                accept=".csv,.txt,text/csv,application/csv,application/vnd.ms-excel,text/plain,application/octet-stream,*/*"
                 :label="t('data.chooseFiles')"
                 multiple
               />
