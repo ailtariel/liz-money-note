@@ -90,6 +90,55 @@ export async function insertTransaction(
   return id;
 }
 
+export async function updateTransactionRecord(
+  id: number,
+  input: TransactionInput,
+  db: SQLiteDBConnection
+) {
+  await db.run(
+    `UPDATE transactions
+     SET book_id = ?, type = ?, amount = ?, currency = ?, account_id = ?,
+         target_account_id = ?, occurred_at = ?, note = ?, updated_at = ?
+     WHERE id = ? AND deleted_at IS NULL`,
+    [
+      input.bookId,
+      input.type,
+      input.amount,
+      input.currency,
+      input.accountId,
+      input.targetAccountId ?? null,
+      input.occurredAt,
+      input.note ?? null,
+      nowIso(),
+      id
+    ],
+    false
+  );
+}
+
+export async function replaceTransactionTags(
+  id: number,
+  tagIds: number[],
+  db: SQLiteDBConnection
+) {
+  await db.run(
+    'DELETE FROM transaction_tags WHERE transaction_id = ?',
+    [id],
+    false
+  );
+
+  if (tagIds.length > 0) {
+    await db.executeSet(
+      tagIds.map((tagId) => ({
+        statement:
+          'INSERT OR IGNORE INTO transaction_tags (transaction_id, tag_id) VALUES (?, ?)',
+        values: [id, tagId]
+      })),
+      false
+    );
+  }
+}
+
 export async function listTransactions(filters: TransactionFilters = {}) {
   const db = await getDatabase();
   const where = ['t.deleted_at IS NULL'];
@@ -188,6 +237,24 @@ export async function listTransactions(filters: TransactionFilters = {}) {
   );
 
   return ((result.values ?? []) as TransactionRow[]).map(mapTransaction);
+}
+
+export async function getMostRecentLinkedAccountId(bookId: number) {
+  const db = await getDatabase();
+  const result = await db.query(
+    `SELECT t.account_id
+     FROM transactions t
+     INNER JOIN books b ON b.id = t.book_id AND b.is_archived = 0
+     INNER JOIN accounts a ON a.id = t.account_id AND a.is_archived = 0
+     INNER JOIN book_accounts ba
+       ON ba.book_id = t.book_id AND ba.account_id = t.account_id
+     WHERE t.book_id = ? AND t.deleted_at IS NULL
+     ORDER BY t.occurred_at DESC, t.id DESC
+     LIMIT 1`,
+    [bookId]
+  );
+  const row = (result.values ?? [])[0] as { account_id: number } | undefined;
+  return row?.account_id ?? null;
 }
 
 export async function getTransactionById(id: number, db?: SQLiteDBConnection) {

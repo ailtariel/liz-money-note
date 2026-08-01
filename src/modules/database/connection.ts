@@ -10,7 +10,6 @@ import { runMigrations } from './migrations';
 const databaseName = __DB_NAME__;
 const databaseEncryptionMode = __DB_ENCRYPTION_MODE__;
 const databaseVersion = __DB_VERSION__;
-const databaseAssetMarkerKey = `${databaseName}.asset-database.initialized`;
 const webWasmPath = '/assets/wasm';
 
 const sqlite = new SQLiteConnection(CapacitorSQLite);
@@ -234,51 +233,13 @@ async function openAndMigrateConnection() {
   return debugConnection;
 }
 
-async function hasPersistedData(connection: SQLiteDBConnection) {
-  const result = await connection.query(
-    `SELECT
-      (SELECT COUNT(*) FROM books) AS book_count,
-      (SELECT COUNT(*) FROM accounts) AS account_count,
-      (SELECT COUNT(*) FROM tags) AS tag_count,
-      (SELECT COUNT(*) FROM transactions) AS transaction_count,
-      (SELECT COUNT(*) FROM recurring_events) AS recurring_event_count,
-      (SELECT COUNT(*) FROM settings) AS setting_count,
-      (SELECT COUNT(*) FROM currencies) AS currency_count,
-      (SELECT COUNT(*) FROM currency_rates) AS currency_rate_count`
-  );
-  const row = (result.values ?? [])[0] as Record<string, number> | undefined;
+async function initializeRuntimeDatabase() {
+  const databaseExists = await sqlite.isDatabase(databaseName);
 
-  return Object.values(row ?? {}).some((value) => Number(value) > 0);
-}
-
-function getDatabaseAssetMarker() {
-  return globalThis.localStorage?.getItem(databaseAssetMarkerKey) ?? null;
-}
-
-function setDatabaseAssetMarker() {
-  globalThis.localStorage?.setItem(databaseAssetMarkerKey, '1');
-}
-
-function clearDatabaseAssetMarker() {
-  globalThis.localStorage?.removeItem(databaseAssetMarkerKey);
-}
-
-async function initializeFromAssetsIfNeeded(
-  connection: SQLiteDBConnection
-): Promise<SQLiteDBConnection> {
-  if (getDatabaseAssetMarker()) {
-    return connection;
+  if (!databaseExists.result) {
+    await sqlite.copyFromAssets(false);
   }
 
-  if (await hasPersistedData(connection)) {
-    setDatabaseAssetMarker();
-    return connection;
-  }
-
-  await connection.close();
-  await connection.delete();
-  await sqlite.copyFromAssets(true);
-  setDatabaseAssetMarker();
   return openAndMigrateConnection();
 }
 
@@ -290,8 +251,7 @@ export async function getDatabase() {
   if (!initPromise) {
     initPromise = (async () => {
       await prepareWebStore();
-      const connection = await openAndMigrateConnection();
-      db = await initializeFromAssetsIfNeeded(connection);
+      db = await initializeRuntimeDatabase();
       return db;
     })();
   }
@@ -323,10 +283,8 @@ export async function resetDatabaseToAssets() {
   await connection.delete();
   db = null;
   initPromise = null;
-  clearDatabaseAssetMarker();
 
   await sqlite.copyFromAssets(true);
-  setDatabaseAssetMarker();
   db = await openAndMigrateConnection();
   return db;
 }

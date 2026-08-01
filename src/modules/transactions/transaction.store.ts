@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia';
 import { ref, shallowRef } from 'vue';
 import { useAccountStore } from '@/modules/accounts/account.store';
-import { createTransaction, deleteTransaction } from './transaction.service';
+import {
+  createTransaction,
+  deleteTransaction,
+  updateTransaction
+} from './transaction.service';
 import { listTransactions } from './transaction.repository';
 import type {
   Transaction,
@@ -13,6 +17,7 @@ export const useTransactionStore = defineStore('transactions', () => {
   const transactions = shallowRef<Transaction[]>([]);
   const filters = ref<TransactionFilters>({});
   const loading = ref(false);
+  const mutating = ref(false);
   const accountStore = useAccountStore();
 
   async function load(nextFilters: TransactionFilters = filters.value) {
@@ -26,21 +31,60 @@ export const useTransactionStore = defineStore('transactions', () => {
   }
 
   async function create(input: TransactionInput) {
-    await createTransaction(input);
-    await Promise.all([load(), accountStore.load()]);
+    if (mutating.value) {
+      return false;
+    }
+
+    mutating.value = true;
+    try {
+      await createTransaction(input);
+      await Promise.all([load(), accountStore.load()]);
+      return true;
+    } finally {
+      mutating.value = false;
+    }
+  }
+
+  async function update(id: number, input: TransactionInput) {
+    if (mutating.value) {
+      return false;
+    }
+
+    mutating.value = true;
+    try {
+      const updated = await updateTransaction(id, input);
+      if (updated) {
+        await Promise.all([load(), accountStore.load()]);
+      }
+      return updated;
+    } finally {
+      mutating.value = false;
+    }
   }
 
   async function remove(id: number) {
-    await deleteTransaction(id);
-    await Promise.all([load(), accountStore.load()]);
+    if (mutating.value) {
+      return false;
+    }
+
+    mutating.value = true;
+    try {
+      await deleteTransaction(id);
+      await Promise.all([load(), accountStore.load()]);
+      return true;
+    } finally {
+      mutating.value = false;
+    }
   }
 
   return {
     transactions,
     filters,
     loading,
+    mutating,
     load,
     create,
+    update,
     remove
   };
 });

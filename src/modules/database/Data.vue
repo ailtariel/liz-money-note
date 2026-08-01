@@ -35,11 +35,23 @@ const restoreConfirmDialog = ref(false);
 const duplicateConfirmDialog = ref(false);
 const pendingImportFiles = ref<ImportTextFile[]>([]);
 const duplicateSummary = ref<ImportDuplicateSummary | null>(null);
+const activeDataOperation = ref<'text-import' | 'restore' | 'export' | null>(null);
+const pendingDuplicateStrategy = ref<ImportDuplicateStrategy | null>(null);
+const textImporting = computed(() => activeDataOperation.value === 'text-import');
+const restoring = computed(() => activeDataOperation.value === 'restore');
+const importing = computed(() => textImporting.value || restoring.value);
+const exporting = computed(() => activeDataOperation.value === 'export');
+const dataOperationInProgress = computed(() => activeDataOperation.value !== null);
 const selectedImportFileCount = computed(() =>
   systemStore.isAndroid ? nativeSelectedFiles.value.length : selectedFiles.value.length
 );
 
 async function exportData() {
+  if (dataOperationInProgress.value) {
+    return;
+  }
+
+  activeDataOperation.value = 'export';
   validationError.value = '';
   try {
     const data = await exportDatabaseJson();
@@ -48,21 +60,34 @@ async function exportData() {
     snackQueueStore.success(t('data.exported'));
   } catch (err) {
     snackQueueStore.error(err instanceof Error ? err.message : t('data.exportFailed'));
+  } finally {
+    activeDataOperation.value = null;
   }
 }
 
 async function restoreData() {
+  if (dataOperationInProgress.value) {
+    return;
+  }
+
   validationError.value = '';
   restoreConfirmDialog.value = true;
 }
 
 async function confirmRestoreData() {
+  if (dataOperationInProgress.value) {
+    return;
+  }
+
+  activeDataOperation.value = 'restore';
   try {
     await importDatabaseJson(importText.value);
     importText.value = '';
     snackQueueStore.success(t('data.restored'));
   } catch (err) {
     snackQueueStore.error(err instanceof Error ? err.message : t('data.restoreFailed'));
+  } finally {
+    activeDataOperation.value = null;
   }
 }
 
@@ -112,6 +137,10 @@ async function chooseNativeImportFiles() {
 }
 
 async function importSelectedFiles() {
+  if (dataOperationInProgress.value) {
+    return;
+  }
+
   validationError.value = '';
   importResult.value = null;
 
@@ -120,6 +149,7 @@ async function importSelectedFiles() {
     return;
   }
 
+  activeDataOperation.value = 'text-import';
   try {
     const files = systemStore.isAndroid
       ? nativeSelectedFiles.value.map(withSelectedCurrency)
@@ -141,20 +171,34 @@ async function importSelectedFiles() {
     await runTextImport(files, 'keep');
   } catch (err) {
     snackQueueStore.error(err instanceof Error ? err.message : t('data.importFailed'));
+  } finally {
+    activeDataOperation.value = null;
   }
 }
 
 async function confirmDuplicateImport(strategy: ImportDuplicateStrategy) {
-  duplicateConfirmDialog.value = false;
+  if (dataOperationInProgress.value) {
+    return;
+  }
 
+  activeDataOperation.value = 'text-import';
+  pendingDuplicateStrategy.value = strategy;
   try {
     await runTextImport(pendingImportFiles.value, strategy);
+    duplicateConfirmDialog.value = false;
   } catch (err) {
     snackQueueStore.error(err instanceof Error ? err.message : t('data.importFailed'));
+  } finally {
+    activeDataOperation.value = null;
+    pendingDuplicateStrategy.value = null;
   }
 }
 
 function abortDuplicateImport() {
+  if (dataOperationInProgress.value) {
+    return;
+  }
+
   duplicateConfirmDialog.value = false;
   pendingImportFiles.value = [];
   duplicateSummary.value = null;
@@ -208,13 +252,25 @@ onMounted(async () => {
     </div>
 
     <template #actions>
-      <v-btn color="secondary" variant="tonal" @click="confirmDuplicateImport('ignore')">
+      <v-btn
+        color="secondary"
+        variant="tonal"
+        :disabled="textImporting"
+        :loading="textImporting && pendingDuplicateStrategy === 'ignore'"
+        @click="confirmDuplicateImport('ignore')"
+      >
         {{ t('data.ignoreDuplicates') }}
       </v-btn>
-      <v-btn color="primary" variant="flat" @click="confirmDuplicateImport('keep')">
+      <v-btn
+        color="primary"
+        variant="flat"
+        :disabled="textImporting"
+        :loading="textImporting && pendingDuplicateStrategy === 'keep'"
+        @click="confirmDuplicateImport('keep')"
+      >
         {{ t('data.keepDuplicates') }}
       </v-btn>
-      <v-btn variant="text" @click="abortDuplicateImport">
+      <v-btn :disabled="textImporting" variant="text" @click="abortDuplicateImport">
         {{ t('data.abortImport') }}
       </v-btn>
     </template>
@@ -241,6 +297,7 @@ onMounted(async () => {
                 v-if="!systemStore.isAndroid"
                 v-model="selectedFiles"
                 accept=".csv,.txt,text/csv,text/plain"
+                :disabled="dataOperationInProgress"
                 :label="t('data.chooseFiles')"
                 multiple
               />
@@ -248,6 +305,7 @@ onMounted(async () => {
                 <v-btn
                   block
                   color="primary"
+                  :disabled="dataOperationInProgress"
                   prepend-icon="$upload"
                   variant="tonal"
                   @click="chooseNativeImportFiles"
@@ -264,6 +322,7 @@ onMounted(async () => {
               </div>
               <v-select
                 v-model="importCurrency"
+                :disabled="dataOperationInProgress"
                 :items="[
                   { title: t('data.autoCurrency'), value: 'auto' },
                   ...currencyStore.currencies.map((currency) => ({
@@ -274,7 +333,8 @@ onMounted(async () => {
                 :label="t('data.currency')"
               />
               <v-btn
-                :disabled="selectedImportFileCount === 0"
+                :disabled="selectedImportFileCount === 0 || exporting"
+                :loading="textImporting"
                 block
                 color="primary"
                 prepend-icon="$upload"
@@ -285,9 +345,15 @@ onMounted(async () => {
 
               <v-divider class="my-4" />
 
-              <v-textarea v-model="importText" :label="t('data.pasteJson')" rows="8" />
+              <v-textarea
+                v-model="importText"
+                :disabled="dataOperationInProgress"
+                :label="t('data.pasteJson')"
+                rows="8"
+              />
               <v-btn
-                :disabled="!importText"
+                :disabled="!importText || exporting"
+                :loading="restoring"
                 block
                 color="error"
                 variant="tonal"
@@ -306,7 +372,14 @@ onMounted(async () => {
               <div class="text-body-medium text-medium-emphasis mb-4">
                 {{ t('data.exportHint') }}
               </div>
-              <v-btn block color="primary" prepend-icon="$download" @click="exportData">
+              <v-btn
+                block
+                color="primary"
+                :disabled="importing"
+                prepend-icon="$download"
+                :loading="exporting"
+                @click="exportData"
+              >
                 {{ t('more.export') }}
               </v-btn>
             </v-card>

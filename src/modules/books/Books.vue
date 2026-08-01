@@ -13,7 +13,7 @@ const error = ref('');
 const editingId = ref<number | null>(null);
 const editorOpen = ref(false);
 const deleteConfirmOpen = ref(false);
-const deletingBookId = ref<number | null>(null);
+const pendingDeleteBookId = ref<number | null>(null);
 const form = reactive({
   name: '',
   description: '',
@@ -127,27 +127,42 @@ async function restore(bookId: number) {
   }
 }
 
+async function setDefaultBook(bookId: number) {
+  error.value = '';
+  try {
+    await store.setDefault(bookId);
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : t('book.defaultBookFailed');
+  }
+}
+
 function requestDelete(bookId: number) {
-  deletingBookId.value = bookId;
+  if (store.deletingBookId !== null) {
+    return;
+  }
+
+  pendingDeleteBookId.value = bookId;
   deleteConfirmOpen.value = true;
 }
 
 async function confirmDelete() {
-  if (!deletingBookId.value) {
+  if (!pendingDeleteBookId.value || store.deletingBookId !== null) {
     return;
   }
 
   error.value = '';
   try {
-    await store.remove(deletingBookId.value);
-    deletingBookId.value = null;
+    const deleted = await store.remove(pendingDeleteBookId.value);
+    if (deleted) {
+      pendingDeleteBookId.value = null;
+    }
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('book.deleteFailed');
   }
 }
 
 onMounted(async () => {
-  await Promise.all([store.load(), accountStore.load()]);
+  await Promise.all([store.load(), store.loadPreferences(), accountStore.load()]);
 });
 </script>
 
@@ -159,7 +174,7 @@ onMounted(async () => {
     :confirm-text="t('common.delete')"
     :cancel-text="t('common.cancel')"
     confirm-color="error"
-    @cancel="deletingBookId = null"
+    @cancel="pendingDeleteBookId = null"
     @confirm="confirmDelete"
   />
 
@@ -202,12 +217,35 @@ onMounted(async () => {
               >
                 {{ book.isArchived ? t('common.archived') : t('common.active') }}
               </v-chip>
+              <v-chip
+                v-if="store.defaultBookId === book.id"
+                class="book-status mt-2 ml-2"
+                color="primary"
+                size="x-small"
+                variant="flat"
+              >
+                {{ t('book.defaultBook') }}
+              </v-chip>
             </div>
             <div class="d-flex flex-column ga-1">
-              <v-btn size="small" variant="text" @click="editBook(book.id)">
+              <v-btn
+                :disabled="book.isArchived || store.defaultBookId === book.id || store.deletingBookId !== null"
+                size="small"
+                variant="text"
+                @click="setDefaultBook(book.id)"
+              >
+                {{ t('book.setDefault') }}
+              </v-btn>
+              <v-btn
+                :disabled="store.deletingBookId !== null"
+                size="small"
+                variant="text"
+                @click="editBook(book.id)"
+              >
                 {{ t('common.edit') }}
               </v-btn>
               <v-btn
+                :disabled="store.deletingBookId !== null"
                 size="small"
                 variant="text"
                 @click="book.isArchived ? restore(book.id) : archive(book.id)"
@@ -216,6 +254,8 @@ onMounted(async () => {
               </v-btn>
               <v-btn
                 color="error"
+                :disabled="store.deletingBookId !== null"
+                :loading="store.deletingBookId === book.id"
                 size="small"
                 variant="text"
                 @click="requestDelete(book.id)"

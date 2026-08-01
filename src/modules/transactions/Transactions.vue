@@ -40,6 +40,8 @@ const detailSheetOpen = ref(false);
 const searchDraft = ref('');
 
 const selectedTransaction = ref<Transaction | null>(null);
+const editorTransaction = ref<Transaction | null>(null);
+const editorInitialBookId = ref<number | null>(null);
 
 const filters = reactive({
   bookId: null as number | null,
@@ -210,6 +212,9 @@ async function loadWithFilters() {
 async function selectBook(value: number | string | null) {
   filters.bookId = typeof value === 'number' ? value : null;
   bookFilterOpen.value = false;
+  if (filters.bookId) {
+    await bookStore.rememberLastOpened(filters.bookId);
+  }
   await loadWithFilters();
 }
 
@@ -276,13 +281,33 @@ function openDetail(transaction: Transaction) {
   detailSheetOpen.value = true;
 }
 
+function openCreateEditor() {
+  editorTransaction.value = null;
+  editorInitialBookId.value = filters.bookId;
+  editorOpen.value = true;
+}
+
+function openEditEditor(transaction: Transaction) {
+  detailSheetOpen.value = false;
+  editorTransaction.value = transaction;
+  editorOpen.value = true;
+}
+
+function closeEditor() {
+  editorOpen.value = false;
+  editorTransaction.value = null;
+  editorInitialBookId.value = null;
+}
+
 onMounted(async () => {
   await Promise.all([
     bookStore.load(),
+    bookStore.loadPreferences(),
     accountStore.load(),
-    tagStore.load(),
-    transactionStore.load()
+    tagStore.load()
   ]);
+  filters.bookId = bookStore.activeDefaultBookId;
+  await loadWithFilters();
 });
 
 const summaryItems = computed(() => {
@@ -305,7 +330,7 @@ const summaryItems = computed(() => {
 ------------------------*/
 const editorOpen = ref(false);
 function handleEditorSaved() {
-  editorOpen.value = false;
+  closeEditor();
 }
 </script>
 
@@ -318,7 +343,7 @@ function handleEditorSaved() {
         variant="flat"
         size="small"
         class="ma-2"
-        @click="editorOpen = true"
+        @click="openCreateEditor"
       />
       <v-btn icon="$search" variant="text" @click="openSearch" />
       <v-chip
@@ -343,7 +368,9 @@ function handleEditorSaved() {
   >
     <TransactionEditor
       v-if="editorOpen"
-      @close="editorOpen = false"
+      :initial-book-id="editorInitialBookId"
+      :transaction="editorTransaction"
+      @close="closeEditor"
       @saved="handleEditorSaved"
     />
   </v-dialog>
@@ -553,6 +580,7 @@ function handleEditorSaved() {
         <TransactionDetailVue
           :transaction="selectedTransaction"
           @close="detailSheetOpen = false"
+          @edit="openEditEditor"
         />
       </v-bottom-sheet>
     </v-container>

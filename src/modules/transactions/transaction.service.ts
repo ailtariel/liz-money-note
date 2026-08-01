@@ -5,12 +5,56 @@ import {
   getAccountById
 } from '@/modules/accounts/account.repository';
 import { isAccountLinkedToBook } from '@/modules/books/book.repository';
-import { insertTransaction } from './transaction.repository';
 import {
   getTransactionById,
-  markTransactionDeleted
+  insertTransaction,
+  markTransactionDeleted,
+  replaceTransactionTags,
+  updateTransactionRecord
 } from './transaction.repository';
 import type { TransactionInput } from './transaction.types';
+
+interface TransactionBalanceEffect {
+  type: TransactionInput['type'];
+  amount: number;
+  accountId: number;
+  targetAccountId?: number | null;
+}
+
+async function applyTransactionBalanceEffect(
+  transaction: TransactionBalanceEffect,
+  direction: 1 | -1,
+  db: SQLiteDBConnection
+) {
+  if (transaction.type === 'income') {
+    await applyAccountBalanceDelta(
+      transaction.accountId,
+      transaction.amount * direction,
+      db
+    );
+    return;
+  }
+
+  if (transaction.type === 'expense') {
+    await applyAccountBalanceDelta(
+      transaction.accountId,
+      -transaction.amount * direction,
+      db
+    );
+    return;
+  }
+
+  await applyAccountBalanceDelta(
+    transaction.accountId,
+    -transaction.amount * direction,
+    db
+  );
+  await applyAccountBalanceDelta(
+    transaction.targetAccountId!,
+    transaction.amount * direction,
+    db
+  );
+}
 
 async function validateTransactionInput(
   input: TransactionInput,
@@ -70,19 +114,41 @@ export async function createTransaction(input: TransactionInput) {
   await db.beginTransaction();
   try {
     const transactionId = await insertTransaction(input, db);
-
-    if (input.type === 'income') {
-      await applyAccountBalanceDelta(input.accountId, input.amount, db);
-    } else if (input.type === 'expense') {
-      await applyAccountBalanceDelta(input.accountId, -input.amount, db);
-    } else {
-      await applyAccountBalanceDelta(input.accountId, -input.amount, db);
-      await applyAccountBalanceDelta(input.targetAccountId!, input.amount, db);
-    }
+    await applyTransactionBalanceEffect(input, 1, db);
 
     await db.commitTransaction();
     await persistDatabase();
     return transactionId;
+  } catch (error) {
+    try {
+      await db.rollbackTransaction();
+    } catch {
+      // Preserve the original database error.
+    }
+    throw error;
+  }
+}
+
+export async function updateTransaction(id: number, input: TransactionInput) {
+  const db = await getDatabase();
+  const transaction = await getTransactionById(id, db);
+
+  if (!transaction || transaction.deletedAt) {
+    return false;
+  }
+
+  await validateTransactionInput(input, db);
+
+  await db.beginTransaction();
+  try {
+    await applyTransactionBalanceEffect(transaction, -1, db);
+    await updateTransactionRecord(id, input, db);
+    await replaceTransactionTags(id, input.tagIds ?? [], db);
+    await applyTransactionBalanceEffect(input, 1, db);
+
+    await db.commitTransaction();
+    await persistDatabase();
+    return true;
   } catch (error) {
     try {
       await db.rollbackTransaction();
@@ -104,19 +170,7 @@ export async function deleteTransaction(id: number) {
   await db.beginTransaction();
   try {
     await markTransactionDeleted(id, db);
-
-    if (transaction.type === 'income') {
-      await applyAccountBalanceDelta(transaction.accountId, -transaction.amount, db);
-    } else if (transaction.type === 'expense') {
-      await applyAccountBalanceDelta(transaction.accountId, transaction.amount, db);
-    } else {
-      await applyAccountBalanceDelta(transaction.accountId, transaction.amount, db);
-      await applyAccountBalanceDelta(
-        transaction.targetAccountId!,
-        -transaction.amount,
-        db
-      );
-    }
+    await applyTransactionBalanceEffect(transaction, -1, db);
 
     await db.commitTransaction();
     await persistDatabase();

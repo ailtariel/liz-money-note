@@ -11,7 +11,10 @@ interface Props {
   transaction: Transaction | null;
 }
 const props = defineProps<Props>();
-const emit = defineEmits(['close']);
+const emit = defineEmits<{
+  close: [];
+  edit: [transaction: Transaction];
+}>();
 
 const { t } = useI18n();
 const trans = useTransaction();
@@ -93,7 +96,9 @@ const removeTransaction = async () => {
       </v-chip>
     </div>
     <div class="d-flex ga-2 mt-5">
-      <v-btn block variant="tonal">{{ t('common.edit') }}</v-btn>
+      <v-btn block variant="tonal" @click="emit('edit', transaction)">
+        {{ t('common.edit') }}
+      </v-btn>
       <v-btn block variant="tonal">{{ t('common.copy') }}</v-btn>
       <v-btn block color="error" variant="tonal" @click="removeTransaction">
         {{ t('common.delete') }}

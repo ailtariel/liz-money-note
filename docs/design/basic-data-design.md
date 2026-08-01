@@ -210,11 +210,13 @@ CREATE TABLE settings (
 
 可保存的值：
 
-- 默认账本 ID
+- 默认账本 ID（`default_book_id`）
 - 默认账户 ID
 - 默认币种
 - 主题模式
-- 上次打开的账本 ID
+- 上次打开的账本 ID（`last_opened_book_id`）
+
+账本 ID 使用十进制字符串保存。读取时只接受正整数；设置指向不存在或已归档账本时，运行时将其视为未配置，不影响历史数据。
 
 ## 推荐索引
 
@@ -352,7 +354,10 @@ recurring_event_tags
 - 每个账本必须至少关联一个账户。
 - 每个账本只能有一个默认账户。
 - 新增流水和周期事件只能使用所选账本已关联的账户。
-- 新增流水默认使用所选账本的默认账户。
+- 流水页首次打开时，如果 `default_book_id` 指向启用中的账本，则默认筛选该账本；否则保持“全部账本”。
+- 用户在流水页明确选择一个账本时，将其保存为 `last_opened_book_id`；选择“全部账本”不会清除该记录。
+- 新增流水按以下顺序选择账本和账户：当前筛选账本及其最近一条有效流水账户、上次打开账本及其最近一条有效流水账户、上次打开账本的默认账户。没有上次打开账本时，再使用默认账本和首个启用账本作为兼容回退。
+- 最近账户查询只接受未删除流水、启用账本、启用账户以及仍然存在的 `book_accounts` 关联。
 - 不同账本可以关联同一个账户。
 
 ```sql
@@ -390,6 +395,24 @@ CSV / TXT 导入时，每个导入文件创建或复用账本与导入账户，�
 本地开发数据库路径由 `.env.local` 的 `DB_LOCAL_PATH` 覆盖。`npm run dev` 会在本地数据库不存在时创建空 SQLite 数据库，并同步到 `DB_ASSET_DIR` 供 `copyFromAssets` 初始化运行时数据库。
 
 `vite build` 默认根据 `src/modules/database/schema.ts` 生成全新的空 SQLite 数据库和 `databases.json`，再由 Capacitor 同步进 Android assets。构建产物只包含空结构库，不包含 `.mockdata` 业务样例数据。
+
+### Database file ownership and lifecycle
+
+- `.local/databases/<database>.db` is the local development seed source. Development startup applies current table and index creation SQL without deleting its business data.
+- `public/assets/databases/<database>.db` is a generated transport asset. Development startup copies the local seed into it; production build replaces it with a fresh schema-only database.
+- `public/assets/databases` must contain only the configured database file and `databases.json`. It is not a runtime persistence directory and must not retain verification databases.
+- Web runtime persistence belongs to the `jeep-sqlite` IndexedDB store.
+- Android runtime persistence belongs to the application's private SQLite database directory.
+- Application mutations never write back to `.local/databases` or `public/assets/databases`.
+
+Runtime startup checks whether the private runtime database exists before opening a connection or running migrations:
+
+1. If no runtime database exists, copy the configured asset database into runtime storage.
+2. Open the runtime database.
+3. Run idempotent schema and data migrations.
+4. Persist all later application mutations only in runtime storage.
+
+An existing runtime database is never replaced during normal startup. The confirmed database-reset action is the explicit destructive path that deletes the runtime database, copies the current asset again, and then runs migrations.
 
 ## Currency and Exchange Rates
 

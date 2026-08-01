@@ -1,4 +1,11 @@
-import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import {
+  copyFile,
+  mkdir,
+  readFile,
+  readdir,
+  rm,
+  writeFile
+} from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -102,6 +109,22 @@ async function writeAssetManifest(assetDir, databaseFileName) {
   );
 }
 
+async function removeUnexpectedDatabaseAssets(assetDir, databaseFileName) {
+  await mkdir(assetDir, { recursive: true });
+  const entries = await readdir(assetDir, { withFileTypes: true });
+
+  await Promise.all(
+    entries
+      .filter(
+        (entry) =>
+          entry.isFile() &&
+          entry.name.endsWith('.db') &&
+          entry.name !== databaseFileName
+      )
+      .map((entry) => rm(path.join(assetDir, entry.name), { force: true }))
+  );
+}
+
 const env = await loadEnv();
 const sqlitePath = env.DB_SQLITE_PATH ?? env.SQLITE3_PATH ?? 'sqlite3';
 const databaseName = env.DB_NAME ?? defaultDatabaseName;
@@ -113,6 +136,8 @@ const localDbPath =
   resolveWorkspacePath(env.DB_LOCAL_PATH) ??
   path.join(rootDir, '.local/databases', databaseFileName);
 const assetDbPath = path.join(assetDir, databaseFileName);
+
+await removeUnexpectedDatabaseAssets(assetDir, databaseFileName);
 
 const schemaModuleUrl = pathToFileURL(
   path.join(rootDir, 'src/modules/database/schema.ts')

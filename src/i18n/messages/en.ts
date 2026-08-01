@@ -67,6 +67,7 @@ export default {
     transfer: 'Transfer',
     balance: 'Balance',
     detail: 'Transaction detail',
+    editTitle: 'Edit transaction',
     account: 'Account',
     book: 'Book',
     tags: 'Tags',
@@ -81,6 +82,7 @@ export default {
     occurredAt: 'Occurred at',
     needBookAccount: 'Please choose a book and account.',
     saveFailed: 'Failed to save transaction.',
+    notFound: 'The transaction does not exist or has been deleted.',
     deleteFailed: 'Failed to delete transaction.',
     search: {
       title: 'Search transactions',
@@ -122,6 +124,9 @@ export default {
   book: {
     linkedAccounts: 'Linked accounts',
     defaultAccount: 'Default',
+    defaultBook: 'Default book',
+    setDefault: 'Set default',
+    defaultBookFailed: 'Failed to set the default book.',
     accountRequired: 'Please link at least one account.',
     defaultAccountRequired: 'Please choose a linked default account.',
     saveFailed: 'Failed to save book.',

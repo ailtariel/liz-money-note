@@ -67,6 +67,7 @@ export default {
     transfer: '转账',
     balance: '结余',
     detail: '流水详情',
+    editTitle: '编辑流水',
     account: '账户',
     book: '账本',
     tags: 'Tag',
@@ -81,6 +82,7 @@ export default {
     occurredAt: '发生时间',
     needBookAccount: '请选择账本和账户。',
     saveFailed: '保存流水失败。',
+    notFound: '流水不存在或已删除。',
     deleteFailed: '删除流水失败。',
     search: {
       title: '搜索流水',
@@ -122,6 +124,9 @@ export default {
   book: {
     linkedAccounts: '关联账户',
     defaultAccount: '默认',
+    defaultBook: '默认账本',
+    setDefault: '设为默认',
+    defaultBookFailed: '设置默认账本失败。',
     accountRequired: '请至少关联一个账户。',
     defaultAccountRequired: '请选择一个已关联的默认账户。',
     saveFailed: '保存账本失败。',
