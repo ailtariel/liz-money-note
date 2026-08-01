@@ -56,11 +56,15 @@ const parserModuleUrl = pathToFileURL(
 const schemaModuleUrl = pathToFileURL(
   path.join(rootDir, 'src/modules/database/schema.ts')
 ).href;
+const tagColorsModuleUrl = pathToFileURL(
+  path.join(rootDir, 'src/modules/tags/tag-colors.ts')
+).href;
 
 const { parseTextImportFile } = await import(parserModuleUrl);
 const { createTableStatements, createIndexStatements } = await import(
   schemaModuleUrl
 );
+const { getTagPaletteColor } = await import(tagColorsModuleUrl);
 
 function sqlString(value) {
   if (value === null || value === undefined) {
@@ -137,7 +141,7 @@ for (const fileName of files) {
       tagIds.set(transaction.category, tagId);
       statements.push(
         `INSERT INTO tags (id, name, color, sort_order, created_at, updated_at)
-         VALUES (${tagId}, ${sqlString(transaction.category)}, NULL, 0, datetime('now'), datetime('now'));`
+         VALUES (${tagId}, ${sqlString(transaction.category)}, ${sqlString(getTagPaletteColor(tagId - 1))}, 0, datetime('now'), datetime('now'));`
       );
       tagId += 1;
     }

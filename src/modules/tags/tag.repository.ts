@@ -1,6 +1,7 @@
 import type { SQLiteDBConnection } from '@capacitor-community/sqlite';
 import { getDatabase, persistDatabase } from '@/modules/database/connection';
 import { nowIso } from '@/modules/shared/date';
+import { getTagPaletteColor } from './tag-colors';
 import type { Tag, TagInput } from './tag.types';
 
 interface TagRow {
@@ -10,6 +11,10 @@ interface TagRow {
   sort_order: number;
   created_at: string;
   updated_at: string;
+}
+
+interface SequenceRow {
+  seq: number | null;
 }
 
 function mapTag(row: TagRow): Tag {
@@ -31,13 +36,22 @@ export async function listTags(db?: SQLiteDBConnection) {
   return ((result.values ?? []) as TagRow[]).map(mapTag);
 }
 
+export async function getNextTagPaletteIndex(db: SQLiteDBConnection) {
+  const result = await db.query(
+    `SELECT seq FROM sqlite_sequence WHERE name = 'tags' LIMIT 1`
+  );
+  return Number(((result.values ?? [])[0] as SequenceRow | undefined)?.seq ?? 0);
+}
+
 export async function createTag(input: TagInput) {
   const db = await getDatabase();
   const now = nowIso();
+  const color =
+    input.color?.trim() || getTagPaletteColor(await getNextTagPaletteIndex(db));
   await db.run(
     `INSERT INTO tags (name, color, sort_order, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?)`,
-    [input.name.trim(), input.color ?? null, input.sortOrder ?? 0, now, now]
+    [input.name.trim(), color, input.sortOrder ?? 0, now, now]
   );
   await persistDatabase();
 }

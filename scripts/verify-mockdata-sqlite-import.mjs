@@ -13,11 +13,15 @@ const parserModuleUrl = pathToFileURL(
 const schemaModuleUrl = pathToFileURL(
   path.join(rootDir, 'src/modules/database/schema.ts')
 ).href;
+const tagColorsModuleUrl = pathToFileURL(
+  path.join(rootDir, 'src/modules/tags/tag-colors.ts')
+).href;
 
 const { parseTextImportFile } = await import(parserModuleUrl);
 const { createTableStatements, createIndexStatements } = await import(
   schemaModuleUrl
 );
+const { getTagPaletteColor } = await import(tagColorsModuleUrl);
 
 function sqlString(value) {
   if (value === null || value === undefined) {
@@ -86,7 +90,7 @@ try {
         tagIds.set(transaction.category, tagId);
         statements.push(
           `INSERT INTO tags (id, name, color, sort_order, created_at, updated_at)
-           VALUES (${tagId}, ${sqlString(transaction.category)}, NULL, 0, datetime('now'), datetime('now'));`
+           VALUES (${tagId}, ${sqlString(transaction.category)}, ${sqlString(getTagPaletteColor(tagId - 1))}, 0, datetime('now'), datetime('now'));`
         );
         tagId += 1;
       }
@@ -130,6 +134,9 @@ try {
     SELECT 'books=' || COUNT(*) FROM books;
     SELECT 'accounts=' || COUNT(*) FROM accounts;
     SELECT 'tags=' || COUNT(*) FROM tags;
+    SELECT 'tags_without_color=' || COUNT(*)
+    FROM tags
+    WHERE color IS NULL OR TRIM(color) = '';
     SELECT 'transactions=' || COUNT(*) FROM transactions;
     SELECT 'balance_mismatches=' || COUNT(*)
     FROM accounts a
@@ -147,6 +154,10 @@ try {
 
   if (!summary.includes('balance_mismatches=0')) {
     throw new Error(`Account balances do not match transactions.\n${summary}`);
+  }
+
+  if (!summary.includes('tags_without_color=0')) {
+    throw new Error(`Imported tags are missing palette colors.\n${summary}`);
   }
 
   console.log(summary);

@@ -139,6 +139,8 @@ export default {
       'Deleted books cannot be recovered. Back up your data first.'
   },
   tag: {
+    presetColors: 'Preset colors',
+    selectColor: 'Select color {color}',
     saveFailed: 'Failed to save tag.',
     deleteFailed: 'Failed to delete tag.'
   },

@@ -177,7 +177,7 @@ The existing `recurring_event_id`, `created_at`, and `deleted_at` values remain 
 
 **Checklist:**
 
-- [ ] Add a reusable Tag color palette and deterministic color rotation for initialization, manual creation, and text import.
+- [x] Add a reusable Tag color palette and deterministic color rotation for initialization, manual creation, and text import.
 - [ ] Add currency conversion guidance where automatic conversion is shown.
 - [ ] Move the add-transaction entry to a bottom-center page action while keeping it outside bottom navigation.
 - [ ] Add configurable transaction-success sound only after storage and Android audio behavior are specified.

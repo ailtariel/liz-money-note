@@ -5,6 +5,8 @@ import { linkDefaultAccountToBook } from '@/modules/books/book.repository';
 import { insertTransaction } from '@/modules/transactions/transaction.repository';
 import { nowIso } from '@/modules/shared/date';
 import type { CurrencyCode } from '@/modules/shared/money';
+import { getNextTagPaletteIndex } from '@/modules/tags/tag.repository';
+import { getTagPaletteColor } from '@/modules/tags/tag-colors';
 import type {
   ImportBatchResult,
   ImportDuplicateSummary,
@@ -86,7 +88,11 @@ async function ensureImportAccount(
   return result.changes?.lastId ?? 0;
 }
 
-async function ensureTag(name: string, db: SQLiteDBConnection) {
+async function ensureTag(
+  name: string,
+  db: SQLiteDBConnection,
+  nextColor: () => string
+) {
   const normalized = name.trim() || '未分类';
   const existing = await db.query('SELECT id FROM tags WHERE name = ? LIMIT 1', [
     normalized
@@ -101,7 +107,7 @@ async function ensureTag(name: string, db: SQLiteDBConnection) {
   const result = await db.run(
     `INSERT INTO tags (name, color, sort_order, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?)`,
-    [normalized, null, 0, now, now],
+    [normalized, nextColor(), 0, now, now],
     false
   );
   return result.changes?.lastId ?? 0;
@@ -223,7 +229,8 @@ async function summarizeDuplicates(
 async function importParsedFile(
   parsedFile: ParsedImportFile,
   db: SQLiteDBConnection,
-  duplicateRows: number
+  duplicateRows: number,
+  nextTagColor: () => string
 ): Promise<ImportFileResult> {
   await db.beginTransaction();
 
@@ -239,7 +246,10 @@ async function importParsedFile(
 
     for (const transaction of parsedFile.transactions) {
       if (!tagIds.has(transaction.category)) {
-        tagIds.set(transaction.category, await ensureTag(transaction.category, db));
+        tagIds.set(
+          transaction.category,
+          await ensureTag(transaction.category, db, nextTagColor)
+        );
       }
 
       await insertTransaction(
@@ -292,6 +302,8 @@ export async function importTextFiles(
 ): Promise<ImportBatchResult> {
   const db = await getDatabase();
   const results: ImportFileResult[] = [];
+  let nextTagColorIndex = await getNextTagPaletteIndex(db);
+  const nextTagColor = () => getTagPaletteColor(nextTagColorIndex++);
   let parsedFiles = files.map(parseTextImportFile);
   let duplicateRowsByIndex: number[] = [];
 
@@ -306,7 +318,8 @@ export async function importTextFiles(
       await importParsedFile(
         parsed,
         db,
-        duplicateRowsByIndex[index] ?? 0
+        duplicateRowsByIndex[index] ?? 0,
+        nextTagColor
       )
     );
   }

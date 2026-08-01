@@ -68,6 +68,8 @@ CREATE TABLE accounts (
 
 Tag 用于标记流水和周期事件，例如早餐、报销、旅行、必要支出。Tag 不承担账本分类职责。
 
+Tag 颜色使用统一的预设色板按创建序号循环分配。手工新增时默认选择下一颜色并允许用户自定义；文本导入和开发预载只在创建新 Tag 时推进色板。迁移仅为 `color` 为空的历史 Tag 按 `id` 确定性回填，不覆盖已有自定义颜色。
+
 ```sql
 CREATE TABLE tags (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

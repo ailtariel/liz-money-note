@@ -1,6 +1,7 @@
 import type { SQLiteDBConnection } from '@capacitor-community/sqlite';
 import { createIndexStatements, createTableStatements } from './schema';
 import { nowIso } from '@/modules/shared/date';
+import { getTagPaletteColor } from '@/modules/tags/tag-colors';
 
 interface IdRow {
   id: number;
@@ -13,6 +14,10 @@ interface AccountReferenceRow {
 
 interface DefaultAccountRow {
   account_id: number | null;
+}
+
+interface TagColorRow {
+  id: number;
 }
 
 async function ensureAtLeastOneAccount(db: SQLiteDBConnection) {
@@ -151,8 +156,25 @@ async function backfillBookAccounts(db: SQLiteDBConnection) {
   }
 }
 
+async function backfillTagColors(db: SQLiteDBConnection) {
+  const result = await db.query(
+    `SELECT id FROM tags
+     WHERE color IS NULL OR TRIM(color) = ''
+     ORDER BY id ASC`
+  );
+
+  for (const tag of (result.values ?? []) as TagColorRow[]) {
+    await db.run(
+      'UPDATE tags SET color = ?, updated_at = ? WHERE id = ?',
+      [getTagPaletteColor(tag.id - 1), nowIso(), tag.id],
+      false
+    );
+  }
+}
+
 export async function runMigrations(db: SQLiteDBConnection) {
   await db.execute(createTableStatements);
   await backfillBookAccounts(db);
+  await backfillTagColors(db);
   await db.execute(createIndexStatements);
 }

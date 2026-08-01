@@ -138,6 +138,8 @@ export default {
     deleteConfirmMessage: '账本删除后无法恢复，建议提前备份'
   },
   tag: {
+    presetColors: '预设颜色',
+    selectColor: '选择颜色 {color}',
     saveFailed: '保存 Tag 失败。',
     deleteFailed: '删除 Tag 失败。'
   },

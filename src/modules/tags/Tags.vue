@@ -3,22 +3,26 @@ import { onMounted, reactive, ref } from 'vue';
 import { useI18n } from '@/i18n';
 import AppBarVue from '@/components/shared/app-bar.vue';
 import { useTagStore } from '@/modules/tags/tag.store';
+import {
+  getTagPaletteColor,
+  tagColorPalette
+} from '@/modules/tags/tag-colors';
 
 const { t } = useI18n();
 const store = useTagStore();
 const error = ref('');
 const editingId = ref<number | null>(null);
 const editorOpen = ref(false);
-const form = reactive({
+const form = reactive<{ name: string; color: string; sortOrder: number }>({
   name: '',
-  color: '#0f766e',
+  color: getTagPaletteColor(0),
   sortOrder: 0
 });
 
 function resetForm() {
   editingId.value = null;
   form.name = '';
-  form.color = '#0f766e';
+  form.color = getTagPaletteColor(store.tags.length);
   form.sortOrder = 0;
 }
 
@@ -35,7 +39,7 @@ function editTag(tagId: number) {
 
   editingId.value = tag.id;
   form.name = tag.name;
-  form.color = tag.color ?? '#0f766e';
+  form.color = tag.color ?? getTagPaletteColor(tag.id - 1);
   form.sortOrder = tag.sortOrder;
   editorOpen.value = true;
 }
@@ -120,6 +124,31 @@ onMounted(() => store.load());
           </div>
           <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
             <v-text-field v-model="form.name" :label="t('common.name')" required />
+            <div>
+              <div class="mb-2 text-label-medium text-medium-emphasis">
+                {{ t('tag.presetColors') }}
+              </div>
+              <div class="d-flex flex-wrap ga-2">
+                <v-btn
+                  v-for="color in tagColorPalette"
+                  :key="color"
+                  :aria-label="t('tag.selectColor', { color })"
+                  :aria-pressed="form.color.toUpperCase() === color"
+                  :color="color"
+                  icon
+                  size="small"
+                  type="button"
+                  variant="flat"
+                  @click="form.color = color"
+                >
+                  <v-icon
+                    v-if="form.color.toUpperCase() === color"
+                    icon="$check"
+                    size="18"
+                  />
+                </v-btn>
+              </div>
+            </div>
             <v-color-input
               v-model="form.color"
               :label="t('common.color')"
