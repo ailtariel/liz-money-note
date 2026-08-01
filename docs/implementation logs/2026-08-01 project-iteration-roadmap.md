@@ -179,7 +179,7 @@ The existing `recurring_event_id`, `created_at`, and `deleted_at` values remain 
 
 - [x] Add a reusable Tag color palette and deterministic color rotation for initialization, manual creation, and text import.
 - [x] Add currency conversion guidance where automatic conversion is shown. Completed in `2026-06-08 statistics-account-currency-sync.md`.
-- [ ] Move the add-transaction entry to a bottom-center page action while keeping it outside bottom navigation.
+- [x] Move the add-transaction entry to a bottom-center page action while keeping it outside bottom navigation.
 - [ ] Add configurable transaction-success sound only after storage and Android audio behavior are specified.
 
 ### Iteration 7: Engineering Cleanup
@@ -213,4 +213,4 @@ These items remain independent and should receive separate implementation logs b
 
 ## Final Status
 
-In progress. The database correction and Iterations 1-3 are complete. Iteration 4 update UX is complete, while launcher reproduction is waiting for a device. Iteration 7 engineering cleanup is complete.
+In progress. The database correction and Iterations 1-3 are complete. Iteration 4 update UX is complete, while launcher reproduction is waiting for a device. Iteration 6 tag colors, currency guidance, and bottom-center transaction action are complete; configurable success sound remains gated by a product and Android audio contract. Iteration 7 engineering cleanup is complete.

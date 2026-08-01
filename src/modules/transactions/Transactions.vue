@@ -349,14 +349,6 @@ function handleEditorSaved() {
 <template>
   <AppBarVue>
     <template #actions>
-      <v-btn
-        color="primary"
-        icon="$add"
-        variant="flat"
-        size="small"
-        class="ma-2"
-        @click="openCreateEditor"
-      />
       <v-btn icon="$search" variant="text" @click="openSearch" />
       <v-chip
         v-if="activeSearch"
@@ -387,7 +379,7 @@ function handleEditorSaved() {
     />
   </v-dialog>
   <v-main>
-    <v-container class="d-flex flex-column ga-4 pa-4">
+    <v-container class="transactions-container d-flex flex-column ga-4 pa-4">
       <v-card class="" color="transparent">
         <v-btn
           class="justify-start px-2"
@@ -609,6 +601,16 @@ function handleEditorSaved() {
       </v-bottom-sheet>
     </v-container>
   </v-main>
+
+  <v-btn
+    :aria-label="t('nav.newTransaction')"
+    class="transaction-add-action"
+    color="primary"
+    elevation="6"
+    icon="$add"
+    size="large"
+    @click="openCreateEditor"
+  />
 </template>
 
 <style scoped>
@@ -634,5 +636,17 @@ function handleEditorSaved() {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.transactions-container {
+  padding-bottom: 6rem !important;
+}
+
+.transaction-add-action {
+  position: fixed;
+  z-index: 10;
+  left: 50%;
+  bottom: calc(98px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
 }
 </style>
