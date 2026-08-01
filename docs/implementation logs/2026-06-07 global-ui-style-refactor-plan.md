@@ -1,5 +1,7 @@
 # Global UI Style Refactor Plan
 
+> Archived on 2026-08-01. This document preserves the original refactor scope and first-slice notes; its unchecked boxes are historical intent, not the active backlog. Use `docs/design/style-design-system.md` and `docs/implementation logs/2026-08-01 project-iteration-roadmap.md` for current work.
+
 **Date:** 2026-06-07
 
 **Goal:** 根据 `docs/design/style-design-system.md` 重构全局 UI 样式系统，并把统一后的 theme token、Vuetify defaults 和全局样式应用到现有页面。
@@ -159,3 +161,7 @@ Implementation started for the first visual review slice after explicit user con
   - Keep local scoped CSS only for truncation, fixed-format visual widgets, native input overrides, and small component-specific geometry.
   - Replace touched legacy tokens (`text-primary`, `text-secondary`, `card-border`, `summary-text`, `nav-active-*`) with the new design-system tokens.
   - Preserve behavior, data flow, routes, schemas, and user-visible copy.
+
+## Final Status
+
+Archived. The documented first slice was implemented and verified; later styling work continued through feature-specific iterations. The unchecked original checklist is retained to show the historical proposal and must not be read as current work.

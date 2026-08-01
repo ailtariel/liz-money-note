@@ -1,5 +1,7 @@
 # 账本软件基础功能实施计划
 
+> 2026-08-01 归档：本文保留初始 MVP 的范围和原始任务清单，未勾选项不再代表当前 backlog。当前约束以 `docs/design/` 为准，后续任务以 `docs/implementation logs/2026-08-01 project-iteration-roadmap.md` 和 `docs/todo.md` 为准。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use executing-plans or equivalent task-by-task execution. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 实现一个本地优先的基础账本 App，支持账本、账户、Tag、收入、支出、转账和周期事件手动批准。
@@ -418,3 +420,7 @@ Expected: Web 构建成功，Android 项目同步成功，并可在 Android Stud
 - `currencies` stores the configured currency list.
 - `currency_rates` stores exchange rates from configured non-default currencies to the current default currency.
 - App startup loads configured currencies, refreshes exchange rates if older than 24 hours, and registers a 24-hour refresh job.
+
+## Final Status
+
+Archived. 核心 MVP 已由本文“当前实现状态”所述功能及后续实施日志落地；原始清单中部分要求已被后续设计替代，例如数据迁移采用 JSON 导入/导出而非直接暴露 SQLite `.db`。保留未勾选框仅用于呈现历史计划，不作为当前完成度统计。

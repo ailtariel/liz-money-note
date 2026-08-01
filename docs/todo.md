@@ -12,16 +12,13 @@
 - [ ] 从剪贴板文本创建流水。
 - [ ] 新增流水按钮移到页面下方正中，保持在底部导航之外。
 
-# 工程与性能
-
-- [ ] 回填或归档状态与最终结果冲突的历史实施计划。
-
 # 可选能力
 
 - [ ] 如果 JSON 备份不能满足需求，增加原始 SQLite `.db` 文件导出和恢复。
 
 # 已完成
 
+- [x] 归档不再代表当前 backlog 的早期 MVP 与全局样式计划，统一历史实施日志状态口径。
 - [x] 流水列表使用稳定 Map 和单次聚合减少重复查找，增加 Loading 并保证并发筛选最后一次请求生效。
 - [x] 将 README 和公开默认标识从 Vue Skeleton 更新为 Liz Money Note，并记录开发、数据库、构建和发布流程。
 - [x] 审计并消除 `jeep-sqlite` crypto externalized 和 ECharts chunk size 构建告警，迁移到 Vite 8 `rolldownOptions`。
