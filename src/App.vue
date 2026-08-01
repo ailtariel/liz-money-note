@@ -26,9 +26,17 @@ const snackQueueStore = useSnackQueueStore();
 const appUpdateStore = useAppUpdateStore();
 const systemStore = useSystemStore();
 const sheetOpen = ref(false);
+const updatePromptOpen = ref(false);
+const startupUpdateCheckPending = ref(true);
 const error = ref('');
 
 const dueEvents = computed(() => recurringStore.dueEvents);
+const updateTargetAvailable = computed(() =>
+  Boolean(
+    appUpdateStore.manifest?.downloadUrl ??
+    appUpdateStore.manifest?.releaseUrl
+  )
+);
 
 function accountName(id: number | null) {
   if (!id) {
@@ -47,10 +55,28 @@ async function refreshExchangeRates(force = false) {
 }
 
 async function checkAppUpdate() {
+  const shouldShowStartupPrompt = startupUpdateCheckPending.value;
+
   try {
-    await appUpdateStore.check();
+    const result = await appUpdateStore.check();
+    if (shouldShowStartupPrompt) {
+      startupUpdateCheckPending.value = false;
+      if (result?.hasUpdate) {
+        updatePromptOpen.value = true;
+      }
+    }
   } catch (err) {
     console.error('Failed to check app update.', err);
+  }
+}
+
+async function installPromptedUpdate() {
+  try {
+    await appUpdateStore.install();
+    updatePromptOpen.value = false;
+  } catch (err) {
+    console.error('Prompted app update installation failed.', err);
+    snackQueueStore.error(t('about.installFailed'));
   }
 }
 
@@ -119,6 +145,44 @@ onMounted(async () => {
 <template>
   <v-app>
     <RouterView />
+
+    <v-dialog v-model="updatePromptOpen" max-width="420">
+      <v-card class="pa-4" color="surface">
+        <v-card-title class="px-0 pt-0 text-title-medium font-weight-bold">
+          {{ t('about.updatePromptTitle') }}
+        </v-card-title>
+        <v-card-text class="px-0 text-body-medium text-medium-emphasis">
+          {{
+            t('about.updatePromptMessage', {
+              version: appUpdateStore.latestVersion
+            })
+          }}
+        </v-card-text>
+        <v-card-actions class="px-0 pb-0">
+          <v-spacer />
+          <v-btn
+            color="primary"
+            variant="flat"
+            :disabled="!updateTargetAvailable"
+            :loading="appUpdateStore.installing"
+            @click="installPromptedUpdate"
+          >
+            {{
+              t('about.updateVersion', {
+                version: appUpdateStore.latestVersion
+              })
+            }}
+          </v-btn>
+          <v-btn
+            :disabled="appUpdateStore.installing"
+            variant="text"
+            @click="updatePromptOpen = false"
+          >
+            {{ t('common.later') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-bottom-sheet v-model="sheetOpen">
       <v-card class="pa-4" color="surface">

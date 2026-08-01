@@ -150,11 +150,13 @@ The existing `recurring_event_id`, `created_at`, and `deleted_at` values remain 
 
 **Checklist:**
 
-- [ ] Reproduce the launcher-icon issue on a clean install and record device/launcher behavior.
-- [ ] Verify Android manifest launcher activity, adaptive-icon XML, density assets, and generated APK contents before changing resources.
-- [ ] Add an application-level update prompt only when a newer release is available.
-- [ ] Reuse the existing update store and Android installer path.
-- [ ] Verify debug and release APK behavior.
+- [ ] Reproduce the launcher-icon issue on a clean install and record device/launcher behavior. Blocked until the affected device or equivalent launcher is connected.
+- [x] Verify Android manifest launcher activity, adaptive-icon XML, density assets, and generated APK contents before changing resources.
+- [x] Add an application-level update prompt only when a newer release is available.
+- [x] Reuse the existing update store and Android installer path.
+- [ ] Verify release APK behavior on a device; local debug assembly and APK packaging inspection passed.
+
+**Status:** Partially completed on 2026-08-01. Startup update UX is complete and verified. The APK launcher contract is valid; clean-install behavior remains a device/launcher verification gap, so no speculative icon change was made.
 
 ### Iteration 5: Account Lifecycle Decision and Implementation
 
@@ -211,4 +213,4 @@ These items remain independent and should receive separate implementation logs b
 
 ## Final Status
 
-In progress. The database correction and Iterations 1-3 are complete; Iteration 4 is the next implementation slice.
+In progress. The database correction and Iterations 1-3 are complete. Iteration 4 update UX is complete, while launcher reproduction is waiting for a device; other independent iterations may continue.

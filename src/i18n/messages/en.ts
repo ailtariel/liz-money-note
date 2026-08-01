@@ -196,6 +196,8 @@ export default {
     title: 'About',
     currentVersion: 'Current version',
     updateAvailable: 'Version {version} is available.',
+    updatePromptTitle: 'Update available',
+    updatePromptMessage: 'Version {version} is available. Update now?',
     checkUpdate: 'Check for updates',
     updateVersion: 'Update {version}',
     noUpdate: 'Already up to date.',
