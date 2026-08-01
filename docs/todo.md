@@ -14,8 +14,6 @@
 
 # 工程与性能
 
-- [ ] 检查并优化流水条目中仍然重复执行的复杂查找和计算。
-- [ ] 流水列表增加 Loading，继续减少无谓响应式引用。
 - [ ] 回填或归档状态与最终结果冲突的历史实施计划。
 
 # 可选能力
@@ -24,6 +22,7 @@
 
 # 已完成
 
+- [x] 流水列表使用稳定 Map 和单次聚合减少重复查找，增加 Loading 并保证并发筛选最后一次请求生效。
 - [x] 将 README 和公开默认标识从 Vue Skeleton 更新为 Liz Money Note，并记录开发、数据库、构建和发布流程。
 - [x] 审计并消除 `jeep-sqlite` crypto externalized 和 ECharts chunk size 构建告警，迁移到 Vite 8 `rolldownOptions`。
 - [x] App 首次自动检测到新版本时弹出一次更新提示，保留 About 红点和手动更新入口。

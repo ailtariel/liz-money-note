@@ -190,8 +190,8 @@ The existing `recurring_event_id`, `created_at`, and `deleted_at` values remain 
 
 - [x] Capture the exact `jeep-sqlite` crypto externalization warning and confirm whether it affects the Web or Android bundle.
 - [x] Capture the ECharts chunk warning and measure the current production chunk split before changing Vite configuration.
-- [ ] Profile repeated transaction-row computations and move only confirmed hot lookups to stable maps.
-- [ ] Add list loading feedback using the existing transaction store state.
+- [x] Profile repeated transaction-row computations and move only confirmed hot lookups to stable maps.
+- [x] Add list loading feedback using the existing transaction store state.
 - [x] Replace the skeleton README with project-specific setup, data, build, and release documentation.
 - [ ] Backfill or archive historical plans whose checkbox state conflicts with their final status.
 
@@ -213,4 +213,4 @@ These items remain independent and should receive separate implementation logs b
 
 ## Final Status
 
-In progress. The database correction and Iterations 1-3 are complete. Iteration 4 update UX is complete, while launcher reproduction is waiting for a device; other independent iterations may continue.
+In progress. The database correction and Iterations 1-3 are complete. Iteration 4 update UX is complete, while launcher reproduction is waiting for a device. Iteration 7 build-warning, transaction-list, and README work is complete; historical-plan reconciliation remains.

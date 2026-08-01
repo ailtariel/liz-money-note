@@ -28,6 +28,7 @@ export default {
     today: 'Today',
     yesterday: 'Yesterday',
     save: 'Save',
+    loading: 'Loading',
     cancel: 'Cancel',
     edit: 'Edit',
     copy: 'Copy',

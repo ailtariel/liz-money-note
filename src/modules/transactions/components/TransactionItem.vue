@@ -3,7 +3,6 @@ import { computed } from 'vue';
 import { useI18n } from '@/i18n';
 import type { Transaction } from '@/modules/transactions/transaction.types';
 import type { TransactionListRow } from '@/modules/transactions/transaction-ui.types';
-import type { Tag } from '@/modules/tags/tag.types';
 import {
   formatShortDate,
   formatTime
@@ -11,7 +10,6 @@ import {
 
 import { formatMinorUnits } from '@/modules/shared/money';
 import useTransaction from '@/modules/transactions/useTransactionDisplay';
-import { useTagStore } from '@/modules/tags/tag.store';
 import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import AmountText from '@/components/shared/AmountText.vue';
 
@@ -23,16 +21,10 @@ const emit = defineEmits(['openDetail']);
 
 const { t } = useI18n();
 const trans = useTransaction();
-const tagStore = useTagStore();
 const transactionStore = useTransactionStore();
 
 const showBook = computed(() => !transactionStore.filters.bookId);
 const showAccount = computed(() => !transactionStore.filters.accountId);
-
-const getTransactionTags = (transaction: Transaction): Tag[] =>
-  transaction.tagIds
-    .map((tagId) => tagStore.tags.find((tag) => tag.id === tagId))
-    .filter((tag): tag is Tag => Boolean(tag));
 
 const openDetail = (transaction: Transaction) => {
   emit('openDetail', transaction);
@@ -91,7 +83,7 @@ const openDetail = (transaction: Transaction) => {
               {{ trans.getBookName(item.transaction.bookId) }}
             </span>
             <v-chip
-              v-for="tag in getTransactionTags(item.transaction)"
+              v-for="tag in trans.getTags(item.transaction.tagIds)"
               :key="tag.id"
               class="transaction-tag"
               :color="tag.color || 'primary'"

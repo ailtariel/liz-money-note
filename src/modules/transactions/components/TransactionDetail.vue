@@ -3,8 +3,6 @@ import { computed } from 'vue';
 import type { Transaction } from '@/modules/transactions/transaction.types';
 import { useI18n } from '@/i18n';
 import useTransaction from '@/modules/transactions/useTransactionDisplay';
-import { useTagStore } from '@/modules/tags/tag.store';
-import type { Tag } from '@/modules/tags/tag.types';
 import AmountText from '@/components/shared/AmountText.vue';
 
 interface Props {
@@ -18,13 +16,10 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const trans = useTransaction();
-const tagStore = useTagStore();
 
 const selectedTags = computed(() =>
   props.transaction
-    ? props.transaction.tagIds
-        .map((id) => tagStore.tags.find((tag) => tag.id === id))
-        .filter((tag): tag is Tag => Boolean(tag))
+    ? trans.getTags(props.transaction.tagIds)
     : []
 );
 

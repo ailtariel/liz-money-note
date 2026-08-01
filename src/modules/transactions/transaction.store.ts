@@ -19,14 +19,26 @@ export const useTransactionStore = defineStore('transactions', () => {
   const loading = ref(false);
   const mutating = ref(false);
   const accountStore = useAccountStore();
+  let latestLoadRequestId = 0;
 
   async function load(nextFilters: TransactionFilters = filters.value) {
-    filters.value = { ...nextFilters };
+    const requestId = ++latestLoadRequestId;
+    const requestFilters = {
+      ...nextFilters,
+      tagIds: nextFilters.tagIds ? [...nextFilters.tagIds] : undefined
+    };
+
+    filters.value = requestFilters;
     loading.value = true;
     try {
-      transactions.value = await listTransactions(filters.value);
+      const result = await listTransactions(requestFilters);
+      if (requestId === latestLoadRequestId) {
+        transactions.value = result;
+      }
     } finally {
-      loading.value = false;
+      if (requestId === latestLoadRequestId) {
+        loading.value = false;
+      }
     }
   }
 

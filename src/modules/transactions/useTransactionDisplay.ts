@@ -5,6 +5,7 @@ import { transactionTypeOptions } from '@/components/shared/financeDisplay';
 import { useBookStore } from '@/modules/books/book.store';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useTagStore } from '@/modules/tags/tag.store';
+import type { Tag } from '@/modules/tags/tag.types';
 import { useTransactionStore } from '@/modules/transactions/transaction.store';
 
 let Instance: ReturnType<typeof createInstance> | null = null;
@@ -23,9 +24,45 @@ function createInstance() {
   const tagStore = useTagStore();
   const transactionStore = useTransactionStore();
   const typeOptions = computed(() => transactionTypeOptions(t));
+  const accountNameById = computed(
+    () =>
+      new Map(
+        accountStore.accounts.map((account) => [account.id, account.name])
+      )
+  );
+  const bookNameById = computed(
+    () => new Map(bookStore.books.map((book) => [book.id, book.name]))
+  );
+  const tagById = computed(
+    () => new Map(tagStore.tags.map((tag) => [tag.id, tag]))
+  );
+  const typeTitleByValue = computed(
+    () =>
+      new Map(typeOptions.value.map((option) => [option.value, option.title]))
+  );
+  const primaryTagByTransactionId = computed(() => {
+    const lookup = new Map<number, Tag>();
+
+    for (const transaction of transactionStore.transactions) {
+      for (const tagId of transaction.tagIds) {
+        const tag = tagById.value.get(tagId);
+        if (tag) {
+          lookup.set(transaction.id, tag);
+          break;
+        }
+      }
+    }
+
+    return lookup;
+  });
+
+  const getTags = (tagIds: number[]): Tag[] =>
+    tagIds
+      .map((tagId) => tagById.value.get(tagId))
+      .filter((tag): tag is Tag => Boolean(tag));
 
   const getPrimaryTag = (transaction: Transaction) => {
-    return tagStore.tags.find((tag) => transaction.tagIds.includes(tag.id));
+    return primaryTagByTransactionId.value.get(transaction.id);
   };
 
   const getColor = (transaction: Transaction) => {
@@ -62,8 +99,7 @@ function createInstance() {
     return (
       transaction.note ||
       getPrimaryTag(transaction)?.name ||
-      typeOptions.value.find((item) => item.value === transaction.type)
-        ?.title ||
+      typeTitleByValue.value.get(transaction.type) ||
       '-'
     );
   };
@@ -73,13 +109,11 @@ function createInstance() {
       return '-';
     }
 
-    return (
-      accountStore.accounts.find((account) => account.id === id)?.name ?? '-'
-    );
+    return accountNameById.value.get(id) ?? '-';
   };
 
   const getBookName = (id: number) => {
-    return bookStore.books.find((book) => book.id === id)?.name ?? '-';
+    return bookNameById.value.get(id) ?? '-';
   };
 
   const removeTransaction = async (id: number) => {
@@ -91,6 +125,7 @@ function createInstance() {
   };
 
   return reactive({
+    getTags,
     getPrimaryTag,
     getColor,
     getIcon,

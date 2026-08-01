@@ -4,7 +4,6 @@ import { useI18n } from '@/i18n';
 import { useBookStore } from '@/modules/books/book.store';
 import { useAccountStore } from '@/modules/accounts/account.store';
 import { useTagStore } from '@/modules/tags/tag.store';
-import type { Tag } from '@/modules/tags/tag.types';
 import { useTransactionStore } from '@/modules/transactions/transaction.store';
 import type {
   Transaction,
@@ -78,31 +77,6 @@ const baseCurrency = computed(
   () => accountStore.accounts[0]?.currency ?? 'AED'
 );
 
-const summaryCurrencies = computed<CurrencyCode[]>(() => {
-  const currencies = transactions.value.map(
-    (transaction) => transaction.currency
-  );
-  return [...new Set(currencies.length ? currencies : [baseCurrency.value])];
-});
-
-function summarizeByCurrency(type: TransactionType) {
-  const totals = new Map<CurrencyCode, number>();
-
-  for (const transaction of transactions.value) {
-    if (transaction.type === type) {
-      totals.set(
-        transaction.currency,
-        (totals.get(transaction.currency) ?? 0) + transaction.amount
-      );
-    }
-  }
-
-  return summaryCurrencies.value.map((currency) => ({
-    currency,
-    amount: totals.get(currency) ?? 0
-  }));
-}
-
 function formatSummaryAmount(amount: number, currency: CurrencyCode) {
   return `${currency} ${new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 2,
@@ -113,44 +87,55 @@ function formatSummaryAmount(amount: number, currency: CurrencyCode) {
 const summaryBookTitle = computed(() =>
   filters.bookId ? trans.getBookName(filters.bookId) : t('common.allBooks')
 );
-const selectedTags = computed(() =>
-  filters.tagIds
-    .map((tagId) => tagStore.tags.find((tag) => tag.id === tagId))
-    .filter((tag): tag is Tag => Boolean(tag))
-);
+const selectedTags = computed(() => trans.getTags(filters.tagIds));
 const activeSearch = computed(() => filters.search?.trim() ?? '');
 
 const listRows = computed<TransactionListRow[]>(() => {
   const rows: TransactionListRow[] = [];
-  const grouped = new Map<string, Transaction[]>();
+  const grouped = new Map<
+    string,
+    {
+      transactions: Transaction[];
+      income: number;
+      expense: number;
+      currency: CurrencyCode;
+    }
+  >();
 
   for (const transaction of transactions.value) {
     const date = transaction.occurredAt.slice(0, 10);
-    const items = grouped.get(date);
-    if (items) {
-      items.push(transaction);
-    } else {
-      grouped.set(date, [transaction]);
+    let group = grouped.get(date);
+
+    if (!group) {
+      group = {
+        transactions: [],
+        income: 0,
+        expense: 0,
+        currency: transaction.currency
+      };
+      grouped.set(date, group);
+    }
+
+    group.transactions.push(transaction);
+    if (transaction.type === 'income') {
+      group.income += transaction.amount;
+    } else if (transaction.type === 'expense') {
+      group.expense += transaction.amount;
     }
   }
 
-  for (const [date, items] of grouped) {
-    const currency = items[0]?.currency ?? baseCurrency.value;
+  for (const [date, group] of grouped) {
     rows.push({
       kind: 'date',
       key: `date-${date}`,
       date,
-      income: items
-        .filter((transaction) => transaction.type === 'income')
-        .reduce((sum, transaction) => sum + transaction.amount, 0),
-      expense: items
-        .filter((transaction) => transaction.type === 'expense')
-        .reduce((sum, transaction) => sum + transaction.amount, 0),
-      currency
+      income: group.income,
+      expense: group.expense,
+      currency: group.currency
     });
 
     rows.push(
-      ...items.map((transaction) => ({
+      ...group.transactions.map((transaction) => ({
         kind: 'item' as const,
         key: `transaction-${transaction.id}`,
         transaction
@@ -311,16 +296,43 @@ onMounted(async () => {
 });
 
 const summaryItems = computed(() => {
+  const totals = new Map<
+    CurrencyCode,
+    Record<'income' | 'expense', number>
+  >();
+
+  for (const transaction of transactions.value) {
+    const currencyTotals = totals.get(transaction.currency) ?? {
+      income: 0,
+      expense: 0
+    };
+
+    if (transaction.type === 'income' || transaction.type === 'expense') {
+      currencyTotals[transaction.type] += transaction.amount;
+    }
+    totals.set(transaction.currency, currencyTotals);
+  }
+
+  if (!totals.size) {
+    totals.set(baseCurrency.value, { income: 0, expense: 0 });
+  }
+
+  const statistics = (type: 'income' | 'expense') =>
+    [...totals].map(([currency, values]) => ({
+      currency,
+      amount: values[type]
+    }));
+
   return [
     {
       key: 'income',
       name: 'transaction.income',
-      statistics: summarizeByCurrency('income')
+      statistics: statistics('income')
     },
     {
       key: 'expense',
       name: 'transaction.expense',
-      statistics: summarizeByCurrency('expense')
+      statistics: statistics('expense')
     }
   ];
 });
@@ -476,15 +488,27 @@ function handleEditorSaved() {
         </v-btn>
       </div>
 
-      <v-card v-if="!listRows.length" class="soft-card pa-6 text-center">
+      <v-progress-linear
+        v-if="transactionStore.loading"
+        :aria-label="t('common.loading')"
+        color="primary"
+        indeterminate
+        rounded
+      />
+
+      <v-card
+        v-if="!transactionStore.loading && !listRows.length"
+        class="soft-card pa-6 text-center"
+      >
         <div class="text-body-large font-weight-medium">
           {{ t('transaction.noRecords') }}
         </div>
       </v-card>
 
       <v-virtual-scroll
-        v-else
-        v-memo="[listRows]"
+        v-if="listRows.length"
+        v-memo="[listRows, transactionStore.loading]"
+        :aria-busy="transactionStore.loading"
         :items="listRows"
         item-height="98"
         item-key="key"

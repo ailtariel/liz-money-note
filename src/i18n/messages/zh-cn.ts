@@ -28,6 +28,7 @@ export default {
     today: '今天',
     yesterday: '昨天',
     save: '保存',
+    loading: '加载中',
     cancel: '取消',
     edit: '编辑',
     copy: '复制',
