@@ -72,4 +72,6 @@ Completed:
 Remaining device-only verification:
 
 - No Android device is connected. A clean APK install on the originally affected launcher is still required to distinguish app-drawer visibility from OEM home-screen auto-placement behavior.
+- A follow-up environment audit confirmed that `C:\Software\platform-tools\adb.exe` is available but `adb devices -l` returns no devices. No Android Emulator executable, configured `ANDROID_HOME`, or configured `ANDROID_SDK_ROOT` is available on this workstation.
+- The existing debug APK remains available at `android/app/build/outputs/apk/debug/app-debug.apk`; device access, rather than a missing build artifact, is the remaining prerequisite.
 - Because the packaged launcher contract is valid, no speculative Android resource or permission change was made.

@@ -156,7 +156,7 @@ The existing `recurring_event_id`, `created_at`, and `deleted_at` values remain 
 - [x] Reuse the existing update store and Android installer path.
 - [ ] Verify release APK behavior on a device; local debug assembly and APK packaging inspection passed.
 
-**Status:** Partially completed on 2026-08-01. Startup update UX is complete and verified. The APK launcher contract is valid; clean-install behavior remains a device/launcher verification gap, so no speculative icon change was made.
+**Status:** Partially completed on 2026-08-01. Startup update UX is complete and verified. The APK launcher contract is valid, a debug APK is available, and a follow-up `adb devices -l` check returned no connected devices; this workstation also has no Android Emulator installation or configured SDK root. Clean-install behavior therefore remains a device/launcher verification gap, so no speculative icon change was made.
 
 ### Iteration 5: Account Lifecycle Decision and Implementation
 
