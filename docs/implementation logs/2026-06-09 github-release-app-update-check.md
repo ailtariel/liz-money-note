@@ -86,3 +86,7 @@ Notes:
 - Startup and cron checks do not show snackbar messages.
 - The About page manual check button shows snackbar results.
 - The update button downloads the APK through the Android plugin and opens the Android system installer.
+
+## Follow-up Correction
+
+On 2026-08-01, `docs/implementation logs/2026-08-01 android-release-app-update-gate.md` restricted this capability to explicitly enabled Android Release builds. The earlier Web fallback and platform-independent startup/cron behavior are no longer part of the product contract.

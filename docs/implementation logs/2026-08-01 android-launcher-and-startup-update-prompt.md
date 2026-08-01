@@ -75,3 +75,7 @@ Device acceptance:
 - A follow-up environment audit confirmed that `C:\Software\platform-tools\adb.exe` is available but `adb devices -l` returns no devices. No Android Emulator executable, configured `ANDROID_HOME`, or configured `ANDROID_SDK_ROOT` is available on this workstation.
 - The existing debug APK remains available at `android/app/build/outputs/apk/debug/app-debug.apk`.
 - Because the packaged launcher contract is valid, no speculative Android resource or permission change was made.
+
+Follow-up behavior correction:
+
+- `docs/implementation logs/2026-08-01 android-release-app-update-gate.md` now limits the startup prompt, recurring check, badge, and About action to explicitly enabled Android Release builds. Web and Dev no longer run or render update behavior.

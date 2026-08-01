@@ -11,6 +11,7 @@ const defaultConfig: RuntimeAppConfig = {
   default_route: '/',
   enable_route_guard: true,
   feature_flags: {
+    enable_app_update: false,
     show_about: true
   },
   vuetify: {

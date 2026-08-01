@@ -125,12 +125,12 @@ git push origin v1.2.3
 - `ANDROID_KEY_ALIAS`
 - `ANDROID_KEY_PASSWORD`
 
-应用通过 `APP_UPDATE_MANIFEST_URL` 查询最新 GitHub Release；首次检测到更高版本时弹出提示，About 页同时保留更新红点和手动检查入口。
+应用更新只对 GitHub Actions 生成的 Android Release APK 启用。有效判定同时要求 Capacitor 平台为 `android`，并且 `APP_FEATURE_FLAGS__ENABLE_APP_UPDATE=true`；Release 工作流会在构建 APK 内的 Web 资源时显式开启该开关。Web、Dev 和普通本地构建默认不检查更新，也不显示启动提示、更新红点或 About 手动更新入口。
 
 ## 环境变量
 
 - `VITE_*`：本地开发服务器端口和 API / Auth 代理，仅由 Vite 使用。
-- `APP_*`：客户端运行时配置；双下划线表示嵌套，例如 `APP_FEATURE_FLAGS__SHOW_ABOUT`。
+- `APP_*`：客户端运行时配置；双下划线表示嵌套，例如 `APP_FEATURE_FLAGS__SHOW_ABOUT`。`APP_FEATURE_FLAGS__ENABLE_APP_UPDATE` 默认必须保持 `false`，只由 Android Release 工作流覆盖。
 - `DB_*`：构建期数据库名、文件、路径、版本和加密模式，不暴露给客户端环境变量。
 - `BUILD_APP_VERSION`：构建时写入应用的版本号；Release 工作流会自动设置。
 - `NG_*`：仓库中 Nginx 模板使用的容器变量。

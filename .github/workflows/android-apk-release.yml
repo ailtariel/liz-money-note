@@ -60,6 +60,7 @@ jobs:
         env:
           BUILD_APP_VERSION: ${{ steps.version.outputs.version_name }}
           DB_SQLITE_PATH: sqlite3
+          APP_FEATURE_FLAGS__ENABLE_APP_UPDATE: 'true'
         run: npm run build
 
       - name: Sync Capacitor Android project

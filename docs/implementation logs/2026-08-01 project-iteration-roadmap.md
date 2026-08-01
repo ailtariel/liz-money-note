@@ -154,9 +154,10 @@ The existing `recurring_event_id`, `created_at`, and `deleted_at` values remain 
 - [x] Verify Android manifest launcher activity, adaptive-icon XML, density assets, and generated APK contents before changing resources.
 - [x] Add an application-level update prompt only when a newer release is available.
 - [x] Reuse the existing update store and Android installer path.
+- [x] Restrict automatic checks, prompts, badges, and manual actions to explicitly enabled Android Release builds; keep Web and Dev disabled.
 - [x] Accept Android runtime behavior from user confirmation; local debug assembly and APK packaging inspection also passed.
 
-**Status:** Completed on 2026-08-01. Startup update UX is verified, the packaged launcher contract and debug APK passed local inspection, and the user confirmed that Android runs correctly while closing further device/launcher investigation. No speculative icon change was made.
+**Status:** Completed on 2026-08-01. Startup update UX is verified and gated by Android plus an explicit Release feature flag. Web verification passed even with the flag forced on because the platform gate suppressed all update behavior. The packaged launcher contract and debug APK passed local inspection, and the user confirmed that Android runs correctly while closing further device/launcher investigation. No speculative icon change was made.
 
 ### Iteration 5: Account Lifecycle Decision and Implementation
 

@@ -19,7 +19,7 @@
 - [x] 流水列表使用稳定 Map 和单次聚合减少重复查找，增加 Loading 并保证并发筛选最后一次请求生效。
 - [x] 将 README 和公开默认标识从 Vue Skeleton 更新为 Liz Money Note，并记录开发、数据库、构建和发布流程。
 - [x] 审计并消除 `jeep-sqlite` crypto externalized 和 ECharts chunk size 构建告警，迁移到 Vite 8 `rolldownOptions`。
-- [x] App 首次自动检测到新版本时弹出一次更新提示，保留 About 红点和手动更新入口。
+- [x] Android Release 首次自动检测到新版本时弹出一次更新提示，保留 About 红点和手动更新入口；Web、Dev 和普通构建不启用更新能力。
 - [x] 增加默认账本和上次打开账本设置，流水页使用默认账本，新流水按最近有效账户回退。
 - [x] 导入、导出、删除账本和保存流水增加 Loading，并阻止重复操作。
 - [x] 修复首次启动时迁移先于资源数据库导入的问题，并清理构建资源目录中的多余数据库。
@@ -30,7 +30,7 @@
 - [x] 使用 `theme.change()` 替换废弃的 Vuetify 主题切换方式。
 - [x] 数据导入重复确认和流水修复。
 - [x] GitHub CI/CD 和 Android APK Release。
-- [x] 自动更新检查、About 页、更新红点和 Android APK 安装。
+- [x] Android Release 自动更新检查、About 更新入口、更新红点和 APK 安装，并通过平台与显式 Release 开关统一隔离。
 - [x] 全局确认对话框组件。
 - [x] 清理缓存不删除数据库，并增加确认提示。
 - [x] 删除账本功能。

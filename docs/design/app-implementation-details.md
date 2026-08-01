@@ -260,6 +260,13 @@ Tag：
 - 系统。
 - 关于。
 
+关于：
+
+- 始终显示当前 App 版本。
+- 更新检查是 Android Release 专属能力；必须同时满足 Capacitor 平台为 Android 和 `APP_FEATURE_FLAGS__ENABLE_APP_UPDATE=true`。
+- Web、Dev 和未显式开启开关的 Android 构建不执行启动或周期更新检查，不显示更新提示、红点和手动更新入口。
+- Android Release 首次自动检测到新版本时显示非阻断提示，About 页面保留手动检查和 APK 安装入口。
+
 系统：
 
 - 清理缓存。

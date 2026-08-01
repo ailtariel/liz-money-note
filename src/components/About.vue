@@ -82,6 +82,7 @@ async function handleUpdateAction() {
           </v-alert>
 
           <v-btn
+            v-if="appUpdateStore.enabled"
             color="primary"
             variant="tonal"
             :loading="actionLoading"

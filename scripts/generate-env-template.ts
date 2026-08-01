@@ -26,16 +26,35 @@ function parseEnvFile(content: string): Record<string, string> {
 }
 
 function loadSelectedEnv(rootDir: string) {
-  return getEnvFiles(rootDir).reduce<Record<string, string>>((acc, filePath) => {
-    if (!fs.existsSync(filePath)) {
-      return acc;
-    }
+  const fileEnv = getEnvFiles(rootDir).reduce<Record<string, string>>(
+    (acc, filePath) => {
+      if (!fs.existsSync(filePath)) {
+        return acc;
+      }
 
-    return {
-      ...acc,
-      ...parseEnvFile(fs.readFileSync(filePath, 'utf8'))
-    };
-  }, {});
+      return {
+        ...acc,
+        ...parseEnvFile(fs.readFileSync(filePath, 'utf8'))
+      };
+    },
+    {}
+  );
+
+  const processEnv = Object.entries(process.env).reduce<Record<string, string>>(
+    (acc, [key, value]) => {
+      if (typeof value === 'string') {
+        acc[key] = value;
+      }
+
+      return acc;
+    },
+    {}
+  );
+
+  return {
+    ...fileEnv,
+    ...processEnv
+  };
 }
 
 function pickAppEnv(env: Record<string, string>) {
@@ -64,7 +83,7 @@ function writeTemplate(rootDir: string) {
   fs.writeFileSync(outputPath, content, 'utf8');
 }
 
-function writeDevRuntimeEnv(rootDir: string) {
+function writeRuntimeEnv(rootDir: string) {
   const env = pickAppEnv(loadSelectedEnv(rootDir));
   const outputPath = path.join(rootDir, 'public', 'config', 'env-config.json');
   writeJsonFile(outputPath, env);
@@ -74,11 +93,13 @@ export default function generateEnvTemplate(): Plugin {
   return {
     name: 'generate-env-template',
     buildStart() {
-      writeTemplate(process.cwd());
+      const rootDir = process.cwd();
+      writeTemplate(rootDir);
+      writeRuntimeEnv(rootDir);
     },
     configureServer(server) {
       const rootDir = server.config.root;
-      writeDevRuntimeEnv(rootDir);
+      writeRuntimeEnv(rootDir);
 
       const envFiles = getEnvFiles(rootDir);
       server.watcher.add(envFiles);
@@ -87,7 +108,7 @@ export default function generateEnvTemplate(): Plugin {
           return;
         }
 
-        writeDevRuntimeEnv(rootDir);
+        writeRuntimeEnv(rootDir);
         server.ws.send({ type: 'full-reload' });
       });
     }

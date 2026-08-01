@@ -129,14 +129,16 @@ onMounted(async () => {
     execute: () => refreshExchangeRates()
   });
 
-  cronJobManager.addJob({
-    id: 'app-update-check',
-    name: 'App update check',
-    interval: 60 * 60 * 1000,
-    immediate: true,
-    maxRetries: 1,
-    execute: () => checkAppUpdate()
-  });
+  if (appUpdateStore.enabled) {
+    cronJobManager.addJob({
+      id: 'app-update-check',
+      name: 'App update check',
+      interval: 60 * 60 * 1000,
+      immediate: true,
+      maxRetries: 1,
+      execute: () => checkAppUpdate()
+    });
+  }
 
   await refreshDueSheet();
 });
@@ -146,7 +148,11 @@ onMounted(async () => {
   <v-app>
     <RouterView />
 
-    <v-dialog v-model="updatePromptOpen" max-width="420">
+    <v-dialog
+      v-if="appUpdateStore.enabled"
+      v-model="updatePromptOpen"
+      max-width="420"
+    >
       <v-card class="pa-4" color="surface">
         <v-card-title class="px-0 pt-0 text-title-medium font-weight-bold">
           {{ t('about.updatePromptTitle') }}
