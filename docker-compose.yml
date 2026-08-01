@@ -1,6 +1,6 @@
 services:
   app:
-    image: vue-skeleton:local
+    image: liz-money-note:local
     build:
       context: .
     env_file:

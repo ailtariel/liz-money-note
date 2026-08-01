@@ -1,7 +1,7 @@
 # -----------------------------
 # Stage 1: Build front-end assets
 # -----------------------------
-# Keep Node 20 here because this skeleton uses a modern Vite toolchain.
+# Keep Node 20 here because the project uses a modern Vite toolchain.
 FROM node:20-alpine AS build-stage
 
 WORKDIR /app

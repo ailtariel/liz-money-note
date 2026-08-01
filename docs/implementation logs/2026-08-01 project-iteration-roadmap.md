@@ -192,7 +192,7 @@ The existing `recurring_event_id`, `created_at`, and `deleted_at` values remain 
 - [x] Capture the ECharts chunk warning and measure the current production chunk split before changing Vite configuration.
 - [ ] Profile repeated transaction-row computations and move only confirmed hot lookups to stable maps.
 - [ ] Add list loading feedback using the existing transaction store state.
-- [ ] Replace the skeleton README with project-specific setup, data, build, and release documentation.
+- [x] Replace the skeleton README with project-specific setup, data, build, and release documentation.
 - [ ] Backfill or archive historical plans whose checkbox state conflicts with their final status.
 
 ### Iteration 8: Optional Product Features

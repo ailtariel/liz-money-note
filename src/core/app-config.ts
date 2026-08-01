@@ -4,7 +4,7 @@ const CONFIG_STORAGE_KEY = '__APP_CONFIG__';
 const RUNTIME_ENV_STORAGE_KEY = '__APP_RUNTIME_ENV__';
 
 const defaultConfig: RuntimeAppConfig = {
-  app_title: 'Vue Skeleton',
+  app_title: 'Liz Money Note',
   api_base_url: '/api',
   update_manifest_url:
     'https://api.github.com/repos/ailtariel/liz-money-note/releases/latest',

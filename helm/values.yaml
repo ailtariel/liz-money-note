@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: your-registry/vue-skeleton
+  repository: your-registry/liz-money-note
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -21,7 +21,7 @@ ingress:
   className: ""
   annotations: {}
   hosts:
-    - host: vue-skeleton.local
+    - host: liz-money-note.local
       paths:
         - path: /
           pathType: Prefix
@@ -31,7 +31,7 @@ env:
   NG_PORT: "8080"
   NG_API_UPSTREAM: "http://your-api-service.default.svc.cluster.local:8080"
   NG_AUTH_UPSTREAM: "http://your-auth-service.default.svc.cluster.local:8080"
-  APP_APP_TITLE: "Vue Skeleton"
+  APP_APP_TITLE: "Liz Money Note"
   APP_API_BASE_URL: "/api"
   APP_ENABLE_ROUTE_GUARD: "true"
   APP_DEFAULT_ROUTE: "/"
