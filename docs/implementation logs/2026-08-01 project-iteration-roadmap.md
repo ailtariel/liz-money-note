@@ -150,13 +150,13 @@ The existing `recurring_event_id`, `created_at`, and `deleted_at` values remain 
 
 **Checklist:**
 
-- [ ] Reproduce the launcher-icon issue on a clean install and record device/launcher behavior. Blocked until the affected device or equivalent launcher is connected.
+- [x] Close launcher-device investigation after the user confirmed that the Android package runs correctly and requested no further Android checks.
 - [x] Verify Android manifest launcher activity, adaptive-icon XML, density assets, and generated APK contents before changing resources.
 - [x] Add an application-level update prompt only when a newer release is available.
 - [x] Reuse the existing update store and Android installer path.
-- [ ] Verify release APK behavior on a device; local debug assembly and APK packaging inspection passed.
+- [x] Accept Android runtime behavior from user confirmation; local debug assembly and APK packaging inspection also passed.
 
-**Status:** Partially completed on 2026-08-01. Startup update UX is complete and verified. The APK launcher contract is valid, a debug APK is available, and a follow-up `adb devices -l` check returned no connected devices; this workstation also has no Android Emulator installation or configured SDK root. Clean-install behavior therefore remains a device/launcher verification gap, so no speculative icon change was made.
+**Status:** Completed on 2026-08-01. Startup update UX is verified, the packaged launcher contract and debug APK passed local inspection, and the user confirmed that Android runs correctly while closing further device/launcher investigation. No speculative icon change was made.
 
 ### Iteration 5: Account Lifecycle Decision and Implementation
 
@@ -213,4 +213,4 @@ These items remain independent and should receive separate implementation logs b
 
 ## Final Status
 
-In progress. The database correction and Iterations 1-3 are complete. Iteration 4 update UX is complete, while launcher reproduction is waiting for a device. Iteration 6 tag colors, currency guidance, and bottom-center transaction action are complete; configurable success sound remains gated by a product and Android audio contract. Iteration 7 engineering cleanup is complete.
+In progress. The database correction and Iterations 1-4 are complete. Iteration 6 tag colors, currency guidance, and bottom-center transaction action are complete; configurable success sound remains gated by a product and Android audio contract. Iteration 7 engineering cleanup is complete.

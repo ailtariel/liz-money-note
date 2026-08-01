@@ -59,7 +59,7 @@
 
 ## Final Status
 
-Partially completed on 2026-08-01.
+Completed on 2026-08-01.
 
 Completed:
 
@@ -69,9 +69,9 @@ Completed:
 - A temporary `0.0.0` build detected GitHub release `0.1.7`, displayed the English prompt, closed through Later, retained the About badge, and produced no browser warnings or errors.
 - The normal `0.1.0` development build followed the no-update path without showing a prompt or logging errors.
 
-Remaining device-only verification:
+Device acceptance:
 
-- No Android device is connected. A clean APK install on the originally affected launcher is still required to distinguish app-drawer visibility from OEM home-screen auto-placement behavior.
+- The user confirmed that the Android package runs correctly and explicitly closed further Android device/launcher investigation for this iteration.
 - A follow-up environment audit confirmed that `C:\Software\platform-tools\adb.exe` is available but `adb devices -l` returns no devices. No Android Emulator executable, configured `ANDROID_HOME`, or configured `ANDROID_SDK_ROOT` is available on this workstation.
-- The existing debug APK remains available at `android/app/build/outputs/apk/debug/app-debug.apk`; device access, rather than a missing build artifact, is the remaining prerequisite.
+- The existing debug APK remains available at `android/app/build/outputs/apk/debug/app-debug.apk`.
 - Because the packaged launcher contract is valid, no speculative Android resource or permission change was made.
