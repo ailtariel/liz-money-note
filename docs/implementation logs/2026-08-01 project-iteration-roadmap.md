@@ -188,8 +188,8 @@ The existing `recurring_event_id`, `created_at`, and `deleted_at` values remain 
 
 **Checklist:**
 
-- [ ] Capture the exact `jeep-sqlite` crypto externalization warning and confirm whether it affects the Web or Android bundle.
-- [ ] Capture the ECharts chunk warning and measure the current production chunk split before changing Vite configuration.
+- [x] Capture the exact `jeep-sqlite` crypto externalization warning and confirm whether it affects the Web or Android bundle.
+- [x] Capture the ECharts chunk warning and measure the current production chunk split before changing Vite configuration.
 - [ ] Profile repeated transaction-row computations and move only confirmed hot lookups to stable maps.
 - [ ] Add list loading feedback using the existing transaction store state.
 - [ ] Replace the skeleton README with project-specific setup, data, build, and release documentation.

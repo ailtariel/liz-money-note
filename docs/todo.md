@@ -14,7 +14,6 @@
 
 # 工程与性能
 
-- [ ] 解决 `jeep-sqlite` crypto externalized 和 ECharts chunk size 警告。
 - [ ] 检查并优化流水条目中仍然重复执行的复杂查找和计算。
 - [ ] 流水列表增加 Loading，继续减少无谓响应式引用。
 - [ ] 将 README 从 Vue Skeleton 模板更新为 Liz Money Note 项目说明。
@@ -26,6 +25,7 @@
 
 # 已完成
 
+- [x] 审计并消除 `jeep-sqlite` crypto externalized 和 ECharts chunk size 构建告警，迁移到 Vite 8 `rolldownOptions`。
 - [x] App 首次自动检测到新版本时弹出一次更新提示，保留 About 红点和手动更新入口。
 - [x] 增加默认账本和上次打开账本设置，流水页使用默认账本，新流水按最近有效账户回退。
 - [x] 导入、导出、删除账本和保存流水增加 Loading，并阻止重复操作。

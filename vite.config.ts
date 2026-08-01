@@ -1,10 +1,36 @@
 import { fileURLToPath, URL } from "node:url";
 import { spawnSync } from "node:child_process";
-import { defineConfig, loadEnv, mergeConfig, type PluginOption, type UserConfig } from "vite";
+import {
+  createLogger,
+  defineConfig,
+  loadEnv,
+  mergeConfig,
+  type PluginOption,
+  type UserConfig,
+} from "vite";
 import vue from "@vitejs/plugin-vue";
 import vuetify from "vite-plugin-vuetify";
 import generateEnvTemplate from "./scripts/generate-env-template";
 import packageJson from "./package.json";
+
+function createProjectLogger() {
+  const logger = createLogger();
+  const warn = logger.warn.bind(logger);
+
+  logger.warn = (message, options) => {
+    const isJeepSqliteCryptoFallbackWarning =
+      message.includes('Module "crypto" has been externalized for browser compatibility') &&
+      message.includes("node_modules/jeep-sqlite/");
+
+    if (isJeepSqliteCryptoFallbackWarning) {
+      return;
+    }
+
+    warn(message, options);
+  };
+
+  return logger;
+}
 
 function runDatabaseInitializer(mode: string, profile: "build" | "dev") {
   const result = spawnSync(
@@ -84,6 +110,7 @@ export default defineConfig(({ mode, command }) => {
 
   const config: Record<string, UserConfig> = {
     default: {
+      customLogger: createProjectLogger(),
       plugins: createPlugins(mode, command),
       define: {
         __APP_VERSION__: JSON.stringify(appVersion),
@@ -99,8 +126,9 @@ export default defineConfig(({ mode, command }) => {
       },
       base: env.BASE_URL || "/",
       build: {
+        chunkSizeWarningLimit: 600,
         outDir: "dist",
-        rollupOptions: {
+        rolldownOptions: {
           input: {
             main: "index.html",
           },
