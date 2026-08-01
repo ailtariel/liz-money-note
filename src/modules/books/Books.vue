@@ -181,6 +181,7 @@ onMounted(async () => {
   <AppBarVue>
     <template #actions>
       <v-btn
+        :aria-label="t('book.addAction')"
         color="primary"
         icon="$add"
         size="small"
@@ -195,39 +196,63 @@ onMounted(async () => {
       <div class="d-flex flex-column ga-4">
         <v-alert v-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
+        <v-progress-linear
+          v-if="store.loading && !store.books.length"
+          color="primary"
+          indeterminate
+          rounded
+        />
+
+        <v-empty-state
+          v-else-if="!store.books.length"
+          icon="$book"
+          :title="t('book.empty')"
+        />
+
         <v-card
           v-for="book in store.books"
           :key="book.id"
-          class="soft-card pa-4"
+          class="soft-card"
         >
-          <div class="d-flex align-center ga-3">
-            <v-avatar color="primary" size="36" variant="tonal">
-              <v-icon icon="$book" size="20" />
-            </v-avatar>
-            <div class="flex-grow-1 min-w-0" @click="editBook(book.id)">
-              <div class="text-body-medium text-truncate">{{ book.name }}</div>
-              <div class="mt-1 text-label-medium text-medium-emphasis text-truncate">
-                {{ book.description || '-' }}
-              </div>
+          <v-card-item>
+            <template #prepend>
+              <v-avatar color="primary" size="40" variant="tonal">
+                <v-icon icon="$book" size="22" />
+              </v-avatar>
+            </template>
+
+            <v-card-title class="text-body-large font-weight-bold">
+              {{ book.name }}
+            </v-card-title>
+            <v-card-subtitle>
+              {{ book.description || t('book.noDescription') }}
+            </v-card-subtitle>
+
+            <template #append>
+              <div class="d-flex flex-column align-end ga-1">
               <v-chip
-                class="book-status mt-2"
-                size="x-small"
+                  class="book-status"
                 :color="book.isArchived ? 'secondary' : 'success'"
+                  size="x-small"
                 variant="tonal"
               >
                 {{ book.isArchived ? t('common.archived') : t('common.active') }}
               </v-chip>
               <v-chip
                 v-if="store.defaultBookId === book.id"
-                class="book-status mt-2 ml-2"
+                  class="book-status"
                 color="primary"
                 size="x-small"
                 variant="flat"
               >
                 {{ t('book.defaultBook') }}
               </v-chip>
-            </div>
-            <div class="d-flex flex-column ga-1">
+              </div>
+            </template>
+          </v-card-item>
+
+          <v-divider />
+          <v-card-actions class="flex-wrap px-4 py-2 ga-1">
               <v-btn
                 :disabled="book.isArchived || store.defaultBookId === book.id || store.deletingBookId !== null"
                 size="small"
@@ -252,6 +277,7 @@ onMounted(async () => {
               >
                 {{ book.isArchived ? t('common.restore') : t('common.archive') }}
               </v-btn>
+            <v-spacer />
               <v-btn
                 color="error"
                 :disabled="store.deletingBookId !== null"
@@ -262,67 +288,68 @@ onMounted(async () => {
               >
                 {{ t('common.delete') }}
               </v-btn>
-            </div>
-          </div>
+          </v-card-actions>
         </v-card>
       </div>
 
       <v-bottom-sheet v-model="editorOpen">
-        <v-card class="pa-4" color="surface">
-          <div class="text-title-large font-weight-bold mb-4">
-            {{ editingId ? t('common.edit') : t('common.add') }}
-          </div>
-          <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
-            <v-text-field v-model="form.name" :label="t('common.name')" required />
-            <v-text-field
-              v-model="form.description"
-              :label="t('common.description')"
-            />
-            <div>
-              <div class="text-body-medium font-weight-bold mb-2">
-                {{ t('book.linkedAccounts') }}
-              </div>
-              <div class="d-flex flex-column ga-2">
-                <v-card
-                  v-for="account in activeAccounts"
-                  :key="account.id"
-                  class="book-account-option pa-3"
-                  color="surface-variant"
-                >
-                  <div class="d-flex align-center ga-2">
-                    <v-checkbox
-                      :model-value="form.accountIds.includes(account.id)"
-                      density="compact"
-                      hide-details
-                      @update:model-value="toggleAccount(account.id)"
-                    />
-                    <div class="flex-grow-1 min-w-0">
-                      <div class="text-body-medium text-truncate">
-                        {{ account.name }}
+        <v-card class="book-editor" color="surface" rounded="t-xl">
+          <v-card-title class="px-4 pt-4 text-title-large font-weight-bold">
+            {{ editingId ? t('book.editTitle') : t('book.addTitle') }}
+          </v-card-title>
+          <v-card-text class="px-4">
+            <v-form class="d-flex flex-column ga-3" @submit.prevent="submit">
+              <v-text-field v-model="form.name" :label="t('common.name')" required />
+              <v-text-field
+                v-model="form.description"
+                :label="t('common.description')"
+              />
+              <div>
+                <div class="text-body-medium font-weight-bold mb-2">
+                  {{ t('book.linkedAccounts') }}
+                </div>
+                <div class="d-flex flex-column ga-2">
+                  <v-card
+                    v-for="account in activeAccounts"
+                    :key="account.id"
+                    class="book-account-option pa-3"
+                    color="surface-variant"
+                  >
+                    <div class="d-flex align-center ga-2">
+                      <v-checkbox
+                        :model-value="form.accountIds.includes(account.id)"
+                        density="compact"
+                        hide-details
+                        @update:model-value="toggleAccount(account.id)"
+                      />
+                      <div class="flex-grow-1 min-w-0">
+                        <div class="text-body-medium text-truncate">
+                          {{ account.name }}
+                        </div>
+                        <div class="text-label-medium text-medium-emphasis">
+                          {{ account.currency }}
+                        </div>
                       </div>
-                      <div class="text-label-medium text-medium-emphasis">
-                        {{ account.currency }}
-                      </div>
+                      <v-radio
+                        v-model="form.defaultAccountId"
+                        :disabled="!form.accountIds.includes(account.id)"
+                        :label="t('book.defaultAccount')"
+                        :value="account.id"
+                      />
                     </div>
-                    <v-radio
-                      v-model="form.defaultAccountId"
-                      :disabled="!form.accountIds.includes(account.id)"
-                      :label="t('book.defaultAccount')"
-                      :value="account.id"
-                    />
-                  </div>
-                </v-card>
+                  </v-card>
+                </div>
               </div>
-            </div>
-            <div class="d-flex ga-2">
-              <v-btn color="primary" type="submit">
-                {{ editingId ? t('common.save') : t('common.add') }}
-              </v-btn>
-              <v-btn variant="text" @click="editorOpen = false">
-                {{ t('common.cancel') }}
-              </v-btn>
-            </div>
-          </v-form>
+              <v-card-actions class="px-0 pb-0">
+                <v-btn color="primary" type="submit">
+                  {{ editingId ? t('common.save') : t('common.add') }}
+                </v-btn>
+                <v-btn variant="text" @click="editorOpen = false">
+                  {{ t('common.cancel') }}
+                </v-btn>
+              </v-card-actions>
+            </v-form>
+          </v-card-text>
         </v-card>
       </v-bottom-sheet>
     </v-container>
@@ -342,5 +369,10 @@ onMounted(async () => {
 
 .book-account-option {
   border: 1px solid rgb(var(--v-theme-outline));
+}
+
+.book-editor {
+  max-height: 88vh;
+  overflow-y: auto;
 }
 </style>

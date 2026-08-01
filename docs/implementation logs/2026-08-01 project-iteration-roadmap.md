@@ -162,14 +162,16 @@ The existing `recurring_event_id`, `created_at`, and `deleted_at` values remain 
 
 **Goal:** Replace account archiving only after the destructive behavior for referenced historical transactions is confirmed.
 
-**Decision gate:** Account deletion affects historical transaction display, book-account links, recurring rules, and balance reconstruction. Confirm whether deletion should be blocked for referenced accounts, soft-delete the account, or cascade through history before implementation.
+**Confirmed policy:** Account deletion is blocked by any transaction or recurring-event reference and never cascades through history. Linked books require another active account; an affected default is replaced deterministically before the account link and account row are deleted. Legacy `is_archived` rows remain recoverable for compatibility.
 
 **Checklist:**
 
-- [ ] Record the confirmed account deletion policy in `docs/design/basic-data-design.md`.
-- [ ] Create a dedicated implementation log for the selected policy.
-- [ ] Implement repository/service/store/UI changes in one iteration.
-- [ ] Verify historical transaction and balance invariants.
+- [x] Record the confirmed account deletion policy in `docs/design/basic-data-design.md`.
+- [x] Create a dedicated implementation log for the selected policy.
+- [x] Implement repository/service/store/UI changes in one iteration.
+- [x] Verify historical transaction and balance invariants.
+
+**Status:** Completed on 2026-08-01. Safe account deletion, legacy restore, localized block feedback, mutation loading, and mobile account/book management presentation were verified against an isolated seeded Web SQLite runtime.
 
 ### Iteration 6: Data Entry Quality
 
@@ -213,4 +215,4 @@ These items remain independent and should receive separate implementation logs b
 
 ## Final Status
 
-In progress. The database correction and Iterations 1-4 are complete. Iteration 6 tag colors, currency guidance, and bottom-center transaction action are complete; configurable success sound remains gated by a product and Android audio contract. Iteration 7 engineering cleanup is complete.
+In progress. The database correction and Iterations 1-5 are complete. Iteration 6 tag colors, currency guidance, and bottom-center transaction action are complete; configurable success sound remains gated by a product and Android audio contract. Iteration 7 engineering cleanup is complete.

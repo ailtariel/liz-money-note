@@ -37,6 +37,15 @@ CREATE TABLE books (
 
 账户用于表达钱从哪里收入、从哪里支出、从哪里转出和转入。
 
+账户删除采用保留历史优先的安全策略：
+
+- 任何流水（包括已软删除但仍保留的流水）通过 `account_id` 或 `target_account_id` 引用账户时，禁止删除账户。
+- 任何周期事件通过 `account_id` 或 `target_account_id` 引用账户时，禁止删除账户。
+- 账户关联账本时，每个账本必须先存在另一个未归档账户作为替代；被删除账户是默认账户时，按账户排序、名称和 ID 确定性选择替代默认账户。
+- 满足上述条件后，在同一个 SQLite 事务中更新默认账户、删除 `book_accounts` 关联并删除账户记录。
+- 删除账户绝不级联删除流水或周期事件，也不重算或改写历史余额。
+- `is_archived` 字段仅为历史数据兼容保留。界面不再提供新的账户归档操作，但允许恢复历史已归档账户。
+
 ```sql
 CREATE TABLE accounts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

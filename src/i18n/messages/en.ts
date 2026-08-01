@@ -119,13 +119,35 @@ export default {
     balance: 'Balance',
     initialBalance: 'Initial balance',
     includeInAssets: 'Include in assets',
-    saveFailed: 'Failed to save account.',
-    archiveFailed: 'Failed to archive account.'
+    addAction: 'Add account',
+    addTitle: 'Add account',
+    editTitle: 'Edit account',
+    empty: 'No accounts yet',
+    legacyArchived: 'Legacy archived',
+    deleted: 'Account deleted.',
+    restored: 'Account restored.',
+    deleteFailed: 'Failed to delete account.',
+    restoreFailed: 'Failed to restore account.',
+    deleteConfirmTitle: 'Delete account',
+    deleteConfirmMessage:
+      'Delete "{name}"? Only accounts without historical references can be deleted. This cannot be undone.',
+    deleteBlockedTransactions:
+      'This account is referenced by transaction history and cannot be deleted.',
+    deleteBlockedRecurring:
+      'This account is referenced by a recurring event and cannot be deleted.',
+    deleteBlockedBookReplacement:
+      'Link another active account to every affected book before deleting this account.',
+    saveFailed: 'Failed to save account.'
   },
   book: {
     linkedAccounts: 'Linked accounts',
     defaultAccount: 'Default',
     defaultBook: 'Default book',
+    addAction: 'Add book',
+    addTitle: 'Add book',
+    editTitle: 'Edit book',
+    empty: 'No books yet',
+    noDescription: 'No description',
     setDefault: 'Set default',
     defaultBookFailed: 'Failed to set the default book.',
     accountRequired: 'Please link at least one account.',

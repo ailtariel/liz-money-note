@@ -31,6 +31,15 @@ export interface AccountInput {
   sortOrder?: number;
 }
 
+export type AccountDeleteBlockReason =
+  | 'transaction_history'
+  | 'recurring_event'
+  | 'book_replacement_required';
+
+export type AccountDeleteResult =
+  | { deleted: true }
+  | { deleted: false; reason: AccountDeleteBlockReason };
+
 export const accountTypeOptions: Array<{ title: string; value: AccountType }> = [
   { title: '现金', value: 'cash' },
   { title: '银行卡', value: 'bank_card' },
