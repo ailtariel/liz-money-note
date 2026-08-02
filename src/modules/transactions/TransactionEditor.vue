@@ -36,7 +36,6 @@ const tagStore = useTagStore();
 const currencyStore = useCurrencyStore();
 const transactionStore = useTransactionStore();
 const error = ref('');
-const accountSheetOpen = ref(false);
 const targetAccountSheetOpen = ref(false);
 const bookSheetOpen = ref(false);
 const dateTimeSheetOpen = ref(false);
@@ -59,12 +58,17 @@ const tagForm = reactive({
   color: '#0f766e'
 });
 
+type CalculatorOperator = '+' | '−' | '×' | '÷';
+
 const keyboardRows = [
-  ['1', '2', '3', 'backspace'],
-  ['4', '5', '6', '+'],
-  ['7', '8', '9', '-'],
-  ['.', '0', 'submit']
-];
+  ['1', '2', '3', '÷'],
+  ['4', '5', '6', '×'],
+  ['7', '8', '9', '−'],
+  ['.', '0', 'backspace', '+']
+] as const;
+const calculatorOperator = ref<CalculatorOperator | null>(null);
+const calculatorAccumulator = ref<number | null>(null);
+const replaceAmountOnInput = ref(false);
 const isEditing = computed(() => Boolean(props.transaction));
 const editorTitle = computed(() =>
   isEditing.value ? t('transaction.editTitle') : t('nav.newTransaction')
@@ -99,8 +103,6 @@ const selectedBookDefaultAccountId = computed(
     null
 );
 
-const showSourceAccountChip = computed(() => linkedAccounts.value.length > 1);
-
 const targetAccounts = computed(() =>
   linkedAccounts.value.filter(
     (account) =>
@@ -109,10 +111,37 @@ const targetAccounts = computed(() =>
   )
 );
 
-const displayAmount = computed(() => formatMoneyInputDisplay(form.amount));
+const displayAmount = computed(() => {
+  const negative = form.amount.startsWith('-');
+  const unsignedAmount = negative ? form.amount.slice(1) : form.amount;
+
+  return `${negative ? '-' : ''}${formatMoneyInputDisplay(unsignedAmount)}`;
+});
 const displayCurrency = computed(
   () => selectedAccount.value?.currency ?? currencyStore.currency
 );
+const quickTags = computed(() => {
+  const selectedTags = tagStore.tags.filter((tag) =>
+    form.tagIds.includes(tag.id)
+  );
+  const recentTagOrder = new Map<number, number>();
+  transactionStore.transactions.forEach((transaction) => {
+    transaction.tagIds.forEach((tagId) => {
+      if (!recentTagOrder.has(tagId)) {
+        recentTagOrder.set(tagId, recentTagOrder.size);
+      }
+    });
+  });
+  const remainingTags = tagStore.tags
+    .filter((tag) => !form.tagIds.includes(tag.id))
+    .sort(
+      (left, right) =>
+        (recentTagOrder.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
+        (recentTagOrder.get(right.id) ?? Number.MAX_SAFE_INTEGER)
+    );
+
+  return [...selectedTags, ...remainingTags].slice(0, 9);
+});
 
 const dateChipLabel = computed(() => {
   const today = todayIsoDate();
@@ -170,15 +199,115 @@ watch(
 );
 
 function updateAmount(value: string) {
-  form.amount = maskMoneyInput(value);
+  const negative = value.startsWith('-');
+  const unsignedAmount = negative ? value.slice(1) : value;
+  const maskedAmount = maskMoneyInput(unsignedAmount);
+
+  form.amount = negative && maskedAmount ? `-${maskedAmount}` : maskedAmount;
 }
 
 function appendAmount(value: string) {
+  if (replaceAmountOnInput.value) {
+    form.amount = '';
+    replaceAmountOnInput.value = false;
+  }
+
   updateAmount(`${form.amount}${value}`);
 }
 
 function backspaceAmount() {
-  form.amount = form.amount.slice(0, -1);
+  if (replaceAmountOnInput.value) {
+    calculatorOperator.value = null;
+    calculatorAccumulator.value = null;
+    replaceAmountOnInput.value = false;
+  }
+
+  updateAmount(form.amount.slice(0, -1));
+}
+
+function resetCalculator() {
+  calculatorOperator.value = null;
+  calculatorAccumulator.value = null;
+  replaceAmountOnInput.value = false;
+}
+
+function calculateAmount(
+  left: number,
+  right: number,
+  operator: CalculatorOperator
+) {
+  if (operator === '÷' && right === 0) {
+    error.value = t('transaction.calculator.divideByZero');
+    return null;
+  }
+
+  const result =
+    operator === '+'
+      ? left + right
+      : operator === '−'
+        ? left - right
+        : operator === '×'
+          ? left * right
+          : left / right;
+  const roundedResult =
+    Math.sign(result) *
+    (Math.round((Math.abs(result) + Number.EPSILON) * 100) / 100);
+
+  return roundedResult;
+}
+
+function handleOperator(operator: CalculatorOperator) {
+  error.value = '';
+  const currentAmount = Number(form.amount || '0');
+
+  if (
+    calculatorOperator.value &&
+    calculatorAccumulator.value !== null &&
+    !replaceAmountOnInput.value
+  ) {
+    const result = calculateAmount(
+      calculatorAccumulator.value,
+      currentAmount,
+      calculatorOperator.value
+    );
+
+    if (result === null) {
+      return;
+    }
+
+    form.amount = result.toFixed(2);
+    calculatorAccumulator.value = result;
+  } else if (calculatorAccumulator.value === null) {
+    calculatorAccumulator.value = currentAmount;
+  }
+
+  calculatorOperator.value = operator;
+  replaceAmountOnInput.value = true;
+}
+
+function resolvePendingCalculation() {
+  if (!calculatorOperator.value || calculatorAccumulator.value === null) {
+    return true;
+  }
+
+  if (replaceAmountOnInput.value) {
+    resetCalculator();
+    return true;
+  }
+
+  const result = calculateAmount(
+    calculatorAccumulator.value,
+    Number(form.amount || '0'),
+    calculatorOperator.value
+  );
+
+  if (result === null) {
+    return false;
+  }
+
+  form.amount = result.toFixed(2);
+  resetCalculator();
+  return true;
 }
 
 function handleKeyboardKey(key: string) {
@@ -191,18 +320,8 @@ function handleKeyboardKey(key: string) {
     return;
   }
 
-  if (key === 'submit') {
-    void submit();
-    return;
-  }
-
-  if (key === '+') {
-    form.type = 'income';
-    return;
-  }
-
-  if (key === '-') {
-    form.type = 'expense';
+  if (key === '+' || key === '−' || key === '×' || key === '÷') {
+    handleOperator(key);
     return;
   }
 
@@ -247,12 +366,24 @@ async function submitTag() {
   }
 }
 
-async function submit() {
+function resetForNextTransaction() {
+  form.amount = '';
+  form.note = '';
+  form.tagIds = [];
+  error.value = '';
+  resetCalculator();
+}
+
+async function submit(continueEntry = false) {
   if (saving.value) {
     return;
   }
 
   error.value = '';
+
+  if (!resolvePendingCalculation()) {
+    return;
+  }
 
   if (!form.bookId || !form.accountId || !selectedAccount.value) {
     error.value = t('transaction.needBookAccount');
@@ -260,10 +391,12 @@ async function submit() {
   }
 
   try {
+    // Transaction type owns the balance direction; calculator sign stays local to the expression.
+    const transactionAmount = Math.abs(Number(form.amount || '0')).toFixed(2);
     const input: TransactionInput = {
       bookId: form.bookId,
       type: form.type,
-      amount: parseMoneyToMinorUnits(form.amount || '0'),
+      amount: parseMoneyToMinorUnits(transactionAmount),
       currency: selectedAccount.value.currency,
       accountId: form.accountId,
       targetAccountId: form.type === 'transfer' ? form.targetAccountId : null,
@@ -283,6 +416,11 @@ async function submit() {
       if (!created) {
         return;
       }
+    }
+
+    if (continueEntry && !props.transaction) {
+      resetForNextTransaction();
+      return;
     }
 
     emit('saved');
@@ -365,75 +503,81 @@ onMounted(async () => {
 <template>
   <v-card class="transaction-editor h-100 d-flex flex-column" color="background" rounded="0">
     <div class="editor-header">
-      <v-btn :disabled="saving" icon="$close" variant="text" @click="emit('close')" />
-      <div class="text-title-large font-weight-bold">
+      <v-btn
+        :aria-label="t('common.close')"
+        :disabled="saving"
+        icon="$close"
+        variant="text"
+        @click="emit('close')"
+      />
+      <div class="editor-title text-title-large font-weight-bold">
         {{ editorTitle }}
       </div>
-      <v-chip
-        class="editor-book-chip"
-        color="surface"
+      <v-btn
+        class="editor-book-button"
+        color="surface-variant"
+        :disabled="saving"
         prepend-icon="$book"
         variant="flat"
         @click="bookSheetOpen = true"
       >
         {{ selectedBook?.name || '-' }}
-      </v-chip>
+      </v-btn>
+    </div>
+
+    <div class="editor-type-region">
+      <div class="editor-type-tabs" role="tablist">
+        <button
+          v-for="item in typeOptions"
+          :key="item.value"
+          class="editor-type-tab"
+          :class="{ 'editor-type-tab-active': form.type === item.value }"
+          :aria-selected="form.type === item.value"
+          role="tab"
+          type="button"
+          @click="form.type = item.value"
+        >
+          <v-icon v-if="form.type === item.value" icon="$check" size="18" />
+          <span>{{ item.title }}</span>
+        </button>
+      </div>
     </div>
 
     <div class="editor-body">
       <v-alert
         v-if="error"
         class="editor-error"
+        closable
         type="error"
         variant="tonal"
+        @click:close="error = ''"
       >
         {{ error }}
       </v-alert>
 
-      <div class="editor-type-tabs">
-        <button
-          v-for="item in typeOptions"
-          :key="item.value"
-          class="editor-type-tab"
-          :class="{ 'editor-type-tab-active': form.type === item.value }"
-          type="button"
-          @click="form.type = item.value"
-        >
-          <v-icon :icon="item.icon" size="20" />
-          <span>{{ item.title }}</span>
-        </button>
-      </div>
-
-      <section class="amount-panel">
-        <div class="amount-panel-top">
-          <div class="amount-line">
-            <span class="amount-currency">{{ displayCurrency }}</span>
-            <span class="amount-value">{{ displayAmount }}</span>
+      <div class="core-inputs">
+        <section class="amount-panel">
+          <div class="amount-panel-top">
+            <div class="amount-line">
+              <span class="amount-currency">{{ displayCurrency }}</span>
+              <span class="amount-value">{{ displayAmount }}</span>
+            </div>
+            <v-btn
+              class="date-button"
+              :disabled="saving"
+              prepend-icon="$calendar"
+              variant="text"
+              @click="dateTimeSheetOpen = true"
+            >
+              {{ dateChipLabel }}
+            </v-btn>
           </div>
-          <v-chip
-            class="date-chip"
-            color="surface"
-            prepend-icon="$calendar"
-            variant="flat"
-            @click="dateTimeSheetOpen = true"
-          >
-            {{ dateChipLabel }}
-          </v-chip>
-        </div>
 
-        <div class="amount-controls">
-          <v-chip
-            v-if="showSourceAccountChip"
-            color="surface"
-            prepend-icon="$account"
-            variant="flat"
-            @click="accountSheetOpen = true"
-          >
-            {{ selectedAccount?.name || '-' }}
-          </v-chip>
-          <v-chip
-            v-if="form.type === 'transfer' && targetAccounts.length"
-            color="surface"
+          <v-btn
+            v-if="form.type === 'transfer'"
+            class="transfer-target-button"
+            color="surface-variant"
+            :disabled="!targetAccounts.length || saving"
             prepend-icon="$transfer"
             variant="flat"
             @click="targetAccountSheetOpen = true"
@@ -442,89 +586,111 @@ onMounted(async () => {
               targetAccounts.find((account) => account.id === form.targetAccountId)
                 ?.name || t('transaction.toAccount')
             }}
-          </v-chip>
+          </v-btn>
+        </section>
+
+        <section class="tag-panel" :aria-label="t('transaction.quickCategories')">
+          <div class="tag-panel-header">
+            <span class="font-weight-medium">
+              {{ t('transaction.quickCategories') }}
+            </span>
+            <span class="text-label-small text-medium-emphasis">
+              {{ t('transaction.recentlyUsed') }}
+            </span>
+          </div>
+          <div class="tag-options-grid">
+            <button
+              v-for="tag in quickTags"
+              :key="tag.id"
+              class="tag-option"
+              :class="{ 'tag-option-active': form.tagIds.includes(tag.id) }"
+              :disabled="saving"
+              type="button"
+              @click="toggleTag(tag.id)"
+            >
+              <v-icon
+                v-if="form.tagIds.includes(tag.id)"
+                icon="$check"
+                size="16"
+              />
+              <span>{{ tag.name }}</span>
+            </button>
+            <button
+              class="tag-option tag-more"
+              :disabled="saving"
+              type="button"
+              @click="tagSheetOpen = true"
+            >
+              {{ t('common.more') }}
+            </button>
+          </div>
+        </section>
+
+        <v-text-field
+          v-model="form.note"
+          class="note-field"
+          density="compact"
+          hide-details
+          :label="t('common.note')"
+          persistent-placeholder
+          :placeholder="t('transaction.notePlaceholder')"
+          variant="outlined"
+        />
+      </div>
+
+      <div class="thumb-zone">
+        <div class="inline-keyboard">
+          <template v-for="row in keyboardRows" :key="row.join('-')">
+            <button
+              v-for="key in row"
+              :key="key"
+              class="keyboard-key"
+              :class="{
+                'keyboard-key-muted': ['+', '−', '×', '÷'].includes(key),
+                'keyboard-key-active': calculatorOperator === key
+              }"
+              :aria-label="
+                key === 'backspace'
+                  ? t('transaction.calculator.backspace')
+                  : undefined
+              "
+              :aria-pressed="['+', '−', '×', '÷'].includes(key) ? calculatorOperator === key : undefined"
+              :disabled="saving"
+              type="button"
+              @click="handleKeyboardKey(key)"
+            >
+              <span>{{ key === 'backspace' ? '⌫' : key }}</span>
+            </button>
+          </template>
         </div>
-      </section>
 
-      <section class="tag-panel">
-        <button
-          v-for="tag in tagStore.tags"
-          :key="tag.id"
-          class="tag-option"
-          :class="{ 'tag-option-active': form.tagIds.includes(tag.id) }"
-          type="button"
-          @click="toggleTag(tag.id)"
-        >
-          {{ tag.name }}
-        </button>
-        <button class="tag-option tag-add" type="button" @click="tagSheetOpen = true">
-          <v-icon icon="$add" size="18" />
-          <span>{{ t('transaction.addTag') }}</span>
-        </button>
-      </section>
-
-      <v-text-field
-        v-model="form.note"
-        class="note-field"
-        density="compact"
-        hide-details
-        :placeholder="t('common.note')"
-        variant="outlined"
-      />
-
-      <div class="inline-keyboard">
-        <template v-for="row in keyboardRows" :key="row.join('-')">
-          <button
-            v-for="key in row"
-            :key="key"
-            class="keyboard-key"
-            :class="{
-              'keyboard-key-submit': key === 'submit',
-              'keyboard-key-muted': key === 'backspace' || key === '+' || key === '-'
-            }"
-            :style="key === 'submit' ? { gridColumn: 'span 2' } : undefined"
-            :aria-busy="key === 'submit' && saving"
-            :disabled="saving"
-            type="button"
-            @click="handleKeyboardKey(key)"
+        <div class="editor-actions" :class="{ 'editor-actions-single': isEditing }">
+          <v-btn
+            v-if="!isEditing"
+            block
+            color="primary"
+            height="48"
+            :loading="saving"
+            rounded="pill"
+            variant="outlined"
+            @click="submit(true)"
           >
-            <v-icon v-if="key === 'backspace'" icon="$close" size="24" />
-            <v-progress-circular
-              v-else-if="key === 'submit' && saving"
-              indeterminate
-              size="28"
-              width="3"
-            />
-            <v-icon v-else-if="key === 'submit'" icon="$check" size="34" />
-            <span v-else>{{ key }}</span>
-          </button>
-        </template>
+            {{ t('transaction.nextTransaction') }}
+          </v-btn>
+          <v-btn
+            block
+            color="primary"
+            height="48"
+            :loading="saving"
+            rounded="pill"
+            variant="flat"
+            @click="submit()"
+          >
+            {{ t('transaction.saveTransaction') }}
+          </v-btn>
+        </div>
       </div>
     </div>
-
-    <v-bottom-sheet v-model="accountSheetOpen">
-      <v-card class="pa-4" color="surface">
-        <div class="text-title-large font-weight-bold mb-3">
-          {{ t('transaction.account') }}
-        </div>
-        <v-list>
-          <v-list-item
-            v-for="account in linkedAccounts"
-            :key="account.id"
-            :active="form.accountId === account.id"
-            @click="
-              form.accountId = account.id;
-              accountSheetOpen = false;
-            "
-          >
-            <v-list-item-title>{{ account.name }}</v-list-item-title>
-            <v-list-item-subtitle>
-              {{ formatMinorUnits(account.currentBalance, account.currency) }}
-            </v-list-item-subtitle>
-          </v-list-item>
-        </v-list>
-      </v-card>
-    </v-bottom-sheet>
 
     <v-bottom-sheet v-model="targetAccountSheetOpen">
       <v-card class="pa-4" color="surface">
@@ -597,6 +763,21 @@ onMounted(async () => {
     <v-bottom-sheet v-model="tagSheetOpen">
       <v-card class="pa-4" color="surface">
         <div class="text-title-large font-weight-bold mb-3">
+          {{ t('transaction.tags') }}
+        </div>
+        <div class="tag-sheet-options mb-4">
+          <v-chip
+            v-for="tag in tagStore.tags"
+            :key="tag.id"
+            :color="form.tagIds.includes(tag.id) ? 'primary' : undefined"
+            :variant="form.tagIds.includes(tag.id) ? 'tonal' : 'outlined'"
+            @click="toggleTag(tag.id)"
+          >
+            {{ tag.name }}
+          </v-chip>
+        </div>
+        <v-divider class="mb-4" />
+        <div class="text-title-medium font-weight-bold mb-3">
           {{ t('transaction.addTag') }}
         </div>
         <v-alert v-if="tagError" class="mb-3" type="error" variant="tonal">
@@ -642,38 +823,44 @@ onMounted(async () => {
 
 .editor-header {
   display: grid;
+  height: 64px;
   grid-template-columns: 48px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px 8px;
+  gap: 4px;
+  padding: 0 16px 0 8px;
 }
 
-.editor-book-chip {
-  max-width: 132px;
-}
-
-.editor-book-chip :deep(.v-chip__content) {
+.editor-title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.editor-body {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  flex-direction: column;
-  gap: 8px;
-  padding: 0 16px 16px;
+.editor-book-button {
+  width: 112px;
+  min-width: 112px;
+  max-width: 132px;
+  height: 36px;
+  padding-inline: 12px;
+  color: rgb(var(--v-theme-on-surface));
 }
 
-.editor-error {
-  flex: 0 0 auto;
+.editor-book-button :deep(.v-btn__content) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-type-region {
+  display: flex;
+  height: 56px;
+  padding: 4px 16px;
 }
 
 .editor-type-tabs {
   display: grid;
-  flex: 0 0 48px;
+  width: 100%;
+  height: 48px;
   grid-template-columns: repeat(3, 1fr);
   overflow: hidden;
   border: 1px solid rgb(var(--v-theme-outline));
@@ -685,12 +872,17 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   border: 0;
+  border-inline-end: 1px solid rgb(var(--v-theme-outline));
   background: transparent;
   color: rgb(var(--v-theme-on-surface));
   font: inherit;
   font-weight: 600;
+}
+
+.editor-type-tab:last-child {
+  border-inline-end: 0;
 }
 
 .editor-type-tab-active {
@@ -698,16 +890,52 @@ onMounted(async () => {
   color: rgb(var(--v-theme-primary));
 }
 
-.amount-panel {
+.editor-body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  overflow: hidden;
+  padding: 4px 16px 16px;
+}
+
+.editor-error {
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  right: 16px;
+  left: 16px;
+  box-shadow: var(--app-card-shadow);
+}
+
+.core-inputs,
+.thumb-zone {
+  display: flex;
   flex: 0 0 auto;
-  padding: 14px 16px 12px;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.amount-panel {
+  position: relative;
+  display: flex;
+  height: 206px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 18px;
   border: 1px solid rgb(var(--v-theme-outline));
-  border-radius: 24px;
+  border-radius: 28px;
   background: rgb(var(--v-theme-surface));
+  box-shadow: var(--app-card-shadow);
 }
 
 .amount-panel-top {
   display: flex;
+  width: 100%;
+  height: 112px;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
@@ -724,42 +952,61 @@ onMounted(async () => {
 .amount-currency {
   color: rgb(var(--v-theme-on-surface));
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .amount-value {
   overflow: hidden;
   color: rgb(var(--v-theme-primary));
-  font-size: clamp(2.5rem, 11vw, 4.5rem);
+  font-size: clamp(3rem, 15vw, 4rem);
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.125;
   text-overflow: ellipsis;
 }
 
-.date-chip {
+.date-button {
+  width: 88px;
+  min-width: 88px;
+  height: 40px;
   flex-shrink: 0;
+  padding-inline: 8px;
 }
 
-.amount-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  min-height: 32px;
-  margin-top: 8px;
+.transfer-target-button {
+  position: absolute;
+  bottom: 14px;
+  left: 18px;
+  max-width: calc(100% - 36px);
+  height: 36px;
 }
 
 .tag-panel {
-  display: grid;
-  flex: 1 1 auto;
-  min-height: 112px;
-  grid-auto-rows: minmax(34px, 1fr);
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  height: 140px;
+  flex-direction: column;
   gap: 8px;
   overflow: hidden;
-  padding: 10px;
+  padding: 10px 12px;
   border: 1px solid rgb(var(--v-theme-outline));
   border-radius: 24px;
   background: rgb(var(--v-theme-surface));
+}
+
+.tag-panel-header {
+  display: flex;
+  height: 24px;
+  flex: 0 0 24px;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.tag-options-grid {
+  display: grid;
+  min-height: 86px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(2, 40px);
+  gap: 6px;
 }
 
 .tag-option {
@@ -768,34 +1015,42 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  border: 1px solid transparent;
-  border-radius: 16px;
-  background: rgb(var(--v-theme-surface-variant));
-  color: rgb(var(--v-theme-primary));
+  overflow: hidden;
+  padding: 0 8px;
+  border: 1px solid rgb(var(--v-theme-outline));
+  border-radius: 10px;
+  background: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-on-surface));
   font: inherit;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 500;
+}
+
+.tag-option span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tag-option-active {
   border-color: rgb(var(--v-theme-primary));
   background: rgb(var(--v-theme-accent));
+  color: rgb(var(--v-theme-primary));
 }
 
-.tag-add {
-  border-style: dashed;
-  border-color: rgb(var(--v-theme-outline));
-  background: rgb(var(--v-theme-surface));
+.tag-more {
   color: rgb(var(--v-theme-on-surface));
 }
 
 .note-field {
-  flex: 0 0 auto;
+  height: 56px;
+  flex: 0 0 56px;
 }
 
 .inline-keyboard {
   display: grid;
-  flex: 0 0 224px;
+  height: 280px;
+  flex: 0 0 280px;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
   gap: 8px;
@@ -811,8 +1066,9 @@ onMounted(async () => {
   background: rgb(var(--v-theme-surface));
   color: rgb(var(--v-theme-on-surface));
   font: inherit;
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 800;
+  touch-action: manipulation;
 }
 
 .keyboard-key-muted {
@@ -820,40 +1076,113 @@ onMounted(async () => {
   font-weight: 700;
 }
 
-.keyboard-key-submit {
+.keyboard-key-active {
   border-color: rgb(var(--v-theme-primary));
-  background: rgb(var(--v-theme-primary));
-  color: rgb(var(--v-theme-on-primary));
+  background: rgb(var(--v-theme-accent));
+  color: rgb(var(--v-theme-primary));
 }
 
-@media (max-height: 740px) {
+.editor-actions {
+  display: grid;
+  height: 48px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  filter: drop-shadow(0 8px 9px rgba(15, 23, 42, 0.14));
+}
+
+.editor-actions-single {
+  grid-template-columns: 1fr;
+}
+
+.tag-sheet-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-height: 860px) {
+  .editor-body,
+  .core-inputs,
+  .thumb-zone {
+    gap: 6px;
+  }
+
+  .amount-panel {
+    height: 150px;
+  }
+
+  .tag-panel {
+    height: 126px;
+    padding-block: 6px;
+  }
+
+  .tag-options-grid {
+    min-height: 78px;
+    grid-template-rows: repeat(2, 36px);
+  }
+
+  .inline-keyboard {
+    height: 256px;
+    flex-basis: 256px;
+  }
+}
+
+@media (max-height: 760px) {
   .editor-header {
-    padding-top: 6px;
+    height: 56px;
+  }
+
+  .editor-type-region {
+    height: 52px;
+    padding-block: 2px;
+  }
+
+  .editor-body,
+  .core-inputs,
+  .thumb-zone {
+    gap: 6px;
   }
 
   .editor-body {
-    gap: 6px;
     padding-bottom: 10px;
   }
 
   .amount-panel {
-    padding: 10px 12px;
+    height: 150px;
+    padding-block: 10px;
   }
 
   .tag-panel {
-    min-height: 92px;
-    gap: 6px;
-    padding: 8px;
+    height: 116px;
+    padding-block: 4px;
+  }
+
+  .tag-options-grid {
+    min-height: 72px;
+    grid-template-rows: repeat(2, 33px);
   }
 
   .inline-keyboard {
-    flex-basis: 196px;
+    height: 224px;
+    flex-basis: 224px;
     gap: 6px;
   }
 
   .keyboard-key {
     border-radius: 14px;
-    font-size: 1.5rem;
+    font-size: 1.375rem;
+  }
+}
+
+@media (max-width: 370px) {
+  .editor-book-button {
+    width: 92px;
+    min-width: 92px;
+  }
+
+  .tag-option {
+    padding-inline: 4px;
+    font-size: 0.75rem;
   }
 }
 </style>

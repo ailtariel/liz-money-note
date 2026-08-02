@@ -63,3 +63,16 @@ Complete.
 Verification:
 
 - `npm run typecheck` passed.
+
+## 2026-08-02 Confirmed Figma Revision
+
+The confirmed Android quick-entry design was applied to the existing full-screen editor:
+
+- Kept the compact book and date triggers in the header and amount card.
+- Removed the normal source-account trigger while preserving the existing recent/default account resolution.
+- Expanded quick tags to two rows and kept the full tag selection and creation surface under More.
+- Replaced the keyboard submit/type shortcuts with four arithmetic operators: `÷`, `×`, `−`, and `+`.
+- Kept all four keys as binary operators, allowed negative calculator results to continue through later operations, and left transaction direction under the selected type tab.
+- Added equal-size Next transaction and Save transaction actions below the keypad.
+- Next transaction uses the existing create mutation, then clears only amount, tags, note, and calculator state.
+- Edit mode keeps its original single-save behavior.

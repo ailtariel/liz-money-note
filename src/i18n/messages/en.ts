@@ -27,9 +27,11 @@ export default {
     custom: 'Custom',
     today: 'Today',
     yesterday: 'Yesterday',
+    more: 'More',
     save: 'Save',
     loading: 'Loading',
     cancel: 'Cancel',
+    close: 'Close',
     edit: 'Edit',
     copy: 'Copy',
     delete: 'Delete',
@@ -78,6 +80,11 @@ export default {
     template: 'Template',
     amountPlaceholder: '0.00',
     addTag: 'Add tag',
+    quickCategories: 'Quick categories',
+    recentlyUsed: 'Recently used',
+    notePlaceholder: 'Add a note (optional)',
+    nextTransaction: 'Next transaction',
+    saveTransaction: 'Save transaction',
     fromAccount: 'From account',
     toAccount: 'To account',
     occurredAt: 'Occurred at',
@@ -85,6 +92,10 @@ export default {
     saveFailed: 'Failed to save transaction.',
     notFound: 'The transaction does not exist or has been deleted.',
     deleteFailed: 'Failed to delete transaction.',
+    calculator: {
+      backspace: 'Backspace',
+      divideByZero: 'Cannot divide by zero.'
+    },
     search: {
       title: 'Search transactions',
       placeholder: 'Tag, amount, title, or description'

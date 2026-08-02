@@ -27,9 +27,11 @@ export default {
     custom: '自定义',
     today: '今天',
     yesterday: '昨天',
+    more: '更多',
     save: '保存',
     loading: '加载中',
     cancel: '取消',
+    close: '关闭',
     edit: '编辑',
     copy: '复制',
     delete: '删除',
@@ -78,6 +80,11 @@ export default {
     template: '模板',
     amountPlaceholder: '0.00',
     addTag: '添加 Tag',
+    quickCategories: '常用分类',
+    recentlyUsed: '最近使用',
+    notePlaceholder: '添加备注（可选）',
+    nextTransaction: '下一笔',
+    saveTransaction: '保存流水',
     fromAccount: '转出账户',
     toAccount: '转入账户',
     occurredAt: '发生时间',
@@ -85,6 +92,10 @@ export default {
     saveFailed: '保存流水失败。',
     notFound: '流水不存在或已删除。',
     deleteFailed: '删除流水失败。',
+    calculator: {
+      backspace: '退格',
+      divideByZero: '除数不能为 0。'
+    },
     search: {
       title: '搜索流水',
       placeholder: 'Tag、金额、标题或描述'
